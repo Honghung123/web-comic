@@ -1,0 +1,34 @@
+package com.group17.comic.plugins;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+
+public interface IDocument { 
+    default Document getDocumentInstanceFromUrl(String link) {
+        StringBuilder sb = new StringBuilder();
+        try {
+            HttpURLConnection con = (HttpURLConnection) new URL(link).openConnection();
+            con.setRequestMethod("GET");
+            con.setRequestProperty("User-Agent",
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36");
+            con.connect();
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+            }
+        } catch (Exception e) { 
+            return Jsoup.parse("");
+        }   
+        Document doc = Jsoup.parse(sb.toString()); 
+        return doc;
+    }
+}

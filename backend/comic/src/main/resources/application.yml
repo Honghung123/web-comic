@@ -1,0 +1,52 @@
+# Tại sao dùng application.yml
+#  - Tốc độ load file nhanh hơn application.properties và cấu trúc dạng tree đễ đọc, ngắn gọn hơn
+#  - Nó là Best Practice cho các cấu hình cần load lên trong thời điểm Compile-time như: cấu hình Database,...
+
+server:
+  port: 8080
+
+spring:
+  application:
+    name: comic
+  output:
+    ansi:
+      enabled: DETECT
+
+logging:
+  level:
+    root: ERROR
+    org:
+      springframework:
+        web: DEBUG
+    com:
+      group17:
+        comic:
+          service: INFO
+  pattern:
+    console: '%d{dd-MM-yyyy HH:mm:ss} - %msg%n'
+    file: '%d{dd-MM-yyyy HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n'
+
+comic:
+  api:
+    document_name: Comic API Documentation
+    description: This is the api comic documentation only for the group 17 :V
+    version: v1.0.0
+    server:
+      local:
+        url: http://localhost:${server.port}
+        description: Local server      
+  base_dir: backend/comic/src/main/java/com/group17/comic/
+  plugin:
+    plugin_package_name: com.group17.comic.plugins.concretes
+    plugin_directory: plugins/concretes
+
+# Cấu hình profile: 
+
+# - Build project thành file jar. Có một số profile như dev, test, uat, prod
+# - Sau khi build thì sẽ triển khai file jar môi trường dev lên Docker. Why to use Docker?
+# * Cách đây hơn chục năm trước, khi đầy file jar lên máy chủ nào đó mà để máy chủ đó chạy file này được thì nó cần 
+# phải được set-up thủ công như cài đặt web server(Tomcat, JBoss hay Glassfish), cài JDK, cấu hình path evironment
+# (như JAVA_HOME), cài shell-script đề chạy script để phân quyền,... và một số cài đặt khác. Thật là khổ d* 
+# => The Savior: DOCKER. Oh yeah, với docker mình sẽ tạo một image bằng cách viết kịch bản(senario)
+# vào một file tên là Dockerfile. Docker sẽ dựa vào Dockerfile và tự set-up tạo ra một image. 
+# => Ngoài Docker thì có một công cự quản lí container tiên tiến hơn đó là Kubernetes
