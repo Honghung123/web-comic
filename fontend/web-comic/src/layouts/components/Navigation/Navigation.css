@@ -1,0 +1,45 @@
+
+.navigation {
+}
+
+ul{
+    list-style: none;
+}
+a{
+    text-decoration: none;
+}
+
+.navigation-wrapper {
+    padding: 1rem 0;
+}
+
+.navigation-list {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5rem;
+}
+
+.navigation-list__item {
+    font-size: 2rem;
+}
+
+/* Hover link effect */
+.link-hover-horizontal:after {
+    content: "";
+    width: 0;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    border-bottom: 0.3rem solid pink;
+    transition: all .4s linear;
+}
+
+.link-hover-horizontal:focus,
+.link-hover-horizontal:hover {
+    color: pink;
+}
+.link-hover-horizontal.active {
+    color: pink;
+}
+
