@@ -5,25 +5,20 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse; 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List; 
  
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import org.springframework.http.HttpStatus;
+import org.jsoup.select.Elements; 
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.group17.comic.model.Author;
-import com.group17.comic.model.Comic;
-import com.group17.comic.model.DataModel;
-import com.group17.comic.model.Genre;
-import com.group17.comic.model.ComicModel;
-import com.group17.comic.model.Pagination;
-import com.group17.comic.plugins.IDocument;
-import com.group17.comic.plugins.WebCrawler;
+import com.group17.comic.log.Logger;
+import com.group17.comic.model.*; 
+import com.group17.comic.plugins.*; 
 import com.group17.comic.utils.StringConverter;
 
 public class TruyenFullCrawler implements WebCrawler, IDocument {
@@ -71,7 +66,7 @@ public class TruyenFullCrawler implements WebCrawler, IDocument {
                 System.out.println("Failed to request. Error code: " + response.statusCode());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.logError(e.getMessage(), e);
         } 
         
         DataModel<List<ComicModel>> result = new DataModel<>(pagination, listMatchedComic);
@@ -134,17 +129,16 @@ public class TruyenFullCrawler implements WebCrawler, IDocument {
                 System.out.println("Failed to request. Error code: " + response.statusCode());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.logError(e.getMessage(), e);
         } 
         DataModel<List<ComicModel>> result = new DataModel<>(pagination, lastedComics);
         return result;
     }
 
     @Override
-    public Comic getComicInfo(String urlComic) {
-        int id = Integer.parseInt(urlComic);
-        String apiUrl = TRUYEN_API + "v1/story/detail/" + id;
-        System.out.println(apiUrl);
+    public Comic getComicInfo(String comicTagId) {
+        int id = Integer.parseInt(comicTagId);
+        String apiUrl = TRUYEN_API + "v1/story/detail/" + id; 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
         Comic comic = null;
@@ -155,20 +149,101 @@ public class TruyenFullCrawler implements WebCrawler, IDocument {
 
                 // Sử dụng Gson để chuyển đổi JSON thành đối tượng truyện
                 JsonObject jsonObject = new Gson().fromJson(responseBody, JsonObject.class).getAsJsonObject("data");
+                String[] genresArray = jsonObject.get("categories").getAsString().split("[,]");
+                var genres =Arrays.asList(genresArray).stream().map(genre -> {
+                    String category = genre.trim();
+                    // Chuyển Tiếng việt có dấu này không dấu. Ví dụ: Đam Mỹ -> dam-my
+                    String convertedCategory = StringConverter.removeDiacriticalMarks(category).toLowerCase().replaceAll(" ", "-");
+                    return new Genre(category, convertedCategory, "the-loai/" + convertedCategory);
+                }).toList();
                 comic = Comic.builder()
-                        .id(jsonObject.get("id").getAsInt())
+                        .tagId(jsonObject.get("id").getAsString())
                         .title(jsonObject.get("title").getAsString())
                         .image(jsonObject.get("image").getAsString())
                         .description(jsonObject.get("description").getAsString())
                         .author(new Author(null, jsonObject.get("author").getAsString()))
-                        .tag(null)
+                        .genres(genres)
+                        .alternateImage(WebCrawler.alternateImage)
                         .build();
             } else {
                 System.out.println("Failed to request. Error code: " + response.statusCode());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.logError(e.getMessage(), e);
         }
         return comic;
+    }
+
+    @Override
+    public DataModel<List<Chapter>> getChapters(String comicTagId, int currentPage) {
+        int id = Integer.parseInt(comicTagId);
+        String apiUrl = TRUYEN_API + "v1/story/detail/" + id + "/chapters?page=" + currentPage;
+        Pagination pagination = null;
+        List<Chapter> chapters = new ArrayList<>();
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                String responseBody = response.body(); 
+                JsonObject jsonObject = new Gson().fromJson(responseBody, JsonObject.class);
+                var paginationObj = jsonObject.getAsJsonObject("meta").getAsJsonObject("pagination");
+                int totalItems = paginationObj.get("total").getAsInt();
+                int perPage = paginationObj.get("per_page").getAsInt();
+                int totalPages = paginationObj.get("total_pages").getAsInt();
+                pagination = new Pagination(currentPage, perPage, totalPages, totalItems);
+                 
+                JsonArray jsonArray = jsonObject.get("data").getAsJsonArray();
+                for (JsonElement element : jsonArray) {
+                    JsonObject chapterObject = element.getAsJsonObject();
+                    int chapter = chapterObject.get("id").getAsInt(); 
+                    String title = chapterObject.get("title").getAsString();
+                    chapters.add(new Chapter(chapter, title));
+                }
+            } else {
+                Logger.logError("Failed to request. Error code: " + response.statusCode(), new Exception("Failed to request. Error code: " + response.statusCode()));
+            }
+        } catch (Exception e) {
+            Logger.logError(e.getMessage(), e);
+        }
+        DataModel<List<Chapter>> result = new DataModel<>(pagination, chapters);
+        return result;
+    }
+
+    @Override
+    public DataModel<ComicChapterContent> getComicChapterContent(String comicTagId, int currentChapter) {
+        String apiUrl = TRUYEN_API + "v1/chapter/detail/" + currentChapter;
+        Pagination pagination = null;
+        ComicChapterContent chapterContent = null;
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                String responseBody = response.body(); 
+                JsonObject jsonObject = new Gson().fromJson(responseBody, JsonObject.class).getAsJsonObject("data"); 
+                pagination = new Pagination(currentChapter, 1, 1, 1);
+                if(jsonObject.get("chapter_prev").isJsonNull()){
+                    pagination.setPreviousPage(currentChapter);
+                }else{
+                    pagination.setPreviousPage(jsonObject.get("chapter_prev").getAsInt());
+                } 
+                if(jsonObject.get("chapter_next").isJsonNull()){
+                    pagination.setNextPage(currentChapter);
+                }else{
+                    pagination.setNextPage(jsonObject.get("chapter_next").getAsInt());
+                }  
+                 
+                String title = jsonObject.get("story_name").getAsString();
+                String content = jsonObject.get("content").getAsString();
+                chapterContent = new ComicChapterContent(title, content, comicTagId);
+            } else {
+                Logger.logError("Failed to request. Error code: " + response.statusCode(), new Exception("Failed to request. Error code: " + response.statusCode()));
+            }
+        } catch (Exception e) {
+            Logger.logError(e.getMessage(), e);
+        }
+        DataModel<ComicChapterContent> result = new DataModel<>(pagination, chapterContent);
+        return result;
     }
 }

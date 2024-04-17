@@ -37,4 +37,11 @@ public class Pagination{
         this.link.setNextPage(currentPage + 1 <= totalPages ? currentPage + 1 : totalPages);
         this.totalItems = totalItems;
     }
+    public void setNextPage(int page) {
+        this.link.setNextPage(page);
+    }
+
+    public void setPreviousPage(int page) {
+        this.link.setPrevPage(page);
+    }
 }

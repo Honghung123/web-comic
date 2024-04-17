@@ -1,7 +1,9 @@
 package com.group17.comic.controller;
 
 import com.group17.comic.dto.response.ResponseSuccess;
+import com.group17.comic.model.Chapter;
 import com.group17.comic.model.Comic;
+import com.group17.comic.model.ComicChapterContent;
 import com.group17.comic.model.Genre;
 import com.group17.comic.model.ComicModel;
 import com.group17.comic.model.Plugin;
@@ -45,26 +47,48 @@ public class PluginController {
         return new ResponseSuccess<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
     }
 
-    @GetMapping("/reading/{tagUrl}")
+    @GetMapping("/reading/{tagId}")
     @SneakyThrows   
     @Operation(summary = "Get comic infomation", description = "Get comic infomation base on tag url with specific server id. Default server id is 0 - plugin's index in plugin list.")
     public ResponseSuccess<Comic> getComicInfo(
-                    @PathVariable(name = "tagUrl", required = true) String tagUrl, 
+                    @PathVariable(name = "tagId", required = true) String tagId, 
                     @RequestParam(name = "server_id", defaultValue = "0") int serverId
         ){ 
-        var comic = pluginService.getComicInfo(serverId, tagUrl);
+        var comic = pluginService.getComicInfo(serverId, tagId);
         return new ResponseSuccess<>(HttpStatus.OK, "Success", comic);
     }
     
-    @GetMapping("/genre")
+    @GetMapping("/reading/{tagId}/chapters")
+    @SneakyThrows   
+    @Operation(summary = "Get comic infomation", description = "Get comic infomation base on tag url with specific server id. Default server id is 0 - plugin's index in plugin list.")
+    public ResponseSuccess<List<Chapter>> getChapters(
+                    @PathVariable(name = "tagId", required = true) String tagId, 
+                    @RequestParam(name = "page", defaultValue = "1") int currentPage,
+                    @RequestParam(name = "server_id", defaultValue = "0") int serverId
+        ){ 
+        var dataDto = pluginService.getChapters(serverId, tagId, currentPage);
+        return new ResponseSuccess<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
+    }
+    
+    @GetMapping("/reading/{tagId}/chapters/{chapter}")
+    @SneakyThrows   
+    @Operation(summary = "Get comic infomation", description = "Get comic infomation base on tag url with specific server id. Default server id is 0 - plugin's index in plugin list.")
+    public ResponseSuccess<ComicChapterContent> getComicChapterContent(
+                    @PathVariable(name = "tagId", required = true) String tagId,  
+                    @PathVariable(name = "chapter", required = true) int currentChapter,
+                    @RequestParam(name = "server_id", defaultValue = "0") int serverId
+        ){ 
+        var dataDto = pluginService.getComicChapterContent(serverId, tagId, currentChapter);
+        return new ResponseSuccess<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
+    }
+    
+    @GetMapping("/genres")
     @SneakyThrows   
     @Operation(summary = "Get all genres", description = "Get all genres with specific server id. Default server id is 0 - plugin's index in plugin list Default the current page,offset, is 1 Default limit, a number of comics per page is 10")
     public ResponseSuccess<List<Genre>> getGenres(
-            @RequestParam(name = "server_id", defaultValue = "0") int serverId,
-            @RequestParam(name = "offset", defaultValue = "1") int offset,
-            @RequestParam(name = "limit", defaultValue = "10") int limit
+            @RequestParam(name = "server_id", defaultValue = "0") int serverId 
         ) {  
-        var genres = pluginService.getAllGenres(serverId, offset, limit);  
+        var genres = pluginService.getAllGenres(serverId);  
         return new ResponseSuccess<>(HttpStatus.OK, "Success", genres);
     }
    

@@ -4,7 +4,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.group17.comic.log.Logger;
+import com.group17.comic.model.Chapter;
 import com.group17.comic.model.Comic;
+import com.group17.comic.model.ComicChapterContent;
 import com.group17.comic.model.DataModel;
 import com.group17.comic.model.Genre;
 import com.group17.comic.model.ComicModel;
@@ -51,7 +53,7 @@ public class PluginService {
     } 
  
     
-    public List<Genre> getAllGenres(int pluginId, int offset, int limit) throws Exception {
+    public List<Genre> getAllGenres(int pluginId) throws Exception {
         checkPlugins();
         var result = plugins.get(pluginId).getGenres();           
         return result;
@@ -76,5 +78,17 @@ public class PluginService {
         checkPlugins();
         var result = plugins.get(serverId).search(keyword, currentPage);
         return result;
+    }
+
+    public DataModel<List<Chapter>> getChapters(int serverId, String tagId, int currentPage) throws Exception {
+        checkPlugins();
+        var result = plugins.get(serverId).getChapters(tagId, currentPage);
+        return result;
+    }
+
+    public DataModel<ComicChapterContent> getComicChapterContent(int serverId, String tagId, int currentChapter) throws Exception{
+        checkPlugins();
+        var result = plugins.get(serverId).getComicChapterContent(tagId, currentChapter);
+        return result; 
     } 
 }

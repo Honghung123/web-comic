@@ -9,7 +9,7 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor 
-public class DataModel<T extends List<?>> {
+public class DataModel<T> {
     private Pagination pagination;
     private T data;
 }

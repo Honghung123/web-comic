@@ -3,19 +3,18 @@ package com.group17.comic.plugins.concretes;
 import java.io.IOException; 
 import java.util.ArrayList;
 import java.util.List;
- 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements; 
+import org.jsoup.select.Elements;
+import org.springframework.http.HttpStatus;
 
-import com.group17.comic.model.Author;
-import com.group17.comic.model.Comic;
-import com.group17.comic.model.DataModel;
-import com.group17.comic.model.Genre;
-import com.group17.comic.model.ComicModel;
-import com.group17.comic.model.Pagination;
-import com.group17.comic.plugins.IDocument;
-import com.group17.comic.plugins.WebCrawler;
+import com.group17.comic.exception.ResourceNotFound;
+import com.group17.comic.log.Logger;
+import com.group17.comic.model.*; 
+import com.group17.comic.plugins.*; 
 
 public class TangThuVienCrawler implements WebCrawler, IDocument {
     private final String TRUYEN_URL = "https://truyen.tangthuvien.vn/";  
@@ -27,10 +26,10 @@ public class TangThuVienCrawler implements WebCrawler, IDocument {
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "ket-qua-tim-kiem?term=" + term); 
         Elements elements = doc.select("#rank-view-list .book-img-text ul li");
         for (Element element : elements) {
-            String image = element.select(".book-img-box a img").first().attr("src");
-            String comicUrl = element.select(".book-mid-info h4 a").first().attr("href"); 
+            String image = element.selectFirst(".book-img-box a img").attr("src");
+            String comicUrl = element.selectFirst(".book-mid-info h4 a").attr("href"); 
             String url = comicUrl.substring(comicUrl.lastIndexOf("/") + 1);
-            String title = element.select(".book-mid-info h4 a").first().text();
+            String title = element.selectFirst(".book-mid-info h4 a").text();
             var authorTag = element.select(".book-mid-info .author a:nth-of-type(1)");
             String author = authorTag.text();
             String authorUrl = authorTag.attr("href");
@@ -43,7 +42,7 @@ public class TangThuVienCrawler implements WebCrawler, IDocument {
             genres.add(new Genre(label, tag, fullTag));
             var chapterTag = element.select(".book-mid-info .author span span.KIBoOgno");
             int totalChapter = Integer.parseInt(chapterTag.text()); 
-            String updatedTime = element.select(".book-mid-info .update span").first().text();
+            String updatedTime = element.selectFirst(".book-mid-info .update span").text();
             listMatchedComic.add(new ComicModel(url, title, image, WebCrawler.alternateImage, genres, totalChapter, totalChapter, updatedTime));
         }
         String pattern = """
@@ -138,10 +137,10 @@ Có...
                 List<ComicModel> lastedComics = new ArrayList<>();
         Elements elements = doc.select("div#rank-view-list ul li");
         for (Element element : elements) {
-            String image = element.select(".book-img-box a img").first().attr("src");
-            String comicUrl = element.select(".book-mid-info h4 a").first().attr("href"); 
+            String image = element.selectFirst(".book-img-box a img").attr("src");
+            String comicUrl = element.selectFirst(".book-mid-info h4 a").attr("href"); 
             String url = comicUrl.substring(comicUrl.lastIndexOf("/") + 1);
-            String title = element.select(".book-mid-info h4 a").first().text();
+            String title = element.selectFirst(".book-mid-info h4 a").text();
             var authorTag = element.select(".book-mid-info .author a:nth-of-type(1)");
             String author = authorTag.text();
             String authorUrl = authorTag.attr("href");
@@ -154,7 +153,7 @@ Có...
             genres.add(new Genre(label, tag, fullTag));
             var chapterTag = element.select(".book-mid-info .author span span.KIBoOgno");
             int totalChapter = Integer.parseInt(chapterTag.text()); 
-            String updatedTime = element.select(".book-mid-info .update span").first().text();
+            String updatedTime = element.selectFirst(".book-mid-info .update span").text();
             lastedComics.add(new ComicModel(url, title, image, WebCrawler.alternateImage, genres, totalChapter, totalChapter, updatedTime));
         }
         int perPage = elements.size();
@@ -171,8 +170,8 @@ Có...
     }
 
     @Override
-    public Comic getComicInfo(String urlComic) {  
-        Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "doc-truyen/" + urlComic);
+    public Comic getComicInfo(String comicTagId) {  
+        Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "doc-truyen/" + comicTagId);
         String comit= """
             <div class="book-information cf">
             <div class="book-img">
@@ -222,22 +221,89 @@ Có...
             
         </div>
                 """;
-        Element element = doc.select("div.book-information").first();
+        Element element = doc.selectFirst("div.book-information");
         String image = element.select(".book-img img").attr("src");
-        String title = element.select(".book-info h1").first().text();
-        var authorTag = element.select(".book-info .tag a:first").first();
+        String title = element.selectFirst(".book-info h1").text();
+        var authorTag = element.select(".book-info .tag a:nth-of-type(1)");
         int authorId = Integer.parseInt(authorTag.attr("href").substring(authorTag.attr("href").lastIndexOf("=") + 1));
         String authorName = authorTag.text();
         var author = new Author(authorId, authorName);
-        String description = element.select(".book-info .intro").text();
         Double rate = Double.parseDouble(element.select("cite#myrate").text());
         List<Genre> genres = new ArrayList<>();
-        var genreTag = element.select(".book-info .tag a:nth-child(2)");
+        var genreTag = element.select(".book-info .tag a:nth-of-type(2)");
         String label = genreTag.text();
         String genreUrl = genreTag.attr("href");
         String fullTag = genreUrl.substring(genreUrl.lastIndexOf("the-loai"));
         String tag = fullTag.substring(fullTag.lastIndexOf("/") + 1);
         genres.add(new Genre(label, tag, fullTag));
-        return new Comic(null, title, urlComic, image, WebCrawler.alternateImage, description, author, genres, true);
+        Element descriptionElement = doc.selectFirst(".book-info-detail > .book-intro");
+        String description = descriptionElement.html();
+        if(description.contains("Bước 1")){
+            description = description.substring(0, description.indexOf("Bước 1") - 1);
+        }
+        return new Comic(comicTagId, title, image, WebCrawler.alternateImage, description, author, genres, true);
+    }
+
+    @Override
+    public DataModel<List<Chapter>> getChapters(String comicTagId, int currentPage) {
+        Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "doc-truyen/" + comicTagId);
+        Pagination pagination = null;
+        List<Chapter> chapters = new ArrayList<>();
+        var totalItemsText = doc.getElementById("j-bookCatalogPage").text();
+        int totalItems = 0;
+        var totalItemMatcher = Pattern.compile("\\((\\d+) chương\\)").matcher(totalItemsText);
+        if (totalItemMatcher.find()) {
+            totalItems = Integer.parseInt(totalItemMatcher.group(1)); 
+        }else {
+            Logger.logError(this.getClass().getSimpleName() + " Can't get total items in pagination", new Exception("Can't get total items in pagination"));
+        }
+        int comicId = Integer.parseInt(doc.getElementById("story_id_hidden").val()); 
+        Document chaperListDoc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "doc-truyen/page/" + comicId + "?page=" + (currentPage-1));
+        Elements elements = chaperListDoc.select(".col-md-6 ul li a span");
+        int perPage = elements.size();
+        for (Element element : elements) { 
+            int chapterNo = 0;
+            String title = "";
+            var chapterMatcher = Pattern.compile("Chương\\s*(\\d+)\\s*:\\s*(.*)").matcher(element.text());
+            if (chapterMatcher.find()) {
+                chapterNo = Integer.parseInt(chapterMatcher.group(1));
+                title = chapterMatcher.group(2);
+                chapters.add(new Chapter(chapterNo, title));
+            }else {
+                Logger.logError(this.getClass().getSimpleName() + " Can't get chapter number and title", new Exception("Can't get chapter number"));
+            }
+        }        var paginationTag = chaperListDoc.select("ul.pagination li:last-child a");
+        String totalPageText = paginationTag.attr("onclick");
+        int totalPages = 0;
+        Matcher totalPageMatcher = Pattern.compile("\\((\\d+)\\)").matcher(totalPageText);
+        if (totalPageMatcher.find()) {
+            totalPages = Integer.parseInt(totalPageMatcher.group(1)) + 1; 
+        }else {
+            Logger.logError(this.getClass().getSimpleName() + " Can't get total items in pagination", new Exception("Can't get total items in pagination"));
+        }         
+        pagination = new Pagination(currentPage, perPage, totalPages, totalItems);
+        DataModel<List<Chapter>> result = new DataModel<>(pagination, chapters);
+        return result;
+    } 
+
+    @Override
+    public DataModel<ComicChapterContent> getComicChapterContent(String comicTagId, int currentChapter) {
+        Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "doc-truyen/" + comicTagId + "/chuong-" + currentChapter);
+        var elementTitle = doc.selectFirst(".chapter-c-content h5 a");
+        if(elementTitle == null) {
+            Logger.logError(this.getClass().getSimpleName() + " Can't get chapter content", new Exception("Can't get chapter content"));
+            throw new ResourceNotFound(HttpStatus.NOT_FOUND, "Can't get chapter content");
+        } 
+        String title = elementTitle.text().substring(elementTitle.text().lastIndexOf(":")+1).trim();
+        var elementContent = doc.selectFirst(".chapter-c-content .box-chap");
+        if(elementContent == null) {
+            Logger.logError(this.getClass().getSimpleName() + " Can't get chapter content", new Exception("Can't get chapter content"));
+            throw new ResourceNotFound(HttpStatus.NOT_FOUND, "Can't get chapter content");
+        }
+        String content = elementContent.html(); 
+        Pagination paginationTemp = getChapters(comicTagId, 1).getPagination();
+        Pagination pagination = new Pagination(currentChapter, 1, paginationTemp.getTotalItems(), paginationTemp.getTotalItems());
+        DataModel<ComicChapterContent> result = new DataModel<>(pagination, new ComicChapterContent(title, content, comicTagId));
+        return result;
     }
 }

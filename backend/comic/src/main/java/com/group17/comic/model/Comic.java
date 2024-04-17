@@ -4,17 +4,14 @@ import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.ToString; 
+import lombok.Getter; 
 
-@Getter
+@Getter 
 @AllArgsConstructor
-@ToString
 @Builder
 public class Comic {
-    private Integer id;
-    private String title;
-    private String tag;
+    private String tagId;
+    private String title; 
     private String image;
     private String alternateImage;
     private String description;

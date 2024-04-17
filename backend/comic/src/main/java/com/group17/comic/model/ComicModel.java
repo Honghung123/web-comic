@@ -3,7 +3,7 @@ package com.group17.comic.model;
 import java.util.List;
 
 public record ComicModel(
-    String url,
+    String tagId,
     String title,
     String image,
     String alternateImage,

@@ -39,7 +39,7 @@ public class OpenApiConfig {
         @Value("${comic.api.server.local.url}") String serverUrl,
         @Value("${comic.api.server.local.description}") String serverDescription
     ){
-        var license = new License().name("API License").url("http://domain.vn/license");
+        var license = new License().name("API License").url("http://group17.hcmus.edu.vn/license");
         List<Server> serverList = List.of(new Server().url(serverUrl).description(serverDescription));
         return new OpenAPI().info(new Info().title(documentName)
                                             .version(version)
