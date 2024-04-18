@@ -1,13 +1,11 @@
 package com.group17.comic.model;
   
+import lombok.AllArgsConstructor;
 import lombok.Getter;  
 
 @Getter 
+@AllArgsConstructor
 public class Chapter {
-    private Integer chapterNo;
+    private String chapterNo;
     private String title;
-    public Chapter(int chapterNo, String title){
-        this.chapterNo = chapterNo;
-        this.title = title; 
-    }
 }

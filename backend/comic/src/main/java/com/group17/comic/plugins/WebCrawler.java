@@ -1,21 +1,35 @@
 package com.group17.comic.plugins;
 
-import java.io.IOException;
-import java.util.List;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
-import com.group17.comic.model.Chapter;
-import com.group17.comic.model.Comic;
-import com.group17.comic.model.ComicChapterContent;
-import com.group17.comic.model.DataModel;
-import com.group17.comic.model.Genre;
-import com.group17.comic.model.ComicModel; 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
-public interface WebCrawler { 
-    String alternateImage = "https://truyen.tangthuvien.vn/images/default-book.png";
-    DataModel<List<ComicModel>> search(String keyword, int currentPage);
-    List<Genre> getGenres();
-    DataModel<List<ComicModel>> getLastedComics(int currentPage) throws IOException;
-    Comic getComicInfo(String comicTagId);
-    DataModel<List<Chapter>> getChapters(String comicTagId, int currentPage);
-    DataModel<ComicChapterContent> getComicChapterContent(String comicTagId, int currentChapter);
+public abstract class WebCrawler { 
+    protected String alternateImage = "https://truyen.tangthuvien.vn/images/default-book.png";
+    protected Document getDocumentInstanceFromUrl(String link) {
+        StringBuilder sb = new StringBuilder();
+        try {
+            HttpURLConnection con = (HttpURLConnection) new URL(link).openConnection();
+            con.setRequestMethod("GET");
+            con.setRequestProperty("User-Agent",
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36");
+            con.connect();
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+            }
+        } catch (Exception e) { 
+            return Jsoup.parse("");
+        }   
+        Document doc = Jsoup.parse(sb.toString()); 
+        return doc;
+    }
 }

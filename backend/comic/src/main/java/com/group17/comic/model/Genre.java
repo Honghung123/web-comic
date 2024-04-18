@@ -1,16 +1,10 @@
 package com.group17.comic.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.AllArgsConstructor; 
+import lombok.Getter; 
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
+@Getter 
+@AllArgsConstructor  
 public class Genre {
     String label;
     String tag;

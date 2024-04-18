@@ -1,15 +1,11 @@
-package com.group17.comic.model;
+package com.group17.comic.model; 
+import lombok.Getter;
+import lombok.experimental.SuperBuilder;
 
-import java.util.List;
-
-public record ComicModel(
-    String tagId,
-    String title,
-    String image,
-    String alternateImage,
-    List<Genre> genres,
-    int totalChapter,
-    int newestChapter,
-    String updatedTime
-) { 
+@Getter
+@SuperBuilder
+public class ComicModel extends Comic{  
+    private Integer totalChapter;
+    private Integer newestChapter;
+    private String updatedTime; 
 }

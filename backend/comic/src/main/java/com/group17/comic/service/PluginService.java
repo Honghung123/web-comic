@@ -4,15 +4,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.group17.comic.log.Logger;
-import com.group17.comic.model.Chapter;
-import com.group17.comic.model.Comic;
-import com.group17.comic.model.ComicChapterContent;
-import com.group17.comic.model.DataModel;
-import com.group17.comic.model.Genre;
-import com.group17.comic.model.ComicModel;
-import com.group17.comic.model.Pagination;
-import com.group17.comic.model.Plugin; 
-import com.group17.comic.plugins.WebCrawler;
+import com.group17.comic.model.*; 
+import com.group17.comic.plugins.IDataCrawler;
 import com.group17.comic.utils.PluginUtility; 
 
 import java.io.IOException; 
@@ -25,7 +18,7 @@ public class PluginService {
     @Value("${comic.base_dir}") String projectDirectory;
     @Value("${comic.plugin.plugin_package_name}") String pluginPackageName;
     @Value("${comic.plugin.plugin_directory}") String pluginDirectory;
-    private List<WebCrawler> plugins = new ArrayList<>();
+    private List<IDataCrawler> plugins = new ArrayList<>();
  
     private void checkPlugins() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, IOException {
         if(plugins.isEmpty()) {
@@ -59,7 +52,7 @@ public class PluginService {
         return result;
     } 
     
-    public DataModel<List<ComicModel>> getNewestCommic(int pluginId, int page) throws Exception {
+    public DataModel<Integer, List<ComicModel>> getNewestCommic(int pluginId, int page) throws Exception {
         checkPlugins();
         var result = plugins.get(pluginId).getLastedComics(page);   
         
@@ -74,19 +67,19 @@ public class PluginService {
     }
 
 
-    public DataModel<List<ComicModel>> searchComic(int serverId, String keyword, int currentPage) throws Exception {
+    public DataSearchModel<Integer, List<ComicModel>, List<Author>> searchComic(int serverId, String keyword, int currentPage) throws Exception {
         checkPlugins();
         var result = plugins.get(serverId).search(keyword, currentPage);
         return result;
     }
 
-    public DataModel<List<Chapter>> getChapters(int serverId, String tagId, int currentPage) throws Exception {
+    public DataModel<Integer, List<Chapter>> getChapters(int serverId, String tagId, int currentPage) throws Exception {
         checkPlugins();
         var result = plugins.get(serverId).getChapters(tagId, currentPage);
         return result;
     }
 
-    public DataModel<ComicChapterContent> getComicChapterContent(int serverId, String tagId, int currentChapter) throws Exception{
+    public DataModel<?, ComicChapterContent> getComicChapterContent(int serverId, String tagId, String currentChapter) throws Exception{
         checkPlugins();
         var result = plugins.get(serverId).getComicChapterContent(tagId, currentChapter);
         return result; 

@@ -1,17 +1,11 @@
 package com.group17.comic.controller;
 
 import com.group17.comic.dto.response.ResponseSuccess;
-import com.group17.comic.model.Chapter;
-import com.group17.comic.model.Comic;
-import com.group17.comic.model.ComicChapterContent;
-import com.group17.comic.model.Genre;
-import com.group17.comic.model.ComicModel;
-import com.group17.comic.model.Plugin;
+import com.group17.comic.model.*; 
 import com.group17.comic.service.PluginService;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.AllArgsConstructor;
+import io.swagger.v3.oas.annotations.tags.Tag; 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
@@ -44,7 +38,7 @@ public class PluginController {
                     @RequestParam(name = "page", defaultValue = "1") int currentPage
         ){ 
         var dataDto = pluginService.searchComic(serverId, keyword, currentPage);
-        return new ResponseSuccess<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
+        return new ResponseSuccess<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData(), dataDto.getMeta());
     }
 
     @GetMapping("/reading/{tagId}")
@@ -75,7 +69,7 @@ public class PluginController {
     @Operation(summary = "Get comic infomation", description = "Get comic infomation base on tag url with specific server id. Default server id is 0 - plugin's index in plugin list.")
     public ResponseSuccess<ComicChapterContent> getComicChapterContent(
                     @PathVariable(name = "tagId", required = true) String tagId,  
-                    @PathVariable(name = "chapter", required = true) int currentChapter,
+                    @PathVariable(name = "chapter", required = true) String currentChapter,
                     @RequestParam(name = "server_id", defaultValue = "0") int serverId
         ){ 
         var dataDto = pluginService.getComicChapterContent(serverId, tagId, currentChapter);

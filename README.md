@@ -1,4 +1,8 @@
 # Welcome
+A project for reading novel, comic
+- Crawl data from [Tang Thu Vien](https://truyen.tangthuvien.vn/), [Truyen Chu TH](https://truyenchuth.com/)
+- Crawl data + API from [Truyen Full](https://truyenfull.vn/) and [API Truyen Full](https://www.postman.com/apptimviec/workspace/app-truyenfull-vn/documentation/1352944-a47fadc6-15df-4c8a-a26b-798586316a6d)
+
 ## Front-end
 ### Prerequisite
 - npm, npx

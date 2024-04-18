@@ -4,10 +4,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import com.group17.comic.model.Pagination;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+ 
+import lombok.Getter; 
 
 /* 
 Two advantages of using generics type instead of using Object:
@@ -24,15 +22,19 @@ public class ResponseSuccess<T> extends ResponseEntity<ResponseSuccess.Payload<T
     public ResponseSuccess(HttpStatus statusCode, String message, T data){
         super(new Payload<T>(statusCode.value(), message, data), statusCode);
     }
-    public ResponseSuccess(HttpStatus statusCode, String message, Pagination pagination, T data){
+    public ResponseSuccess(HttpStatus statusCode, String message, Pagination<?> pagination, T data){
         super(new Payload<T>(statusCode.value(), message, pagination , data), statusCode);
+    }
+    public ResponseSuccess(HttpStatus statusCode, String message, Pagination<?> pagination, T data, Object others){
+        super(new Payload<T>(statusCode.value(), message, pagination , data, others), statusCode);
     }
     @Getter 
     public static class Payload<T>{
         private int statusCode;
         private String message;
-        private Pagination pagination;
+        private Pagination<?> pagination;
         private T data;
+        private Object others;
         public Payload(int statusCode, String message) {
             this.statusCode = statusCode;
             this.message = message;
@@ -42,11 +44,13 @@ public class ResponseSuccess<T> extends ResponseEntity<ResponseSuccess.Payload<T
             this.message = message; 
             this.data = data;
         }
-        public Payload(int statusCode, String message, Pagination pagination, T data){
-            this.statusCode = statusCode;
-            this.message = message;
+        public Payload(int statusCode, String message, Pagination<?> pagination, T data){
+            this(statusCode, message, data);
             this.pagination = pagination;
-            this.data = data;
+        }
+        public Payload(int statusCode, String message, Pagination<?> pagination, T data, Object others){
+            this(statusCode, message, pagination, data);
+            this.others = others;
         }
      }
 }

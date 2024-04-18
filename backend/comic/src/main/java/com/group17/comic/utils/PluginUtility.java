@@ -13,12 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.group17.comic.plugins.WebCrawler;
+import com.group17.comic.plugins.IDataCrawler;
 
 public class PluginUtility {
     /**
      * Retrieves all plugins from a plugin folder.
-     * 
+     *
      * @return          a list of WebCrawler plugins
      * @throws IOException
      * @throws ClassNotFoundException
@@ -27,17 +27,17 @@ public class PluginUtility {
      * @throws InstantiationException
      * @throws IllegalAccessException
      */
-    public static List<WebCrawler> getAllPluginsFromFolder(String concreteRelativePath, String pluginPackageName) throws IOException, ClassNotFoundException, NoSuchMethodException,
-    InvocationTargetException, InstantiationException, IllegalAccessException { 
+    public static List<IDataCrawler> getAllPluginsFromFolder(String concreteRelativePath, String pluginPackageName) throws IOException, ClassNotFoundException, NoSuchMethodException,
+            InvocationTargetException, InstantiationException, IllegalAccessException {
         List<File> files = getAllFilesFromDirectory(concreteRelativePath);
-        List<WebCrawler> plugins = new ArrayList<>();
+        List<IDataCrawler> plugins = new ArrayList<>();
         for (File file : files) {
             var clazz = getClassInstance(file, pluginPackageName);
             if (clazz != null) {
-                boolean isImplemented = WebCrawler.class.isAssignableFrom(clazz);
+                boolean isImplemented = IDataCrawler.class.isAssignableFrom(clazz);
                 if (isImplemented) {
                     Constructor<?> constructor = clazz.getDeclaredConstructor();
-                    WebCrawler plugin = (WebCrawler) constructor.newInstance(); 
+                    IDataCrawler plugin = (IDataCrawler) constructor.newInstance();
                     plugins.add(plugin);
                 } else {
                     System.out.println("================================");
@@ -45,7 +45,7 @@ public class PluginUtility {
                     System.out.println("================================");
                 }
             }
-        } 
+        }
         return plugins;
     }
 
@@ -61,7 +61,7 @@ public class PluginUtility {
         String extension = filePath.getName().split("\\.")[1];
         if (extension.equals("java")) {
             URL url = filePath.toURI().toURL();
-            URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{url}); 
+            URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{url});
             Class<?> clazz = classLoader.loadClass(packageName + "." + fileName);
             classLoader.close();
             return clazz;

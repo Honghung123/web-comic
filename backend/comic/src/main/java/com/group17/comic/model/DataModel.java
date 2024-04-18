@@ -1,15 +1,12 @@
 package com.group17.comic.model;
+ 
 
-import java.util.List;
-
-import lombok.AllArgsConstructor;
-import lombok.Builder; 
+import lombok.AllArgsConstructor; 
 import lombok.Getter; 
 
-@Getter
-@Builder
+@Getter 
 @AllArgsConstructor 
-public class DataModel<T> {
-    private Pagination pagination;
-    private T data;
+public class DataModel<T, V> {
+    private Pagination<T> pagination;
+    private V data;
 }
