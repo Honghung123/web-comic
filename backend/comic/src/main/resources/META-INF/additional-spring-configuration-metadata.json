@@ -3,22 +3,7 @@
     "name": "comic.base_dir",
     "type": "java.lang.String",
     "description": "A relative path of 'comic' project"
-  },
-  {
-    "name": "comic.plugin.plugin_package_name",
-    "type": "java.lang.String",
-    "description": "The package name of plugins in Comic project"
-  },
-  {
-    "name": "comic.plugin.plugin_directory",
-    "type": "java.lang.String",
-    "description": "A description for 'comic.plugin.plugin_directory'"
-  },
-  {
-    "name": "comic.image.comic.alternate_image",
-    "type": "java.lang.String",
-    "description": "A description for 'comic.image.comic.alternate_image'"
-  },
+  } ,
   {
     "name": "comic.api.document_name",
     "type": "java.lang.String",
@@ -28,17 +13,40 @@
     "name": "comic.api.server.local.description",
     "type": "java.lang.String",
     "description": "A description for 'comic.api.server.local.description'"
-  },{
+  },
+  {
     "name": "comic.api.server.local.url",
     "type": "java.lang.String",
     "description": "A description for 'comic.api.server.local.url'"
-  },{
+  },
+  {
     "name": "comic.api.version",
     "type": "java.lang.String",
     "description": "A description for 'comic.api.version'"
-  },{
+  },
+  {
     "name": "comic.api.description",
     "type": "java.lang.String",
     "description": "A description for 'comic.api.description'"
+  },
+  {
+    "name": "comic.plugin.crawler.crawler_package_name",
+    "type": "java.lang.String",
+    "description": "The package name of plugins in Comic project"
+  },
+  {
+    "name": "comic.plugin.crawler.crawler_directory",
+    "type": "java.lang.String",
+    "description": "A description for 'comic.plugin.plugin_directory'"
+  },
+  {
+    "name": "comic.plugin.converter.converter_package_name",
+    "type": "java.lang.String",
+    "description": "A description for 'comic.converter.converter_package_name'"
+  },
+  {
+    "name": "comic.plugin.converter.converter_directory",
+    "type": "java.lang.String",
+    "description": "A description for 'comic.converter.converter_directory'"
   }
 ]}

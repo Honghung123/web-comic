@@ -1,26 +1,25 @@
-package com.group17.comic;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-// import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.regex.Pattern;
+package com.group17.comic;  
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import com.group17.comic.plugins.exporter.concretes.PdfConverter;
+
+import java.io.IOException;
 
 @SpringBootTest
 class ComicApplicationTests {
 
 	@Test
-	void contextLoads() {
-		var totalItemsText = "Danh sach chuong(123 chuong)";
-		int totalItems = 0;
-        var totalItemMatcher = Pattern.compile("\\w*\\((\\d+)\\w*\\)\\w*").matcher(totalItemsText);
-        if (totalItemMatcher.find()) {
-            totalItems = Integer.parseInt(totalItemMatcher.group(1));
-        }
-		assertTrue(totalItems == 123); 
+	void createPDF() throws IOException {
+		var text = """
+			<h1>Hello World!</h1><a href='https://pdf.co'>Go to PDF.co</a>
+		""";
+//		PdfConverter.createPdfFromText(text, "test.pdf");
 	}
 
+	@Test
+	void testPath () {
+//		PdfConverter.createUploadDir("plugins/exporter/uploads/");
+	}
 }

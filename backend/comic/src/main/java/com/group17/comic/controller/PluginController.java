@@ -1,22 +1,28 @@
 package com.group17.comic.controller;
 
+import com.group17.comic.dto.request.ChapterDTO;
+import com.group17.comic.dto.response.ChapterFile;
 import com.group17.comic.dto.response.ResponseSuccess;
 import com.group17.comic.model.*; 
 import com.group17.comic.service.PluginService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag; 
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
+import lombok.RequiredArgsConstructor; 
 
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus; 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
+ 
 import java.util.List;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 // @Tag: A Swagger annotation used to categorize API endpoints related to the Plugin Controller.
 // @SneakyThrows: A Lombok annotation to silently throw checked exceptions
@@ -29,8 +35,16 @@ import java.util.List;
 public class PluginController {
     private final PluginService pluginService;
 
-    @GetMapping("/search")
-    @SneakyThrows   
+    @PostMapping("/download")
+    public ResponseEntity<InputStreamResource> exportFileFromText(
+        @RequestBody ChapterDTO chapterDto,
+        @RequestParam(name = "converter_id", defaultValue = "0") int converterId
+        ){
+            ChapterFile chapterFile = pluginService.exportFile(chapterDto, converterId);
+            return new ResponseEntity(chapterFile.getResource(), chapterFile.getHeaders(), HttpStatus.OK);
+    } 
+
+    @GetMapping("/search") 
     @Operation(summary = "Search comic", description = "Search comic base on keyword with specific server id. Default server id is 0 - plugin's index in plugin list. Default the current page is 1.")
     public ResponseSuccess<List<ComicModel>> searchComic(
                     @RequestParam(name = "keyword", required = true) String keyword, 
@@ -41,8 +55,7 @@ public class PluginController {
         return new ResponseSuccess<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData(), dataDto.getMeta());
     }
 
-    @GetMapping("/reading/{tagId}")
-    @SneakyThrows   
+    @GetMapping("/reading/{tagId}") 
     @Operation(summary = "Get comic infomation", description = "Get comic infomation base on tag url with specific server id. Default server id is 0 - plugin's index in plugin list.")
     public ResponseSuccess<Comic> getComicInfo(
                     @PathVariable(name = "tagId", required = true) String tagId, 
@@ -52,8 +65,7 @@ public class PluginController {
         return new ResponseSuccess<>(HttpStatus.OK, "Success", comic);
     }
     
-    @GetMapping("/reading/{tagId}/chapters")
-    @SneakyThrows   
+    @GetMapping("/reading/{tagId}/chapters") 
     @Operation(summary = "Get comic infomation", description = "Get comic infomation base on tag url with specific server id. Default server id is 0 - plugin's index in plugin list.")
     public ResponseSuccess<List<Chapter>> getChapters(
                     @PathVariable(name = "tagId", required = true) String tagId, 
@@ -64,8 +76,7 @@ public class PluginController {
         return new ResponseSuccess<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
     }
     
-    @GetMapping("/reading/{tagId}/chapters/{chapter}")
-    @SneakyThrows   
+    @GetMapping("/reading/{tagId}/chapters/{chapter}") 
     @Operation(summary = "Get comic infomation", description = "Get comic infomation base on tag url with specific server id. Default server id is 0 - plugin's index in plugin list.")
     public ResponseSuccess<ComicChapterContent> getComicChapterContent(
                     @PathVariable(name = "tagId", required = true) String tagId,  
@@ -76,8 +87,7 @@ public class PluginController {
         return new ResponseSuccess<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
     }
     
-    @GetMapping("/genres")
-    @SneakyThrows   
+    @GetMapping("/genres") 
     @Operation(summary = "Get all genres", description = "Get all genres with specific server id. Default server id is 0 - plugin's index in plugin list Default the current page,offset, is 1 Default limit, a number of comics per page is 10")
     public ResponseSuccess<List<Genre>> getGenres(
             @RequestParam(name = "server_id", defaultValue = "0") int serverId 
@@ -86,8 +96,7 @@ public class PluginController {
         return new ResponseSuccess<>(HttpStatus.OK, "Success", genres);
     }
    
-    @GetMapping("/lasted-comic")
-    @SneakyThrows   
+    @GetMapping("/lasted-comic") 
     @Operation(summary = "Get lasted comics", description = "Get lasted comics with specific server id. Default server id is 0 - plugin's index in plugin list Default current page is 1")
     public ResponseSuccess<List<ComicModel>> getNewestCommic(
         @RequestParam(name = "server_id", defaultValue = "0") int serverId,
@@ -97,11 +106,17 @@ public class PluginController {
         return new ResponseSuccess<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
     }
 
-    @GetMapping("/plugins")
-    @SneakyThrows
-    @Operation(summary = "Get all plugins", description = "Get all plugins from the folder to crawl comic. Id of each plugin is the index of it in plugin list")
-    public ResponseSuccess<List<Plugin>> getAllPlugins() {
-        var plugins = pluginService.getAllPlugins(); 
-        return new ResponseSuccess<>(HttpStatus.OK, "Success", plugins);
+    @GetMapping("/crawler-plugins") 
+    @Operation(summary = "Get all crawler plugins", description = "Get all crawler plugins from the folder to crawl comic. Id of each plugin is the index of it in plugin list")
+    public ResponseSuccess<List<Plugin>> getAllPCrawlerlugins() {
+        var crawlers = pluginService.getAllCrawlerPlugins(); 
+        return new ResponseSuccess<>(HttpStatus.OK, "Success", crawlers);
+    }   
+
+    @GetMapping("/converter-plugins") 
+    @Operation(summary = "Get all converter plugins", description = "Get all converter plugins from the folder to crawl comic. Id of each plugin is the index of it in plugin list")
+    public ResponseSuccess<List<Plugin>> getAllPConverterlugins() {
+        var converters = pluginService.getAllConverterPlugins(); 
+        return new ResponseSuccess<>(HttpStatus.OK, "Success", converters);
     }   
 }

@@ -1,10 +1,11 @@
-package com.group17.comic.plugins;
+package com.group17.comic.plugins.crawler;
  
 import java.util.List;
 
 import com.group17.comic.model.*; 
 
 public interface IDataCrawler {     
+    String getPluginName();
     List<Genre> getGenres();
     DataModel<Integer, List<Chapter>> getChapters(String comicTagId, int currentPage);
     DataSearchModel<Integer, List<ComicModel>, List<Author>> search(String keyword, int currentPage);

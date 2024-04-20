@@ -37,8 +37,12 @@ comic:
         description: Local server      
   base_dir: backend/comic/src/main/java/com/group17/comic/
   plugin:
-    plugin_package_name: com.group17.comic.plugins.concretes
-    plugin_directory: plugins/concretes
+    crawler:
+      crawler_package_name: com.group17.comic.plugins.crawler.concretes
+      crawler_directory: plugins/crawler/concretes
+    converter:
+      converter_package_name: com.group17.comic.plugins.exporter.concretes
+      converter_directory: plugins/exporter/concretes
 
 # Cấu hình profile: 
 

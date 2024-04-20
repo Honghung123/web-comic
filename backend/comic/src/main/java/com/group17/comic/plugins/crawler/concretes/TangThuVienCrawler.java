@@ -1,4 +1,4 @@
-package com.group17.comic.plugins.concretes;
+package com.group17.comic.plugins.crawler.concretes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,11 +13,17 @@ import org.springframework.http.HttpStatus;
 import com.group17.comic.exception.ResourceNotFound;
 import com.group17.comic.log.Logger;
 import com.group17.comic.model.*;
-import com.group17.comic.plugins.*;
+import com.group17.comic.plugins.crawler.IDataCrawler;
+import com.group17.comic.plugins.crawler.WebCrawler;
 import com.group17.comic.utils.*;
 
 public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
     private final String TRUYEN_URL = "https://truyen.tangthuvien.vn/";
+
+    @Override
+    public String getPluginName() {
+        return "Tang Thu Vien";
+    }
 
     @Override
     public DataSearchModel<Integer, List<ComicModel>, List<Author>> search(String keyword, int currentPage) {

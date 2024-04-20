@@ -1,4 +1,4 @@
-package com.group17.comic.plugins;
+package com.group17.comic.plugins.crawler;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

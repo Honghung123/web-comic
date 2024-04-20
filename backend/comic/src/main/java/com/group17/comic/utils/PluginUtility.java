@@ -11,9 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import com.group17.comic.plugins.IDataCrawler;
+import java.util.stream.Collectors; 
 
 public class PluginUtility {
     /**
@@ -27,23 +25,23 @@ public class PluginUtility {
      * @throws InstantiationException
      * @throws IllegalAccessException
      */
-    public static List<IDataCrawler> getAllPluginsFromFolder(String concreteRelativePath, String pluginPackageName) throws IOException, ClassNotFoundException, NoSuchMethodException,
+    @SuppressWarnings("unchecked")
+    public static <T> List<T> getAllPluginsFromFolder(String concreteRelativePath, String pluginPackageName, Class<?> intefaces) throws IOException, ClassNotFoundException, NoSuchMethodException,
             InvocationTargetException, InstantiationException, IllegalAccessException {
+        if(!intefaces.isInterface()){
+            throw new IllegalAccessException("The class is not an interface");
+        }
         List<File> files = getAllFilesFromDirectory(concreteRelativePath);
-        List<IDataCrawler> plugins = new ArrayList<>();
+        List<T> plugins = new ArrayList<>();
         for (File file : files) {
             var clazz = getClassInstance(file, pluginPackageName);
             if (clazz != null) {
-                boolean isImplemented = IDataCrawler.class.isAssignableFrom(clazz);
+                boolean isImplemented = intefaces.isAssignableFrom(clazz); // not compatible for type T 
                 if (isImplemented) {
                     Constructor<?> constructor = clazz.getDeclaredConstructor();
-                    IDataCrawler plugin = (IDataCrawler) constructor.newInstance();
+                    T plugin = (T) constructor.newInstance();
                     plugins.add(plugin);
-                } else {
-                    System.out.println("================================");
-                    System.out.println("Class " + file.getName() + " does not implement interface WebCrawler");
-                    System.out.println("================================");
-                }
+                } 
             }
         }
         return plugins;
@@ -81,5 +79,5 @@ public class PluginUtility {
         return Files.list(pluginDirectory)
                 .map(Path::toFile)
                 .collect(Collectors.toList());
-    }
+    } 
 }

@@ -1,4 +1,4 @@
-package com.group17.comic.plugins.concretes;
+package com.group17.comic.plugins.crawler.concretes;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -17,13 +17,19 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.group17.comic.log.Logger;
-import com.group17.comic.model.*;
-import com.group17.comic.plugins.*;
+import com.group17.comic.model.*; 
+import com.group17.comic.plugins.crawler.IDataCrawler;
+import com.group17.comic.plugins.crawler.WebCrawler;
 import com.group17.comic.utils.*;
 
 public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     private final String TRUYEN_API = "https://api.truyenfull.vn/";
     private final String TRUYEN_URL = "https://truyenfull.vn/";
+
+    @Override
+    public String getPluginName() {
+        return "Truyen Full";
+    }
 
     @Override
     public DataSearchModel<Integer, List<ComicModel>, List<Author>> search(String keyword, int currentPage) {

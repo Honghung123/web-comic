@@ -1,87 +1,120 @@
-package com.group17.comic.service ;
- 
+package com.group17.comic.service;
+
 import org.springframework.beans.factory.annotation.Value; 
 import org.springframework.stereotype.Service;
 
-import com.group17.comic.log.Logger;
-import com.group17.comic.model.*; 
-import com.group17.comic.plugins.IDataCrawler;
-import com.group17.comic.utils.PluginUtility; 
+import com.group17.comic.dto.request.ChapterDTO;
+import com.group17.comic.dto.response.ChapterFile; 
+import com.group17.comic.model.*;
+import com.group17.comic.plugins.crawler.IDataCrawler;
+import com.group17.comic.plugins.exporter.IFileConverter;
+import com.group17.comic.utils.PluginUtility;
 
-import java.io.IOException; 
-import java.lang.reflect.InvocationTargetException; 
-import java.util.ArrayList; 
-import java.util.List; 
+import lombok.SneakyThrows; 
+import java.util.ArrayList;
+import java.util.List;
 
-@Service 
+@Service
 public class PluginService {
-    @Value("${comic.base_dir}") String projectDirectory;
-    @Value("${comic.plugin.plugin_package_name}") String pluginPackageName;
-    @Value("${comic.plugin.plugin_directory}") String pluginDirectory;
-    private List<IDataCrawler> plugins = new ArrayList<>();
- 
-    private void checkPlugins() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, IOException {
-        if(plugins.isEmpty()) {
-            Logger.logInfo("There are currently no plugins. Loading plugins from plugin directory");
-            plugins = PluginUtility.getAllPluginsFromFolder(projectDirectory + pluginDirectory, pluginPackageName);
-        }
+    @Value("${comic.base_dir}")
+    String projectDirectory;
+    @Value("${comic.plugin.crawler.crawler_package_name}")
+    String crawlerPackageName;
+    @Value("${comic.plugin.crawler.crawler_directory}")
+    String crawlerDirectory;
+    private List<IDataCrawler> crawlers = new ArrayList<>();
+    @Value("${comic.plugin.converter.converter_package_name}")
+    String converterPackageName;
+    @Value("${comic.plugin.converter.converter_directory}")
+    String converterDirectory;
+    private List<IFileConverter> converters = new ArrayList<>();
+
+    @SneakyThrows
+    private void checkCrawlerPlugins(){
+        String pluginRelativePath = projectDirectory + crawlerDirectory;
+        crawlers = PluginUtility.getAllPluginsFromFolder(pluginRelativePath, crawlerPackageName, IDataCrawler.class);
     }
-    
-    /**
-     * The function get all plugins available.
-     *
-     * @return         return a list of all plugins
-     */
-    public List<Plugin> getAllPlugins() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, IOException {
-        checkPlugins();
+
+    @SneakyThrows
+    public List<Plugin> getAllCrawlerPlugins(){
+        checkCrawlerPlugins();
         List<Plugin> pluginList = new ArrayList<>();
         int index = 0;
-        for (var plugin : plugins) {
-            String pluginClassName = plugin.getClass().getSimpleName();
-            String pluginName = pluginClassName.substring(0, pluginClassName.lastIndexOf("Crawler"));
+        for (var crawler : crawlers) {
+            String pluginName = crawler.getPluginName();
             pluginList.add(new Plugin(index, pluginName));
             index++;
         }
         return pluginList;
-    } 
- 
-    
-    public List<Genre> getAllGenres(int pluginId) throws Exception {
-        checkPlugins();
-        var result = plugins.get(pluginId).getGenres();           
-        return result;
-    } 
-    
-    public DataModel<Integer, List<ComicModel>> getNewestCommic(int pluginId, int page) throws Exception {
-        checkPlugins();
-        var result = plugins.get(pluginId).getLastedComics(page);   
-        
+    }
+
+    @SneakyThrows
+    public List<Genre> getAllGenres(int pluginId){
+        checkCrawlerPlugins();
+        var result = crawlers.get(pluginId).getGenres();
         return result;
     }
 
+    @SneakyThrows
+    public DataModel<Integer, List<ComicModel>> getNewestCommic(int pluginId, int page){
+        checkCrawlerPlugins();
+        var result = crawlers.get(pluginId).getLastedComics(page);
 
-    public Comic getComicInfo(int pluginId, String tagUrl) throws Exception {
-        checkPlugins();
-        var comic = plugins.get(pluginId).getComicInfo(tagUrl);   
+        return result;
+    }
+
+    @SneakyThrows
+    public Comic getComicInfo(int pluginId, String tagUrl){
+        checkCrawlerPlugins();
+        var comic = crawlers.get(pluginId).getComicInfo(tagUrl);
         return comic;
     }
 
-
-    public DataSearchModel<Integer, List<ComicModel>, List<Author>> searchComic(int serverId, String keyword, int currentPage) throws Exception {
-        checkPlugins();
-        var result = plugins.get(serverId).search(keyword, currentPage);
+    @SneakyThrows
+    public DataSearchModel<Integer, List<ComicModel>, List<Author>> searchComic(int serverId, String keyword,
+            int currentPage){
+        checkCrawlerPlugins();
+        var result = crawlers.get(serverId).search(keyword, currentPage);
         return result;
     }
 
-    public DataModel<Integer, List<Chapter>> getChapters(int serverId, String tagId, int currentPage) throws Exception {
-        checkPlugins();
-        var result = plugins.get(serverId).getChapters(tagId, currentPage);
+    @SneakyThrows
+    public DataModel<Integer, List<Chapter>> getChapters(int serverId, String tagId, int currentPage){
+        checkCrawlerPlugins();
+        var result = crawlers.get(serverId).getChapters(tagId, currentPage);
         return result;
     }
 
-    public DataModel<?, ComicChapterContent> getComicChapterContent(int serverId, String tagId, String currentChapter) throws Exception{
-        checkPlugins();
-        var result = plugins.get(serverId).getComicChapterContent(tagId, currentChapter);
-        return result; 
-    } 
+    @SneakyThrows
+    public DataModel<?, ComicChapterContent> getComicChapterContent(int serverId, String tagId, String currentChapter) {
+        checkCrawlerPlugins();
+        var result = crawlers.get(serverId).getComicChapterContent(tagId, currentChapter);
+        return result;
+    }
+
+
+    @SneakyThrows
+    private void checkConverterPlugins(){
+        String converterRelativePath = projectDirectory + converterDirectory;
+        converters = PluginUtility.getAllPluginsFromFolder(converterRelativePath, converterPackageName, IFileConverter.class);
+    }
+
+    @SneakyThrows
+    public List<Plugin> getAllConverterPlugins(){
+        checkConverterPlugins();
+        List<Plugin> pluginList = new ArrayList<>();
+        int index = 0;
+        for (var converter : converters) { 
+            String pluginName = converter.getPluginName();
+            pluginList.add(new Plugin(index, pluginName));
+            index++;
+        }
+        return pluginList;
+    }
+
+    @SneakyThrows
+    public ChapterFile exportFile(ChapterDTO chapterDto, int converterId) {
+        checkConverterPlugins();
+        return converters.get(converterId).getConvertedFile(chapterDto);
+    }
 }
