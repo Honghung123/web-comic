@@ -10,24 +10,12 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+
+import com.group17.comic.dto.response.ErrorResponse;
+import com.group17.comic.exception.customs.InvalidTypeException;
+import com.group17.comic.exception.customs.ResourceNotFound;
 import com.group17.comic.log.Logger;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-class ErrorResponse {
-    private int statusCode;
-    private String error;
-    private String message;
-    private LocalDateTime timestamp;
-    private String path;
-}
+ 
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {

@@ -16,12 +16,14 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.group17.comic.exception.InvalidTypeException;
+import com.group17.comic.exception.customs.InvalidTypeException;
 import com.group17.comic.log.Logger;
 import com.group17.comic.model.*; 
 import com.group17.comic.plugins.crawler.IDataCrawler;
 import com.group17.comic.plugins.crawler.WebCrawler;
 import com.group17.comic.utils.*;
+
+import lombok.SneakyThrows;
 
 public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     private final String TRUYEN_API = "https://api.truyenfull.vn/";
@@ -33,7 +35,8 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     }
 
     @Override
-    public DataSearchModel<Integer, List<ComicModel>, List<Author>> search(String keyword, int currentPage) {
+    public DataSearchModel<Integer, List<ComicModel>, List<Author>> search(String keyword,
+            String byGenres, String byAuthorTagId, int currentPage) {
         List<ComicModel> listMatchedComic = new ArrayList<>();
         String term = keyword.trim().replace(" ", "%20");
         String apiUrl = TRUYEN_API + "/v1/tim-kiem?title=" + term;
@@ -44,9 +47,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 200) {
-                String responseBody = response.body();
-
-                // Sử dụng Gson để chuyển đổi JSON thành đối tượng truyện
+                String responseBody = response.body(); 
                 JsonObject jsonObject = new Gson().fromJson(responseBody, JsonObject.class);
                 JsonArray jsonArray = jsonObject.getAsJsonArray("data");
                 for (JsonElement element : jsonArray) {
@@ -108,6 +109,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         return result;
     }
 
+    @SneakyThrows
     @Override
     public List<Genre> getGenres() {
         List<Genre> genres = new ArrayList<>();

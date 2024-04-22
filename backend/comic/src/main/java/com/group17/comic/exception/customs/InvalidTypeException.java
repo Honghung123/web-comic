@@ -1,7 +1,6 @@
-package com.group17.comic.exception;
-
+package com.group17.comic.exception.customs;
 import org.springframework.http.HttpStatus;
-
+import com.group17.comic.exception.CustomException;
 import lombok.Getter;
 
 @Getter

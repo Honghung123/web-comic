@@ -6,14 +6,16 @@ import java.util.regex.Pattern;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements; 
+import org.jsoup.select.Elements;
 
-import com.group17.comic.exception.ResourceNotFound;
+import com.group17.comic.exception.customs.ResourceNotFound;
 import com.group17.comic.log.Logger;
 import com.group17.comic.model.*;
 import com.group17.comic.plugins.crawler.IDataCrawler;
 import com.group17.comic.plugins.crawler.WebCrawler;
 import com.group17.comic.utils.*;
+
+import lombok.SneakyThrows;
 
 public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
     private final String TRUYEN_URL = "https://truyen.tangthuvien.vn/";
@@ -23,8 +25,10 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         return "Tang Thu Vien";
     }
 
+    @SneakyThrows
     @Override
-    public DataSearchModel<Integer, List<ComicModel>, List<Author>> search(String keyword, int currentPage) {
+    public DataSearchModel<Integer, List<ComicModel>, List<Author>> search(String keyword,
+            String byGenres, String byAuthorTagId, int currentPage) {
         List<ComicModel> listMatchedComic = new ArrayList<>();
         String term = keyword.trim().replace(" ", "%20");
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "ket-qua-tim-kiem?term=" + term);
@@ -79,6 +83,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         return dataDto;
     }
 
+    @SneakyThrows
     @Override
     public List<Genre> getGenres() {
         List<Genre> genres = new ArrayList<Genre>();
@@ -96,6 +101,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         return genres;
     }
 
+    @SneakyThrows
     @Override
     public DataModel<Integer, List<ComicModel>> getLastedComics(int currentPage) {
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "tong-hop?tp=cv&page=" + currentPage);
@@ -148,6 +154,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         return result;
     }
 
+    @SneakyThrows
     @Override
     public Comic getComicInfo(String comicTagId) {
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "doc-truyen/" + comicTagId);
@@ -189,6 +196,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         return comic;
     }
 
+    @SneakyThrows
     @Override
     public DataModel<Integer, List<Chapter>> getChapters(String comicTagId, int currentPage) {
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "doc-truyen/" + comicTagId);
@@ -228,6 +236,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         return result;
     }
 
+    @SneakyThrows
     @Override
     public DataModel<Integer, ComicChapterContent> getComicChapterContent(String comicTagId, String currentChapter) {
         Document doc = this

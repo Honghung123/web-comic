@@ -70,10 +70,10 @@ public class PluginService {
     }
 
     @SneakyThrows
-    public DataSearchModel<Integer, List<ComicModel>, List<Author>> searchComic(int serverId, 
-            String keyword, int currentPage){
+    public DataSearchModel<Integer, List<ComicModel>, List<Author>> searchComic(int serverId,
+            String keyword, String byGenres, String byAuthorTagId, int currentPage){
         checkCrawlerPlugins();
-        var result = crawlers.get(serverId).search(keyword, currentPage);
+        var result = crawlers.get(serverId).search(keyword, byGenres, byAuthorTagId, currentPage);
         return result;
     }
 

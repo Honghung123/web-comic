@@ -5,14 +5,16 @@ import java.util.List;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements; 
+import org.jsoup.select.Elements;
 
-import com.group17.comic.exception.ResourceNotFound;
+import com.group17.comic.exception.customs.ResourceNotFound;
 import com.group17.comic.log.Logger;
 import com.group17.comic.model.*;
 import com.group17.comic.plugins.crawler.IDataCrawler;
 import com.group17.comic.plugins.crawler.WebCrawler;
 import com.group17.comic.utils.*;
+
+import lombok.SneakyThrows;
 
 public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
     private final String TRUYEN_URL = "https://truyenchuth.com/";
@@ -22,8 +24,10 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
         return "Truyen Chu TH";
     }
 
+    @SneakyThrows
     @Override
-    public DataSearchModel<Integer, List<ComicModel>, List<Author>> search(String keyword, int currentPage) {
+    public DataSearchModel<Integer, List<ComicModel>, List<Author>> search(String keyword,
+            String byGenres, String byAuthorTagId, int currentPage) {
         List<ComicModel> listMatchedComic = new ArrayList<>();
         String term = keyword.trim().replace(" ", "+");
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "searching?key=" + term);
@@ -63,6 +67,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
         return dataDto;
     }
 
+    @SneakyThrows
     @Override
     public List<Genre> getGenres() {
         List<Genre> genres = new ArrayList<Genre>();
@@ -78,6 +83,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
         return genres;
     }
 
+    @SneakyThrows
     @Override
     public DataModel<Integer, List<ComicModel>> getLastedComics(int currentPage) {
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "loadmore?p=" + currentPage);
@@ -115,6 +121,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
         return result;
     }
 
+    @SneakyThrows
     @Override
     public Comic getComicInfo(String comicTagId) {
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + comicTagId);
@@ -154,6 +161,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
         return comic;
     }
 
+    @SneakyThrows
     @Override
     public DataModel<Integer, List<Chapter>> getChapters(String comicTagId, int currentPage) {
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + comicTagId + "?p=" + currentPage);
@@ -179,6 +187,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
         return result;
     }
 
+    @SneakyThrows
     @Override
     public DataModel<String, ComicChapterContent> getComicChapterContent(String comicTagId, String currentChapter) {
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + comicTagId + "/" + currentChapter);

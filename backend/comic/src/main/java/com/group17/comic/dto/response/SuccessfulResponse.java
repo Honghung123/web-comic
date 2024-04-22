@@ -14,18 +14,18 @@ Two advantages of using generics type instead of using Object:
         that the method always returns expected class. So, you may have a ClassCastException at runtime.
 */
 
-public class ResponseSuccess<T> extends ResponseEntity<ResponseSuccess.Payload<T>>{ 
+public class SuccessfulResponse<T> extends ResponseEntity<SuccessfulResponse.Payload<T>>{ 
 
-    public ResponseSuccess(HttpStatus statusCode, String message){
+    public SuccessfulResponse(HttpStatus statusCode, String message){
         super(new Payload<T>(statusCode.value(), message), statusCode);
     }
-    public ResponseSuccess(HttpStatus statusCode, String message, T data){
+    public SuccessfulResponse(HttpStatus statusCode, String message, T data){
         super(new Payload<T>(statusCode.value(), message, data), statusCode);
     }
-    public ResponseSuccess(HttpStatus statusCode, String message, Pagination<?> pagination, T data){
+    public SuccessfulResponse(HttpStatus statusCode, String message, Pagination<?> pagination, T data){
         super(new Payload<T>(statusCode.value(), message, pagination , data), statusCode);
     }
-    public ResponseSuccess(HttpStatus statusCode, String message, Pagination<?> pagination, T data, Object others){
+    public SuccessfulResponse(HttpStatus statusCode, String message, Pagination<?> pagination, T data, Object others){
         super(new Payload<T>(statusCode.value(), message, pagination , data, others), statusCode);
     }
     @Getter 

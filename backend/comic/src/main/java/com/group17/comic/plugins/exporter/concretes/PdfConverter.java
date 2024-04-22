@@ -36,23 +36,20 @@ public class PdfConverter implements IFileConverter {
     @SneakyThrows
     public ChapterFile getConvertedFile(ChapterDTO chapterDto) {
         String formatTitile = StringConverter.removeDiacriticalMarks(chapterDto.title());
-        formatTitile = formatTitile.replaceAll("[^a-zA-Z0-9\\s]", "-").trim();
+        formatTitile = formatTitile.replaceAll("[^a-zA-Z0-9]", "-").trim();
         String fileName = formatTitile + ".pdf";
         // Convert html to pdf online, and download it afterwards 
-        Response response = this.savePdfFromText(chapterDto.content(), fileName);
-        // Then save the pdf file to folder 
-        byte[] fileBytes = response.body().bytes();
+        byte[] fileBytes = this.savePdfFromText(chapterDto.content(), fileName);
+        // Then save the pdf file to folder  
         String uploadFolderAbsolutePath = Paths.get(uploadDir).toAbsolutePath().toString();
-        FileUtility.deleteDirectory(new File(uploadFolderAbsolutePath));
-        FileUtility.createDirectory(new File(uploadFolderAbsolutePath));
+        File uploadFolderFile = new File(uploadFolderAbsolutePath);
+        FileUtility.deleteDirectory(uploadFolderFile);
+        FileUtility.createDirectory(uploadFolderFile);
         File destinationFile = Paths.get(uploadDir + fileName).toFile();
         FileUtility.saveDownloadedBytesToFolder(fileBytes, destinationFile);
         // Get the pdf file from folder to return to client
         InputStreamResource resource =
-                new InputStreamResource(new FileInputStream(uploadDir + fileName)); 
-        File uploadFolder = new File(
-                Paths.get(uploadDir).toAbsolutePath().toString());
-        FileUtility.deleteDirectory(uploadFolder); 
+                new InputStreamResource(new FileInputStream(uploadDir + fileName));  
         HttpHeaders headers = new HttpHeaders();  
         headers.setContentLength(Files.size(Paths.get(uploadDir + fileName))); 
         headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);  
@@ -60,7 +57,7 @@ public class PdfConverter implements IFileConverter {
     }
 
     @SuppressWarnings("deprecation")
-    public Response savePdfFromText(String myText, String fileOutputName) throws IOException {
+    public byte[] savePdfFromText(String myText, String fileOutputName) throws IOException {
         String url = "https://api.pdf.co/v1/pdf/convert/from/html";
         String apiKey = "damrosehung123@gmail.com_QkG8Xf1Md9B2N4HSeK8vnArZ8GnI98keh80LbC9w063U00eXf88sdc3T9g6Z1sNW;";
         JsonObject jsonBody = new JsonObject();
@@ -98,7 +95,8 @@ public class PdfConverter implements IFileConverter {
                         .build();
                 // Execute request
                 Response downloadFileResponse = webClient.newCall(downloadFileRequest).execute();
-                return downloadFileResponse;
+                byte[] fileBytes = downloadFileResponse.body().bytes();
+                return fileBytes;
             } else {
                 // Display service reported error
                 System.out.println(json.get("message").getAsString());

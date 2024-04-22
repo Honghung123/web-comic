@@ -31,12 +31,15 @@ public class EpubConverter implements IFileConverter {
         formatTitle = formatTitle.replaceAll("[^a-zA-Z0-9\\s]", "-").trim();
         String fileName = formatTitle + ".epub";
         // Wirte content to epub file and save it to folder 
-
+        String uploadFolderAbsolutePath = Paths.get(uploadDir).toAbsolutePath().toString();
+        File uploadFolderFile = new File(uploadFolderAbsolutePath);
+        FileUtility.deleteDirectory(uploadFolderFile);
+        FileUtility.createDirectory(uploadFolderFile);
+        File destinationFile = Paths.get(uploadDir + fileName).toFile();
         // Get epub file from folder to return to client
         InputStreamResource resource = 
-                    new InputStreamResource(new FileInputStream(uploadDir + fileName));
-        File uploadFolder = new File(Paths.get(uploadDir).toAbsolutePath().toString());
-        FileUtility.deleteDirectory(uploadFolder); 
+                    new InputStreamResource(new FileInputStream(uploadDir + fileName)); 
+        FileUtility.deleteDirectory(uploadFolderFile); 
         HttpHeaders headers = new HttpHeaders();  
         headers.setContentLength(Files.size(Paths.get(uploadDir + fileName))); 
         headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);  

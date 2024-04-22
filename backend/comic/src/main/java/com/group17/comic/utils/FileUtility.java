@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 
 public class FileUtility {
     public static boolean createDirectory(File file) {
@@ -34,7 +36,9 @@ public class FileUtility {
             content = "";
         }
         // create new file and write content into it
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+        try (FileOutputStream fos = new FileOutputStream(new File(filePath));
+             OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
+             BufferedWriter writer = new BufferedWriter(osw)) {
             writer.write(content);
             return true;
         } catch (IOException e) {

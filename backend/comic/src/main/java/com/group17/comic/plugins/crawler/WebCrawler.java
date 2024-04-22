@@ -9,9 +9,11 @@ import java.nio.charset.StandardCharsets;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
+import com.group17.comic.log.Logger;
+
 public abstract class WebCrawler { 
     protected String alternateImage = "https://truyen.tangthuvien.vn/images/default-book.png";
-    protected Document getDocumentInstanceFromUrl(String link) {
+    protected Document getDocumentInstanceFromUrl(String link) throws Exception {
         StringBuilder sb = new StringBuilder();
         try {
             HttpURLConnection con = (HttpURLConnection) new URL(link).openConnection();
@@ -27,7 +29,8 @@ public abstract class WebCrawler {
                 }
             }
         } catch (Exception e) { 
-            return Jsoup.parse("");
+            Logger.logError("Failed to get document from url: " + link, e);
+            throw e;
         }   
         Document doc = Jsoup.parse(sb.toString()); 
         return doc;

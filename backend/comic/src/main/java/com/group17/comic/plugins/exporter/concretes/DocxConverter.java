@@ -40,7 +40,7 @@ public class DocxConverter implements IFileConverter {
     @SneakyThrows
     @Override
     public ChapterFile getConvertedFile(ChapterDTO chapterDto) {
-        String formatedTitle = StringConverter.removeDiacriticalMarks(chapterDto.title()).replace("[^a-zA-Z0-9\\s]", "-").trim();
+        String formatedTitle = StringConverter.removeDiacriticalMarks(chapterDto.title()).replaceAll("[^a-zA-Z0-9]", "-").trim();
         String htmlFile = formatedTitle + ".html";
         String fileOutputName = formatedTitle + ".docx";     
         // Create a html file and save it to folder   
@@ -56,18 +56,19 @@ public class DocxConverter implements IFileConverter {
             + "</body>\n" 
             + "</html>";
         String htmlFilePath = uploadDir + htmlFile;
+        String uploadFolderAbsolutePath = Paths.get(uploadDir).toAbsolutePath().toString();
+        File uploadFolderFile = new File(uploadFolderAbsolutePath);
+        FileUtility.deleteDirectory(uploadFolderFile);
+        FileUtility.createDirectory(uploadFolderFile);
         FileUtility.createFile(htmlFilePath, simpleHtmlContent);
         // Then get the saved html file from folder to convert to docx, and download it afterwards
-        Response response = this.convertFileOnline(htmlFile, htmlFilePath, fileOutputName);
-        // Next,  save download converted docx to folder
-        byte[] fileBytes = response.body().bytes();
+        byte[] fileBytes = this.convertFileOnline(htmlFile, htmlFilePath, fileOutputName);
+        // Next, save download converted docx to folder 
         File destinationFile = Paths.get(uploadDir + fileOutputName).toFile();
         FileUtility.saveDownloadedBytesToFolder(fileBytes, destinationFile); 
         // Finally, get the saved docx file from folder to return to client
         InputStreamResource resource = 
                     new InputStreamResource(new FileInputStream(uploadDir + fileOutputName));
-        File uploadFolder = new File(Paths.get(uploadDir).toAbsolutePath().toString());
-        FileUtility.deleteDirectory(uploadFolder); 
         HttpHeaders headers = new HttpHeaders();  
         headers.setContentLength(Files.size(Paths.get(uploadDir + fileOutputName))); 
         headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);  
@@ -76,7 +77,7 @@ public class DocxConverter implements IFileConverter {
 
     @SuppressWarnings("deprecation")
     @SneakyThrows
-    private Response convertFileOnline(String htmlFile, String htmlFilePath, String fileOutputName) {
+    private byte[] convertFileOnline(String htmlFile, String htmlFilePath, String fileOutputName) {
         String api = "https://api.apyhub.com/convert/html-file/doc-file?output=";
         String apyToken = "APY0Xu6XpJitjtR6YduOHqBpPgg3d6XbDm5SNb4R6ava3bX81L2jjuEtLiJ4jtG1xjqz4GNqy";
         RequestBody requestBody = new MultipartBody.Builder()
@@ -93,7 +94,7 @@ public class DocxConverter implements IFileConverter {
         OkHttpClient client = new OkHttpClient();
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-            return response;
+            return response.body().bytes(); 
         } 
     }
 } 
