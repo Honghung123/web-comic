@@ -2,15 +2,13 @@ package com.group17.comic.exception;
 
 import org.springframework.http.HttpStatus;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Getter; 
 
-@Setter
 @Getter
-public class ResourceNotFound extends RuntimeException {
+public class ResourceNotFound extends RuntimeException implements CustomException {
     private HttpStatus statusCode; 
-    public ResourceNotFound(HttpStatus statusCode, String message) {
+    public ResourceNotFound(String message) {
         super(message);
-        this.statusCode = statusCode;
+        this.statusCode = HttpStatus.BAD_REQUEST;
     }    
 }

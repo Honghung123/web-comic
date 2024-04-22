@@ -1,10 +1,8 @@
 package com.group17.comic.plugins.exporter.concretes;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.FileInputStream; 
+import java.nio.file.Files; 
 import java.nio.file.Paths;
 
 import org.springframework.core.io.InputStreamResource;
@@ -32,8 +30,8 @@ public class EpubConverter implements IFileConverter {
         String formatTitle = StringConverter.removeDiacriticalMarks(chapterDto.title());
         formatTitle = formatTitle.replaceAll("[^a-zA-Z0-9\\s]", "-").trim();
         String fileName = formatTitle + ".epub";
-        // Wirte content to epub file and save it to upload files 
-        
+        // Wirte content to epub file and save it to folder 
+
         // Get epub file from folder to return to client
         InputStreamResource resource = 
                     new InputStreamResource(new FileInputStream(uploadDir + fileName));
@@ -43,6 +41,5 @@ public class EpubConverter implements IFileConverter {
         headers.setContentLength(Files.size(Paths.get(uploadDir + fileName))); 
         headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);  
         return new ChapterFile(headers, resource);
-    }
-    
+    }    
 }

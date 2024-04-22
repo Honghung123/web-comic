@@ -1,14 +1,12 @@
 package com.group17.comic.plugins.crawler.concretes;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
+import java.util.List; 
 import java.util.regex.Pattern;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import org.springframework.http.HttpStatus;
+import org.jsoup.select.Elements; 
 
 import com.group17.comic.exception.ResourceNotFound;
 import com.group17.comic.log.Logger;
@@ -123,18 +121,16 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
             var chapterTag = element.select(".book-mid-info .author span span.KIBoOgno");
             int totalChapter = Integer.parseInt(chapterTag.text());
             String updatedTime = element.selectFirst(".book-mid-info .update span").text();
-            boolean isFull = false;
             var comicModel = ComicModel.builder()
                     .tagId(comicTagId)
                     .title(title)
                     .image(image)
-                    .alternateImage(this.alternateImage)
+                    .alternateImage(this.alternateImage)                    
                     .genres(genres)
                     .author(author)
                     .totalChapter(totalChapter)
-                    .totalChapter(totalChapter)
-                    .updatedTime(updatedTime)
-                    .isFull(isFull)
+                    .newestChapter(totalChapter)
+                    .updatedTime(updatedTime) 
                     .build();
             lastedComics.add(comicModel);
         }
@@ -155,8 +151,10 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
     @Override
     public Comic getComicInfo(String comicTagId) {
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "doc-truyen/" + comicTagId);
-
         Element element = doc.selectFirst("div.book-information");
+        if(element == null){
+            throw new ResourceNotFound("Comic not found");
+        }
         String image = element.select(".book-img img").attr("src");
         String title = element.selectFirst(".book-info h1").text();
         var authorTag = element.select(".book-info .tag a:nth-of-type(1)");
@@ -164,6 +162,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         String authorName = authorTag.text();
         var author = new Author(authorId, authorName);
         Double rate = Double.parseDouble(element.select("cite#myrate").text());
+        
         List<Genre> genres = new ArrayList<>();
         var genreTag = element.select(".book-info .tag a:nth-of-type(2)");
         String label = genreTag.text();
@@ -171,11 +170,11 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         String fullTag = genreUrl.substring(genreUrl.lastIndexOf("the-loai"));
         String tag = fullTag.substring(fullTag.lastIndexOf("/") + 1);
         genres.add(new Genre(label, tag, fullTag));
+
         Element descriptionElement = doc.selectFirst(".book-info-detail > .book-intro");
-        String description = descriptionElement.html();
-        if (description.contains("Bước 1")) {
-            description = description.substring(0, description.indexOf("Bước 1") - 1);
-        }
+        String description = descriptionElement.html(); 
+        Element statusElement = doc.selectFirst(".book-info .tag span.blue");
+        boolean isFull = StringConverter.removeDiacriticalMarks(statusElement.text()).equals("Da hoan thanh");
         var comic = Comic.builder()
                 .tagId(comicTagId)
                 .title(title)
@@ -185,7 +184,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
                 .author(author)
                 .genres(genres)
                 .rate(rate)
-                .isFull(false)
+                .isFull(isFull)
                 .build();
         return comic;
     }
@@ -195,20 +194,19 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "doc-truyen/" + comicTagId);
         Pagination<Integer> pagination = null;
         List<Chapter> chapters = new ArrayList<>();
-        var totalItemsText = doc.getElementById("j-bookCatalogPage").text();
+        String totalItemsText = doc.getElementById("j-bookCatalogPage").text();
         int totalItems = 0;
         var totalItemMatcher = Pattern.compile("\\((\\d+) chương\\)").matcher(totalItemsText);
-        if (totalItemMatcher.find()) {
-            totalItems = Integer.parseInt(totalItemMatcher.group(1));
+        if (totalItemMatcher.find()) {  
+            totalItems = Integer.parseInt(totalItemMatcher.group(1)) - 5;
         } else {
-            Logger.logError(this.getClass().getSimpleName() + " Can't get total items in pagination",
-                    new Exception("Can't get total items in pagination"));
+            Logger.logError(this.getClass().getSimpleName()
+                 + " Can't get total items", null);
         }
         int comicId = Integer.parseInt(doc.getElementById("story_id_hidden").val());
         Document chaperListDoc = this
                 .getDocumentInstanceFromUrl(TRUYEN_URL + "doc-truyen/page/" + comicId + "?page=" + (currentPage - 1));
-        Elements elements = chaperListDoc.select(".col-md-6 ul li a span");
-        int perPage = elements.size();
+        Elements elements = chaperListDoc.select(".col-md-6 ul li a span");        
         for (Element element : elements) {
             String chapterNo = "";
             String title = "";
@@ -222,16 +220,8 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
                         new Exception("Can't get chapter number"));
             }
         }
-        var paginationTag = chaperListDoc.select("ul.pagination li:last-child a");
-        String totalPageText = paginationTag.attr("onclick");
-        int totalPages = 0;
-        Matcher totalPageMatcher = Pattern.compile("\\((\\d+)\\)").matcher(totalPageText);
-        if (totalPageMatcher.find()) {
-            totalPages = Integer.parseInt(totalPageMatcher.group(1)) + 1;
-        } else {
-            Logger.logError(this.getClass().getSimpleName() + " Can't get total items in pagination",
-                    new Exception("Can't get total items in pagination"));
-        }
+        int perPage = elements.size(); 
+        int totalPages = totalItems / perPage + (totalItems % perPage == 0 ? 0 : 1);         
         pagination = new Pagination<>(currentPage, perPage, totalPages, totalItems);
         PaginationUtility.updatePagination(pagination);
         DataModel<Integer, List<Chapter>> result = new DataModel<>(pagination, chapters);
@@ -246,19 +236,20 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         if (elementTitle == null) {
             Logger.logError(this.getClass().getSimpleName() + " Can't get chapter content",
                     new Exception("Can't get chapter content"));
-            throw new ResourceNotFound(HttpStatus.NOT_FOUND, "Can't get chapter content");
+            throw new ResourceNotFound("Can't get chapter content");
         }
         String title = elementTitle.text().substring(elementTitle.text().lastIndexOf(":") + 1).trim();
         var elementContent = doc.selectFirst(".chapter-c-content .box-chap");
         if (elementContent == null) {
             Logger.logError(this.getClass().getSimpleName() + " Can't get chapter content",
                     new Exception("Can't get chapter content"));
-            throw new ResourceNotFound(HttpStatus.NOT_FOUND, "Can't get chapter content");
+            throw new ResourceNotFound("Can't get chapter content");
         }
         String content = elementContent.html();
         Pagination<Integer> paginationTemp = getChapters(comicTagId, 1).getPagination();
         Pagination<Integer> pagination = new Pagination<>(Integer.parseInt(currentChapter), 1,
                 paginationTemp.getTotalItems(), paginationTemp.getTotalItems());
+        PaginationUtility.updatePagination(pagination);
         DataModel<Integer, ComicChapterContent> result = new DataModel<>(pagination,
                 new ComicChapterContent(title, content, comicTagId));
         return result;

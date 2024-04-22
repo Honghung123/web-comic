@@ -5,8 +5,7 @@ import java.util.List;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import org.springframework.http.HttpStatus;
+import org.jsoup.select.Elements; 
 
 import com.group17.comic.exception.ResourceNotFound;
 import com.group17.comic.log.Logger;
@@ -86,11 +85,14 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
         Elements elements = doc.select(".list-row-img");
         for (Element element : elements) {
             var anchorTag = element.selectFirst(".row-info a");
-            Author author = new Author("", "");
             String title = anchorTag.text();
             String comicUrl = anchorTag.attr("href");
             String tagId = comicUrl.substring(comicUrl.lastIndexOf("/") + 1);
             String image = element.selectFirst(".row-image a img").attr("src");
+            var authorTag = element.selectFirst(".row-author");
+            String authorName = authorTag.text();
+            String authorId = StringConverter.removeDiacriticalMarks(authorName).toLowerCase().replaceAll(" ", "-");
+            Author author = new Author(authorId, authorName);
             List<Genre> genres = new ArrayList<>();
             boolean isFull = false;
             var comicModel = ComicModel.builder()
@@ -105,8 +107,8 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
             lastedComics.add(comicModel);
         }
         int perPage = elements.size();
-        int totalPages = 25;
-        int totalItems = totalPages * perPage;
+        int totalPages = 25; 
+        int totalItems = totalPages * perPage   ;
         var pagination = new Pagination<Integer>(currentPage, perPage, totalPages, totalItems);
         PaginationUtility.updatePagination(pagination);
         DataModel<Integer, List<ComicModel>> result = new DataModel<>(pagination, lastedComics);
@@ -117,6 +119,9 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
     public Comic getComicInfo(String comicTagId) {
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + comicTagId);
         Element element = doc.getElementById("list");
+        if(element.selectFirst(".detail") == null) {
+            throw new ResourceNotFound("Comic not found");
+        }
         String image = element.select(".detail-thumbnail img").attr("src");
         String title = element.selectFirst(".detail-right h2 a").text();
         var authorTag = element.selectFirst(".detail-info ul li:nth-of-type(1) h2 a");
@@ -165,7 +170,9 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
         var lastPageTag = doc.select(".pagination ul.paging li.last a");
         var lastPageHref = lastPageTag.attr("href");
         int totalPages = Integer.parseInt(lastPageHref.substring(lastPageHref.lastIndexOf("=") + 1));
-        int totalItems = perPage * totalPages;
+        var lastestChapterText = doc.selectFirst("#newchaps ul li:last-child").text();
+        int lastestChapter = Integer.parseInt(lastestChapterText.substring(lastestChapterText.indexOf(" ")+1, lastestChapterText.indexOf(":")));
+        int totalItems = lastestChapter; 
         pagination = new Pagination<>(currentPage, perPage, totalPages, totalItems);
         PaginationUtility.updatePagination(pagination);
         DataModel<Integer, List<Chapter>> result = new DataModel<>(pagination, chapters);
@@ -177,16 +184,14 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + comicTagId + "/" + currentChapter);
         var elementTitle = doc.selectFirst(".chapter-header ul li:nth-of-type(3) h3");
         if (elementTitle == null) {
-            Logger.logError(this.getClass().getSimpleName() + " Can't get chapter content",
-                    new Exception("Can't get chapter content"));
-            throw new ResourceNotFound(HttpStatus.NOT_FOUND, "Can't get chapter content");
+            Logger.logError(this.getClass().getSimpleName() + " Can't get chapter title", null);
+            throw new ResourceNotFound("Can't get chapter title");
         }
         String title = elementTitle.text();
-        var elementContent = doc.selectFirst("#content p");
+        var elementContent = doc.selectFirst("#content");
         if (elementContent == null) {
-            Logger.logError(this.getClass().getSimpleName() + " Can't get chapter content",
-                    new Exception("Can't get chapter content"));
-            throw new ResourceNotFound(HttpStatus.NOT_FOUND, "Can't get chapter content");
+            Logger.logError(this.getClass().getSimpleName() + " Can't get chapter content", null);
+            throw new ResourceNotFound("Can't get chapter content");
         }
         String content = elementContent.html();
         var nextChapElement = doc.getElementById("nextchap");

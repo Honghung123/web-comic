@@ -57,9 +57,9 @@ public class DocxConverter implements IFileConverter {
             + "</html>";
         String htmlFilePath = uploadDir + htmlFile;
         FileUtility.createFile(htmlFilePath, simpleHtmlContent);
-        // Then get the saved html file from folder to convert to docx 
+        // Then get the saved html file from folder to convert to docx, and download it afterwards
         Response response = this.convertFileOnline(htmlFile, htmlFilePath, fileOutputName);
-        // Next, download converted docx and save it to folder
+        // Next,  save download converted docx to folder
         byte[] fileBytes = response.body().bytes();
         File destinationFile = Paths.get(uploadDir + fileOutputName).toFile();
         FileUtility.saveDownloadedBytesToFolder(fileBytes, destinationFile); 

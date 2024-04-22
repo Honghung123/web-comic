@@ -16,6 +16,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.group17.comic.exception.InvalidTypeException;
 import com.group17.comic.log.Logger;
 import com.group17.comic.model.*; 
 import com.group17.comic.plugins.crawler.IDataCrawler;
@@ -134,33 +135,34 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 200) {
-                String responseBody = response.body();
-                // Sử dụng Gson để chuyển đổi JSON thành đối tượng truyện
+                String responseBody = response.body(); 
                 JsonObject jsonObject = new Gson().fromJson(responseBody, JsonObject.class);
                 JsonArray jsonArray = jsonObject.getAsJsonArray("data");
                 for (JsonElement element : jsonArray) {
                     String comicTagId = element.getAsJsonObject().get("id").getAsString();
                     String title = element.getAsJsonObject().get("title").getAsString();
                     String image = element.getAsJsonObject().get("image").getAsString();
-                    String[] categories = element.getAsJsonObject().get("categories").getAsString().split("[,]");
+                    String authorName =element.getAsJsonObject().get("author").getAsString();
+                    String authorId = StringConverter.removeDiacriticalMarks(authorName).toLowerCase().replace(" ", "-");
+                    Author author = new Author(authorId, authorName);
                     List<Genre> genres = new ArrayList<>();
-                    for (String untrimedCategory : categories) {
-                        String category = untrimedCategory.trim();
-                        // Chuyển Tiếng việt có dấu thành không dấu. Ví dụ: Đam Mỹ -> dam-my
+                    String[] categories = element.getAsJsonObject().get("categories").getAsString().split("[,]");
+                    for (String category : categories) {
+                        category = category.trim(); 
                         String convertedCategory = StringConverter.removeDiacriticalMarks(category).toLowerCase()
                                 .replaceAll(" ", "-");
                         genres.add(new Genre(category, convertedCategory, "the-loai/" + convertedCategory));
                     }
                     int newestChapter = element.getAsJsonObject().get("total_chapters").getAsInt();
                     String updatedTime = element.getAsJsonObject().get("time").getAsString();
-                    boolean isFull = false;
+                    boolean isFull = element.getAsJsonObject().get("is_full").getAsBoolean();
                     var comicModel = ComicModel.builder()
                             .tagId(comicTagId)
                             .title(title)
                             .image(image)
                             .alternateImage(this.alternateImage)
                             .genres(genres)
-                            .author(null)
+                            .author(author)
                             .newestChapter(newestChapter)
                             .totalChapter(newestChapter)
                             .updatedTime(updatedTime)
@@ -175,7 +177,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                 pagination = new Pagination<>(currentPage, perPage, totalPages, totalItems);
                 PaginationUtility.updatePagination(pagination);
             } else {
-                System.out.println("Failed to request. Error code: " + response.statusCode());
+                Logger.logError("Failed to request. Error code: " + response.statusCode(), null);
             }
         } catch (Exception e) {
             Logger.logError(e.getMessage(), e);
@@ -186,7 +188,10 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
 
     @Override
     public Comic getComicInfo(String comicTagId) {
-        int id = Integer.parseInt(comicTagId);
+        if(!comicTagId.matches("^\\d+$")) {
+            throw new InvalidTypeException("Invalid comic tag id"); 
+        }
+        int id = Integer.parseInt(comicTagId); 
         String apiUrl = TRUYEN_API + "v1/story/detail/" + id;
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
@@ -194,14 +199,13 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 200) {
-                String responseBody = response.body();
-
-                // Sử dụng Gson để chuyển đổi JSON thành đối tượng truyện
+                String responseBody = response.body(); 
                 JsonObject jsonObject = new Gson().fromJson(responseBody, JsonObject.class).getAsJsonObject("data");
                 String[] genresArray = jsonObject.get("categories").getAsString().split("[,]");
+                String authorName = jsonObject.get("author").getAsString();
+                String authorId = StringConverter.removeDiacriticalMarks(authorName).toLowerCase().replace(" ", "-");
                 var genres = Arrays.asList(genresArray).stream().map(genre -> {
-                    String category = genre.trim();
-                    // Chuyển Tiếng việt có dấu này không dấu. Ví dụ: Đam Mỹ -> dam-my
+                    String category = genre.trim(); 
                     String convertedCategory = StringConverter.removeDiacriticalMarks(category).toLowerCase()
                             .replaceAll(" ", "-");
                     return new Genre(category, convertedCategory, "the-loai/" + convertedCategory);
@@ -211,12 +215,12 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                         .title(jsonObject.get("title").getAsString())
                         .image(jsonObject.get("image").getAsString())
                         .description(jsonObject.get("description").getAsString())
-                        .author(new Author(null, jsonObject.get("author").getAsString()))
+                        .author(new Author(authorId, authorName))
                         .genres(genres)
                         .alternateImage(this.alternateImage)
                         .build();
             } else {
-                System.out.println("Failed to request. Error code: " + response.statusCode());
+                Logger.logError("Failed to request comic information from TruyenFullCrawler. Error code: " + response.statusCode(), null);
             }
         } catch (Exception e) {
             Logger.logError(e.getMessage(), e);
@@ -226,6 +230,9 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
 
     @Override
     public DataModel<Integer, List<Chapter>> getChapters(String comicTagId, int currentPage) {
+        if(!comicTagId.matches("^\\d+$")) {
+            throw new InvalidTypeException("Invalid comic tag id"); 
+        }
         int id = Integer.parseInt(comicTagId);
         String apiUrl = TRUYEN_API + "v1/story/detail/" + id + "/chapters?page=" + currentPage;
         Pagination<Integer> pagination = null;
@@ -263,6 +270,10 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
 
     @Override
     public DataModel<Integer, ComicChapterContent> getComicChapterContent(String comicTagId, String currentChapter) {
+        if(!comicTagId.matches("^\\d+$")) {
+            Logger.logError("Invalid comic tag id: " + comicTagId, null);
+            throw new InvalidTypeException("Invalid comic tag id"); 
+        }
         Integer chapterId = Integer.parseInt(currentChapter);
         String apiUrl = TRUYEN_API + "v1/chapter/detail/" + currentChapter;
         Pagination<Integer> pagination = null;
@@ -275,23 +286,17 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                 String responseBody = response.body();
                 JsonObject jsonObject = new Gson().fromJson(responseBody, JsonObject.class).getAsJsonObject("data");
                 pagination = new Pagination<>(chapterId, 1, 1, 1);
-                if (jsonObject.get("chapter_prev").isJsonNull()) {
-                    pagination.setPreviousPage(chapterId);
-                } else {
+                if (!jsonObject.get("chapter_prev").isJsonNull()) { 
                     pagination.setPreviousPage(jsonObject.get("chapter_prev").getAsInt());
                 }
-                if (jsonObject.get("chapter_next").isJsonNull()) {
-                    pagination.setNextPage(chapterId);
-                } else {
+                if (!jsonObject.get("chapter_next").isJsonNull()) { 
                     pagination.setNextPage(jsonObject.get("chapter_next").getAsInt());
                 }
-
                 String title = jsonObject.get("story_name").getAsString();
                 String content = jsonObject.get("content").getAsString();
                 chapterContent = new ComicChapterContent(title, content, comicTagId);
             } else {
-                Logger.logError("Failed to request. Error code: " + response.statusCode(),
-                        new Exception("Failed to request. Error code: " + response.statusCode()));
+                Logger.logError("Failed to request. Error code: " + response.statusCode(), null);
             }
         } catch (Exception e) {
             Logger.logError(e.getMessage(), e);

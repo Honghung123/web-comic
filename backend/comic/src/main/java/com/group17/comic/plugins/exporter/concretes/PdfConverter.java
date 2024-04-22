@@ -1,8 +1,7 @@
 package com.group17.comic.plugins.exporter.concretes;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.Files; 
 import java.nio.file.Paths;
 
 import com.google.gson.JsonObject;
@@ -39,16 +38,16 @@ public class PdfConverter implements IFileConverter {
         String formatTitile = StringConverter.removeDiacriticalMarks(chapterDto.title());
         formatTitile = formatTitile.replaceAll("[^a-zA-Z0-9\\s]", "-").trim();
         String fileName = formatTitile + ".pdf";
-        // Convert html to pdf online, 
+        // Convert html to pdf online, and download it afterwards 
         Response response = this.savePdfFromText(chapterDto.content(), fileName);
-        // Then save pdf file to folder 
+        // Then save the pdf file to folder 
         byte[] fileBytes = response.body().bytes();
         String uploadFolderAbsolutePath = Paths.get(uploadDir).toAbsolutePath().toString();
         FileUtility.deleteDirectory(new File(uploadFolderAbsolutePath));
         FileUtility.createDirectory(new File(uploadFolderAbsolutePath));
         File destinationFile = Paths.get(uploadDir + fileName).toFile();
         FileUtility.saveDownloadedBytesToFolder(fileBytes, destinationFile);
-        // Get the download pdf file from folder to return to client
+        // Get the pdf file from folder to return to client
         InputStreamResource resource =
                 new InputStreamResource(new FileInputStream(uploadDir + fileName)); 
         File uploadFolder = new File(

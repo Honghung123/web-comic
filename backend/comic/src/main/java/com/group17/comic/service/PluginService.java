@@ -59,7 +59,6 @@ public class PluginService {
     public DataModel<Integer, List<ComicModel>> getNewestCommic(int pluginId, int page){
         checkCrawlerPlugins();
         var result = crawlers.get(pluginId).getLastedComics(page);
-
         return result;
     }
 
@@ -71,8 +70,8 @@ public class PluginService {
     }
 
     @SneakyThrows
-    public DataSearchModel<Integer, List<ComicModel>, List<Author>> searchComic(int serverId, String keyword,
-            int currentPage){
+    public DataSearchModel<Integer, List<ComicModel>, List<Author>> searchComic(int serverId, 
+            String keyword, int currentPage){
         checkCrawlerPlugins();
         var result = crawlers.get(serverId).search(keyword, currentPage);
         return result;

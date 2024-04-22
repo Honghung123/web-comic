@@ -7,5 +7,5 @@ import lombok.experimental.SuperBuilder;
 public class ComicModel extends Comic{  
     private Integer totalChapter;
     private Integer newestChapter;
-    private String updatedTime; 
+    private String updatedTime;  
 }

@@ -7,6 +7,10 @@ A project for reading novel, comic
 
 - Html to PDF API:  [PDF from HTML](https://developer.pdf.co/api/pdf-from-html/index.html)
 
+----------------------------------------
+Api document: [API Document using Swagger](http://localhost:8080/swagger-ui/index.html)
+----------------------------------------
+
 ## Front-end
 
 ### Prerequisite

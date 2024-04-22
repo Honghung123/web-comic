@@ -31,21 +31,31 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 @RequestMapping("/api/v1/comic")
 @RequiredArgsConstructor
-@Tag(name = "Plugin Controller")
-public class PluginController {
+@Tag(name = "Comic Controller")
+public class ComicController {
     private final PluginService pluginService;
+  
+    @GetMapping("/genres") 
+    @Operation(summary = "Get all genres", description = "Get all genres with specific server id. Default server id is 0 - plugin's index in plugin list Default the current page,offset, is 1 Default limit, a number of comics per page is 10")
+    public ResponseSuccess<List<Genre>> getGenres(
+            @RequestParam(name = "server_id", defaultValue = "0") int serverId 
+        ) {  
+        var genres = pluginService.getAllGenres(serverId);  
+        return new ResponseSuccess<>(HttpStatus.OK, "Success", genres);
+    }
 
-    @PostMapping("/download")
-    public ResponseEntity<InputStreamResource> exportFileFromText(
-        @RequestBody ChapterDTO chapterDto,
-        @RequestParam(name = "converter_id", defaultValue = "0") int converterId
-        ){
-            ChapterFile chapterFile = pluginService.exportFile(chapterDto, converterId);
-            return new ResponseEntity(chapterFile.getResource(), chapterFile.getHeaders(), HttpStatus.OK);
-    } 
+    @GetMapping("/lasted-comic") 
+    @Operation(summary = "Get lasted comics", description = "Get lasted comics with specific server id. Default server id is 0 - plugin's index in plugin list Default current page is 1")
+    public ResponseSuccess<List<ComicModel>> getNewestCommic(
+        @RequestParam(name = "server_id", defaultValue = "0") int serverId,
+            @RequestParam(name = "page", defaultValue = "1") int page
+    ) { 
+        var dataDto = pluginService.getNewestCommic(serverId, page);   
+        return new ResponseSuccess<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
+    }
 
     @GetMapping("/search") 
-    @Operation(summary = "Search comic", description = "Search comic base on keyword with specific server id. Default server id is 0 - plugin's index in plugin list. Default the current page is 1.")
+    @Operation(summary = "Search comic", description = "Search comic base on keyword(by title, author or published year) with specific server id. Default server id is 0 - plugin's index in plugin list. Default the current page is 1.")
     public ResponseSuccess<List<ComicModel>> searchComic(
                     @RequestParam(name = "keyword", required = true) String keyword, 
                     @RequestParam(name = "server_id", defaultValue = "0") int serverId,
@@ -86,25 +96,15 @@ public class PluginController {
         var dataDto = pluginService.getComicChapterContent(serverId, tagId, currentChapter);
         return new ResponseSuccess<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
     }
-    
-    @GetMapping("/genres") 
-    @Operation(summary = "Get all genres", description = "Get all genres with specific server id. Default server id is 0 - plugin's index in plugin list Default the current page,offset, is 1 Default limit, a number of comics per page is 10")
-    public ResponseSuccess<List<Genre>> getGenres(
-            @RequestParam(name = "server_id", defaultValue = "0") int serverId 
-        ) {  
-        var genres = pluginService.getAllGenres(serverId);  
-        return new ResponseSuccess<>(HttpStatus.OK, "Success", genres);
-    }
-   
-    @GetMapping("/lasted-comic") 
-    @Operation(summary = "Get lasted comics", description = "Get lasted comics with specific server id. Default server id is 0 - plugin's index in plugin list Default current page is 1")
-    public ResponseSuccess<List<ComicModel>> getNewestCommic(
-        @RequestParam(name = "server_id", defaultValue = "0") int serverId,
-            @RequestParam(name = "page", defaultValue = "1") int page
-    ) { 
-        var dataDto = pluginService.getNewestCommic(serverId, page);   
-        return new ResponseSuccess<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
-    }
+      
+    @PostMapping("/export-file")
+    public ResponseEntity<InputStreamResource> exportFileFromText(
+        @RequestBody ChapterDTO chapterDto,
+        @RequestParam(name = "converter_id", defaultValue = "0") int converterId
+        ){
+            ChapterFile chapterFile = pluginService.exportFile(chapterDto, converterId);
+            return new ResponseEntity<>(chapterFile.getResource(), chapterFile.getHeaders(), HttpStatus.OK);
+    } 
 
     @GetMapping("/crawler-plugins") 
     @Operation(summary = "Get all crawler plugins", description = "Get all crawler plugins from the folder to crawl comic. Id of each plugin is the index of it in plugin list")

@@ -1,5 +1,6 @@
 package com.group17.comic.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.AllArgsConstructor; 
@@ -18,5 +19,5 @@ public class Comic {
     private Author author; 
     private List<Genre> genres;
     private Double rate;
-    private boolean isFull;
+    private boolean isFull; 
 }
