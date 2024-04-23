@@ -3,6 +3,7 @@ package com.group17.comic.service;
 import org.springframework.beans.factory.annotation.Value; 
 import org.springframework.stereotype.Service;
 
+import com.group17.comic.dto.request.AlternatedChapterDTO;
 import com.group17.comic.dto.request.ChapterDTO;
 import com.group17.comic.dto.response.ChapterFile; 
 import com.group17.comic.model.*;
@@ -10,6 +11,7 @@ import com.group17.comic.plugins.crawler.IDataCrawler;
 import com.group17.comic.plugins.exporter.IFileConverter;
 import com.group17.comic.utils.PluginUtility;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.SneakyThrows; 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,13 +38,13 @@ public class PluginService {
     }
 
     @SneakyThrows
-    public List<Plugin> getAllCrawlerPlugins(){
+    public List<CrawlerPlugin> getAllCrawlerPlugins(){
         checkCrawlerPlugins();
-        List<Plugin> pluginList = new ArrayList<>();
+        List<CrawlerPlugin> pluginList = new ArrayList<>();
         int index = 0;
         for (var crawler : crawlers) {
             String pluginName = crawler.getPluginName();
-            pluginList.add(new Plugin(index, pluginName));
+            pluginList.add(new CrawlerPlugin(index, pluginName));
             index++;
         }
         return pluginList;
@@ -91,6 +93,11 @@ public class PluginService {
         return result;
     }
 
+    public DataModel<?, ComicChapterContent> getComicChapterContentOnOtherServer(int serverId, @NotNull AlternatedChapterDTO altChapterDto) {
+        checkCrawlerPlugins();
+        var result = crawlers.get(serverId).getComicChapterContentOnOtherServer(altChapterDto);
+        return result;    
+    }
 
     @SneakyThrows
     private void checkConverterPlugins(){
@@ -99,13 +106,14 @@ public class PluginService {
     }
 
     @SneakyThrows
-    public List<Plugin> getAllConverterPlugins(){
+    public List<ConverterPlugin> getAllConverterPlugins(){
         checkConverterPlugins();
-        List<Plugin> pluginList = new ArrayList<>();
+        List<ConverterPlugin> pluginList = new ArrayList<>();
         int index = 0;
         for (var converter : converters) { 
             String pluginName = converter.getPluginName();
-            pluginList.add(new Plugin(index, pluginName));
+            String blobType = converter.getBlobType();
+            pluginList.add(new ConverterPlugin(index, pluginName, blobType));
             index++;
         }
         return pluginList;

@@ -7,6 +7,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.group17.comic.dto.request.AlternatedChapterDTO;
 import com.group17.comic.exception.customs.ResourceNotFound;
 import com.group17.comic.log.Logger;
 import com.group17.comic.model.*;
@@ -218,6 +219,23 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
         }
         DataModel<String, ComicChapterContent> result = new DataModel<>(pagination,
                 new ComicChapterContent(title, content, comicTagId));
+        return result;
+    }
+
+    @SneakyThrows
+    @Override
+    public DataModel<String, ComicChapterContent> getComicChapterContentOnOtherServer(AlternatedChapterDTO altChapterDto) {
+        // AE tìm truyện cùng tên truyện và cùng tên tác giả, tìm chương có chapterNo chỉ định(ví dụ chương 4),
+        // thì ae tìm chương chỉ chứa số 4 trả về chapter 4 và pagination - trang trước và trang kế tiếp 
+        // Start coding here
+        String currentChapter = "";
+        String title = "";
+        String comicTagId = "";
+        String content = ""; 
+        Pagination<String> pagination = new Pagination<>(currentChapter, 1, -1, -1);
+        DataModel<String, ComicChapterContent> result = new DataModel<>(pagination,
+                new ComicChapterContent(title, content, comicTagId));
+        // End coding here
         return result;
     }
 }

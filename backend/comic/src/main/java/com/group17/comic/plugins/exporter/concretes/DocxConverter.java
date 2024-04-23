@@ -36,6 +36,11 @@ public class DocxConverter implements IFileConverter {
     public String getPluginName() {
         return "DOCX";
     }
+    
+    @Override
+    public String getBlobType() {
+        return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    }
 
     @SneakyThrows
     @Override

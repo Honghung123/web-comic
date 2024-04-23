@@ -1,5 +1,6 @@
 package com.group17.comic.controller;
 
+import com.group17.comic.dto.request.AlternatedChapterDTO;
 import com.group17.comic.dto.request.ChapterDTO;
 import com.group17.comic.dto.response.ChapterFile;
 import com.group17.comic.dto.response.SuccessfulResponse;
@@ -7,7 +8,8 @@ import com.group17.comic.model.*;
 import com.group17.comic.service.PluginService;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag; 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor; 
 
 import org.springframework.core.io.InputStreamResource;
@@ -89,13 +91,23 @@ public class ComicController {
     }
     
     @GetMapping("/reading/{tagId}/chapters/{chapter}") 
-    @Operation(summary = "Get comic infomation", description = "Get comic infomation base on tag url with specific server id. Default server id is 0 - plugin's index in plugin list.")
+    @Operation(summary = "Get comic infomation", description = "Get comic content of a chapter base on tag url with specific server id. Default server id is 0 - plugin's index in plugin list.")
     public SuccessfulResponse<ComicChapterContent> getComicChapterContent(
                     @PathVariable(name = "tagId", required = true) String tagId,  
                     @PathVariable(name = "chapter", required = true) String currentChapter,
                     @RequestParam(name = "server_id", defaultValue = "0") int serverId
         ){ 
         var dataDto = pluginService.getComicChapterContent(serverId, tagId, currentChapter);
+        return new SuccessfulResponse<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
+    }
+    
+    @PostMapping("/reading/change-server") 
+    @Operation(summary = "Change comic server", description = "Get comic content base of a chapter on alternate server with specific server id. Default server id is 0 - plugin's index in plugin list.")
+    public SuccessfulResponse<ComicChapterContent> getComicChapterContentOnOtherServer(
+                    @RequestBody @NotNull AlternatedChapterDTO altChapterDto,
+                    @RequestParam(name = "server_id", defaultValue = "0") int serverId
+        ){ 
+        var dataDto = pluginService.getComicChapterContentOnOtherServer(serverId, altChapterDto);
         return new SuccessfulResponse<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
     }
       
@@ -110,14 +122,14 @@ public class ComicController {
 
     @GetMapping("/crawler-plugins") 
     @Operation(summary = "Get all crawler plugins", description = "Get all crawler plugins from the folder to crawl comic. Id of each plugin is the index of it in plugin list")
-    public SuccessfulResponse<List<Plugin>> getAllPCrawlerlugins() {
+    public SuccessfulResponse<List<CrawlerPlugin>> getAllPCrawlerlugins() {
         var crawlers = pluginService.getAllCrawlerPlugins(); 
         return new SuccessfulResponse<>(HttpStatus.OK, "Success", crawlers);
     }   
 
     @GetMapping("/converter-plugins") 
     @Operation(summary = "Get all converter plugins", description = "Get all converter plugins from the folder to crawl comic. Id of each plugin is the index of it in plugin list")
-    public SuccessfulResponse<List<Plugin>> getAllPConverterlugins() {
+    public SuccessfulResponse<List<ConverterPlugin>> getAllPConverterlugins() {
         var converters = pluginService.getAllConverterPlugins(); 
         return new SuccessfulResponse<>(HttpStatus.OK, "Success", converters);
     }   

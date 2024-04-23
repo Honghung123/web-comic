@@ -33,6 +33,11 @@ public class PdfConverter implements IFileConverter {
     }
 
     @Override
+    public String getBlobType() {
+        return "application/pdf";
+    }
+
+    @Override
     @SneakyThrows
     public ChapterFile getConvertedFile(ChapterDTO chapterDto) {
         String formatTitile = StringConverter.removeDiacriticalMarks(chapterDto.title());

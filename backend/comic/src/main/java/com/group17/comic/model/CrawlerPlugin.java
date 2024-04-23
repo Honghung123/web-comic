@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter 
 @AllArgsConstructor  
-public class Plugin {
+public class CrawlerPlugin {
     Integer id;
     String name; 
 }

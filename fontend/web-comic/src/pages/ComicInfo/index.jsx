@@ -22,7 +22,7 @@ export default function ComicInfo() {
                 responseType: 'blob'
               });
             console.log(response);
-            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const blob = new Blob([response.data], { type: 'application/epub+zip'});
             const windowUrl = window.URL || window.webkitURL;
             const downloadUrl = windowUrl.createObjectURL(blob);
             const anchor = document.createElement("a");

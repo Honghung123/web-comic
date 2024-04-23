@@ -15,12 +15,12 @@ import org.springframework.web.filter.CorsFilter;
  * kỳ thành phần nào trong origin khác nhau
  *  - Same Origin Policy là một chính sách quy định nội dung của một origin chỉ được đọc 
  * và thay đổi bới một thành phần khác cũng nằm cùng origin đó, các yêu cầu từ 
- * các origin khác sẽ bị chặn lại(Hiểu đơn giản là cho phép request từ domain khác).
+ * các origin khác sẽ bị chặn lại(Hiểu đơn giản là không cho phép request từ domain khác).
  *  => Ví dụ: các thành phần trong http://example.vn:8080 có thể đọc và thay đổi thành phần khác 
  * trong example.vn:8080 đó. Nếu http://example.vn:3000 hay domain nào khác hay thậm chí 
  * các subdomain(VD: http://www.api.example.vn) cần muốn truy xuất hay thay đối thành phần của
  * http://example.vn:8080 thì sẽ bị chặn và nhận lỗi "'No Access-Control-Allow-Origin' header ..."
- *  - Nhưng trong lập trình Web, web, lập trình viên thường xuyên phải thực hiện truy vấn đến 
+ *  - Nhưng trong lập trình Web, lập trình viên thường xuyên phải thực hiện truy vấn đến 
  * các domain khác, đặc biệt là khi làm việc với các API. Đó là lúc chúng ta cần đến CORS
  *  - Có 3 cách implement:
  *   + C1: Tạo một @Configuration class implement interface WebMvcConfigurer và override phương

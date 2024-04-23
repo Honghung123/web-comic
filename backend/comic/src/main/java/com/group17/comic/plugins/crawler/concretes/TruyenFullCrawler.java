@@ -16,6 +16,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.group17.comic.dto.request.AlternatedChapterDTO;
 import com.group17.comic.exception.customs.InvalidTypeException;
 import com.group17.comic.log.Logger;
 import com.group17.comic.model.*; 
@@ -305,5 +306,21 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         }
         DataModel<Integer, ComicChapterContent> result = new DataModel<>(pagination, chapterContent);
         return result;
+    }
+
+    @Override
+    public DataModel<?, ComicChapterContent> getComicChapterContentOnOtherServer(AlternatedChapterDTO altChapterDto) {
+        // AE tìm truyện cùng tên truyện và cùng tên tác giả, tìm chương có chapterNo chỉ định(ví dụ chương 4),
+        // thì ae tìm chương chỉ chứa số 4 trả về chapter 4 và pagination - trang trước và trang kế tiếp 
+        // Start coding here
+        int currentChapter = altChapterDto.chapterNo();
+        String title = "";
+        String comicTagId = "";
+        String content = ""; 
+        Pagination<Integer> pagination = new Pagination<>(currentChapter, 1, -1, -1);
+        DataModel<Integer, ComicChapterContent> result = new DataModel<>(pagination,
+                new ComicChapterContent(title, content, comicTagId));
+        // End coding here
+        return result;     
     }
 }
