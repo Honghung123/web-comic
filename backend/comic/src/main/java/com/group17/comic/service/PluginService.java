@@ -1,5 +1,6 @@
 package com.group17.comic.service;
 
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Value; 
 import org.springframework.stereotype.Service;
 
@@ -123,5 +124,21 @@ public class PluginService {
     public ChapterFile exportFile(ChapterDTO chapterDto, int converterId) {
         checkConverterPlugins();
         return converters.get(converterId).getConvertedFile(chapterDto);
+    }
+
+    @SneakyThrows
+    public void checkCrawlerServerSize(int crawlersSize) {
+        checkCrawlerPlugins();
+        if (crawlersSize > crawlers.size()) {
+            throw new BadRequestException("Server has changed. Please fresh your page");
+        }
+    }
+
+    @SneakyThrows
+    public void checkConverterPluginSize(int convertersSize) {
+        checkConverterPlugins();
+        if (convertersSize > converters.size()) {
+            throw new BadRequestException("Converter has changed. Please fresh your page");
+        }    
     }
 }

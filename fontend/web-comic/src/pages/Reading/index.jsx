@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Button from "@mui/material/Button";
 import axios from "axios";
 
 const comicTitle = "Chương 01: Thiên địa dị tượng, luyện thể thiên phú?";
@@ -15,16 +16,21 @@ const comicContent = `
 
 export default function Reading() {
   const [content, setContent] = useState("");
+  const converterSize = 3;
   const handleSubmit = async (event) => {
     event.preventDefault();
     const payload = {
       title: comicTitle,
       content: comicContent,
     };
+    const headers = {
+        "converter-size": converterSize,
+    }
     const url = `http://localhost:8080/api/v1/comic/export-file?converter_id=2`;
     try {
       const response = await axios.post(url, payload, {
-        responseType: "blob",
+        responseType: "blob" ,
+        headers
       });
       console.log(response);
       const blob = new Blob([response.data], { type: "application/pdf" });
@@ -44,7 +50,7 @@ export default function Reading() {
   return (
     <>
       <h1>This is the Reading page. Read content of a chapter of a novel.</h1>
-
+      <Button variant="contained" onClick={handleSubmit}>Download file PDF</Button>
       <br />
     </>
   );

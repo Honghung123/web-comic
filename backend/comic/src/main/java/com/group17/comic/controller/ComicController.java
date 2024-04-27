@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 // @Tag: A Swagger annotation used to categorize API endpoints related to the Plugin Controller.
 // @SneakyThrows: A Lombok annotation to silently throw checked exceptions
@@ -39,7 +40,9 @@ public class ComicController {
     @GetMapping("/genres")
     @Operation(summary = "Get all genres", description = "Get all genres with specific server id. Default server id is 0 - plugin's index in plugin list Default the current page,offset, is 1 Default limit, a number of comics per page is 10")
     public SuccessfulResponse<List<Genre>> getGenres(
-            @RequestParam(name = "server_id", defaultValue = "0") int serverId) {
+            @RequestParam(name = "server_id", defaultValue = "0") int serverId,
+            @RequestHeader(name = "crawler-size", defaultValue = "3") int crawlerSize) {
+        pluginService.checkCrawlerServerSize(crawlerSize);
         var genres = pluginService.getAllGenres(serverId);
         return new SuccessfulResponse<>(HttpStatus.OK, "Success", genres);
     }
@@ -48,7 +51,9 @@ public class ComicController {
     @Operation(summary = "Get lasted comics", description = "Get lasted comics with specific server id. Default server id is 0 - plugin's index in plugin list Default current page is 1")
     public SuccessfulResponse<List<ComicModel>> getNewestCommic(
             @RequestParam(name = "server_id", defaultValue = "0") int serverId,
-            @RequestParam(name = "page", defaultValue = "1") int page) {
+            @RequestParam(name = "page", defaultValue = "1") int page, 
+            @RequestHeader(name = "crawler-size", defaultValue = "3") int crawlerSize) {
+        pluginService.checkCrawlerServerSize(crawlerSize);
         var dataDto = pluginService.getNewestCommic(serverId, page);
         return new SuccessfulResponse<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
     }
@@ -60,7 +65,9 @@ public class ComicController {
             @RequestParam(name = "genres", defaultValue = "") String byGenres,
             @RequestParam(name = "authors", defaultValue = "") String byAuthorTagId,
             @RequestParam(name = "server_id", defaultValue = "0") int serverId,
-            @RequestParam(name = "page", defaultValue = "1") int currentPage) {
+            @RequestParam(name = "page", defaultValue = "1") int currentPage,
+            @RequestHeader(name = "crawler-size", defaultValue = "3") int crawlerSize) {
+        pluginService.checkCrawlerServerSize(crawlerSize);
         var dataDto = pluginService.searchComic(serverId, keyword, byGenres, byAuthorTagId, currentPage);
         return new SuccessfulResponse<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData(),
                 dataDto.getMeta());
@@ -70,7 +77,9 @@ public class ComicController {
     @Operation(summary = "Get comic infomation", description = "Get comic infomation base on tag url with specific server id. Default server id is 0 - plugin's index in plugin list.")
     public SuccessfulResponse<Comic> getComicInfo(
             @PathVariable(name = "tagId", required = true) String tagId,
-            @RequestParam(name = "server_id", defaultValue = "0") int serverId) {
+            @RequestParam(name = "server_id", defaultValue = "0") int serverId,
+            @RequestHeader(name = "crawler-size", defaultValue = "3") int crawlerSize) {
+        pluginService.checkCrawlerServerSize(crawlerSize);
         var comic = pluginService.getComicInfo(serverId, tagId);
         return new SuccessfulResponse<>(HttpStatus.OK, "Success", comic);
     }
@@ -80,7 +89,9 @@ public class ComicController {
     public SuccessfulResponse<List<Chapter>> getChapters(
             @PathVariable(name = "tagId", required = true) String tagId,
             @RequestParam(name = "page", defaultValue = "1") int currentPage,
-            @RequestParam(name = "server_id", defaultValue = "0") int serverId) {
+            @RequestParam(name = "server_id", defaultValue = "0") int serverId,
+            @RequestHeader(name = "crawler-size", defaultValue = "3") int crawlerSize) {
+        pluginService.checkCrawlerServerSize(crawlerSize);
         var dataDto = pluginService.getChapters(serverId, tagId, currentPage);
         return new SuccessfulResponse<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
     }
@@ -90,7 +101,9 @@ public class ComicController {
     public SuccessfulResponse<ComicChapterContent> getComicChapterContent(
             @PathVariable(name = "tagId", required = true) String tagId,
             @PathVariable(name = "chapter", required = true) String currentChapter,
-            @RequestParam(name = "server_id", defaultValue = "0") int serverId) {
+            @RequestParam(name = "server_id", defaultValue = "0") int serverId,
+            @RequestHeader(name = "crawler-size", defaultValue = "3") int crawlerSize) {
+        pluginService.checkCrawlerServerSize(crawlerSize);
         var dataDto = pluginService.getComicChapterContent(serverId, tagId, currentChapter);
         return new SuccessfulResponse<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
     }
@@ -99,7 +112,9 @@ public class ComicController {
     @Operation(summary = "Change comic server", description = "Get comic content base of a chapter on alternate server with specific server id. Default server id is 0 - plugin's index in plugin list.")
     public SuccessfulResponse<ComicChapterContent> getComicChapterContentOnOtherServer(
             @RequestBody @NotNull AlternatedChapterDTO altChapterDto,
-            @RequestParam(name = "server_id", defaultValue = "0") int serverId) {
+            @RequestParam(name = "server_id", defaultValue = "0") int serverId,
+            @RequestHeader(name = "crawler-size", defaultValue = "3") int crawlerSize) {
+        pluginService.checkCrawlerServerSize(crawlerSize);
         var dataDto = pluginService.getComicChapterContentOnOtherServer(serverId, altChapterDto);
         return new SuccessfulResponse<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
     }
@@ -107,7 +122,9 @@ public class ComicController {
     @PostMapping("/export-file")
     public ResponseEntity<InputStreamResource> exportFileFromText(
             @RequestBody ChapterDTO chapterDto,
-            @RequestParam(name = "converter_id", defaultValue = "0") int converterId) {
+            @RequestParam(name = "converter_id", defaultValue = "0") int converterId,
+            @RequestHeader(name = "converter-size", defaultValue = "3") int converterSize) {
+        pluginService.checkConverterPluginSize(converterSize);
         ChapterFile chapterFile = pluginService.exportFile(chapterDto, converterId);
         return new ResponseEntity<>(chapterFile.getResource(), chapterFile.getHeaders(), HttpStatus.OK);
     }
