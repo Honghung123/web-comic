@@ -1,7 +1,5 @@
 import React, { useState } from "react";
-import Form from "../../components/Form";
-import Button from "../../components/Button";
-import axios from "axios"; 
+import axios from "axios";
 
 const comicTitle = "Chương 01: Thiên địa dị tượng, luyện thể thiên phú?";
 const comicContent = `
@@ -16,42 +14,38 @@ const comicContent = `
 `;
 
 export default function Reading() {
-    const [content, setContent] = useState("");
-    const handleSubmit = async (event) => {
-        event.preventDefault(); 
-        const payload = {
-            title: comicTitle,
-            content: comicContent
-        };
-        const url = `http://localhost:8080/api/v1/comic/export-file?converter_id=2`;
-        try {
-            const response = await axios.post(url, payload, {
-                responseType: 'blob'
-              });
-            console.log(response);
-            const blob = new Blob([response.data], { type: 'application/pdf' });
-            const windowUrl = window.URL || window.webkitURL;
-            const downloadUrl = windowUrl.createObjectURL(blob);
-            const anchor = document.createElement("a");
-            anchor.href = downloadUrl;
-            anchor.download = comicTitle;
-            document.body.appendChild(anchor);
-            anchor.click();
-            // Xóa URL sau khi đã tải xuống
-            window.URL.revokeObjectURL(downloadUrl);
-        } catch (error) {
-            alert(error);
-        }
+  const [content, setContent] = useState("");
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const payload = {
+      title: comicTitle,
+      content: comicContent,
     };
-    return (
-        <>
-            <h1>This is the Reading page. Read content of a chapter of a novel.</h1>
-            <Form handleSubmit={handleSubmit}> 
-                <Button type="submit" className="px-4 py-2 text-white bg-rose-500 rounded">
-                    Download file PDF now
-                </Button>
-            </Form>
-            <br />
-        </>
-    );
+    const url = `http://localhost:8080/api/v1/comic/export-file?converter_id=2`;
+    try {
+      const response = await axios.post(url, payload, {
+        responseType: "blob",
+      });
+      console.log(response);
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const windowUrl = window.URL || window.webkitURL;
+      const downloadUrl = windowUrl.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = downloadUrl;
+      anchor.download = comicTitle;
+      document.body.appendChild(anchor);
+      anchor.click();
+      // Xóa URL sau khi đã tải xuống
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      alert(error);
+    }
+  };
+  return (
+    <>
+      <h1>This is the Reading page. Read content of a chapter of a novel.</h1>
+
+      <br />
+    </>
+  );
 }

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import Form from "../../components/Form";
-import Button from "../../components/Button";
-import axios from "axios"; 
+import Button from "@mui/material/Button";
+import axios from "axios";
 
 const comicTitle = "Chương 04: Thiên địa dị tượng, luyện thể thiên phú?";
 const comicContent = `
@@ -16,41 +15,41 @@ const comicContent = `
 `;
 
 export default function Home() {
-    const handleSubmit = async (event) => {
-        event.preventDefault(); 
-        const payload = {
-            title: comicTitle,
-            content: comicContent
-        };
-        const url = `http://localhost:8080/api/v1/comic/export-file?converter_id=0`;
-        try {
-            const response = await axios.post(url, payload, {
-                responseType: 'blob'
-              });
-            console.log(response);
-            const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-            const windowUrl = window.URL || window.webkitURL;
-            const downloadUrl = windowUrl.createObjectURL(blob);
-            const anchor = document.createElement("a");
-            anchor.href = downloadUrl;
-            anchor.download = comicTitle;
-            document.body.appendChild(anchor);
-            anchor.click();
-            // Xóa URL sau khi đã tải xuống
-            window.URL.revokeObjectURL(downloadUrl);
-        } catch (error) {
-            alert(error);
-        }
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const payload = {
+      title: comicTitle,
+      content: comicContent,
     };
-    return (
-        <>
-            <h1 className="text-3xl font-bold underline">This is the Home</h1>
-            <Form handleSubmit={handleSubmit}> 
-                <Button type="submit" className="px-4 py-2 text-white bg-sky-500 rounded">
-                    Download file Docx now
-                </Button>
-            </Form>
-            <br />
-        </>
-    );
+    const url = `http://localhost:8080/api/v1/comic/export-file?converter_id=0`;
+    try {
+      const response = await axios.post(url, payload, {
+        responseType: "blob",
+      });
+      console.log(response);
+      const blob = new Blob([response.data], {
+        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      });
+      const windowUrl = window.URL || window.webkitURL;
+      const downloadUrl = windowUrl.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = downloadUrl;
+      anchor.download = comicTitle;
+      document.body.appendChild(anchor);
+      anchor.click();
+      // Xóa URL sau khi đã tải xuống
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      alert(error);
+    }
+  };
+  return (
+    <>
+      <h1 className="text-3xl font-bold underline">This is the Home</h1>
+
+      <br />
+
+      <Button variant="contained">Hello world</Button>
+    </>
+  );
 }
