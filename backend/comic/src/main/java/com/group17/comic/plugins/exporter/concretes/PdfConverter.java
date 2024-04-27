@@ -1,7 +1,7 @@
 package com.group17.comic.plugins.exporter.concretes;
 
 import java.io.*;
-import java.nio.file.Files; 
+import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import com.google.gson.JsonObject;
@@ -10,9 +10,9 @@ import com.google.gson.JsonPrimitive;
 import com.group17.comic.utils.FileUtility;
 import com.group17.comic.utils.StringConverter;
 import lombok.SneakyThrows;
-import okhttp3.*; 
+import okhttp3.*;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders; 
+import org.springframework.http.HttpHeaders;
 
 import com.group17.comic.dto.request.ChapterDTO;
 import com.group17.comic.dto.response.ChapterFile;
@@ -27,6 +27,7 @@ import com.group17.comic.plugins.exporter.IFileConverter;
 
 public class PdfConverter implements IFileConverter {
     private static String uploadDir = "backend/comic/src/main/java/com/group17/comic/plugins/exporter/uploads/";
+
     @Override
     public String getPluginName() {
         return "PDF";
@@ -53,11 +54,10 @@ public class PdfConverter implements IFileConverter {
         File destinationFile = Paths.get(uploadDir + fileName).toFile();
         FileUtility.saveDownloadedBytesToFolder(fileBytes, destinationFile);
         // Get the pdf file from folder to return to client
-        InputStreamResource resource =
-                new InputStreamResource(new FileInputStream(uploadDir + fileName));  
-        HttpHeaders headers = new HttpHeaders();  
-        headers.setContentLength(Files.size(Paths.get(uploadDir + fileName))); 
-        headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);  
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(uploadDir + fileName));
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentLength(Files.size(Paths.get(uploadDir + fileName)));
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);
         return new ChapterFile(headers, resource);
     }
 
@@ -112,5 +112,5 @@ public class PdfConverter implements IFileConverter {
         }
         return null;
     }
-    
+
 }

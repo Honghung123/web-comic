@@ -11,7 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors; 
+import java.util.stream.Collectors;
 
 public class PluginUtility {
     /**
@@ -26,9 +26,10 @@ public class PluginUtility {
      * @throws IllegalAccessException
      */
     @SuppressWarnings("unchecked")
-    public static <T> List<T> getAllPluginsFromFolder(String concreteRelativePath, String pluginPackageName, Class<?> intefaces) throws IOException, ClassNotFoundException, NoSuchMethodException,
+    public static <T> List<T> getAllPluginsFromFolder(String concreteRelativePath, String pluginPackageName,
+            Class<?> intefaces) throws IOException, ClassNotFoundException, NoSuchMethodException,
             InvocationTargetException, InstantiationException, IllegalAccessException {
-        if(!intefaces.isInterface()){
+        if (!intefaces.isInterface()) {
             throw new IllegalAccessException("The class is not an interface");
         }
         List<File> files = getAllFilesFromDirectory(concreteRelativePath);
@@ -41,7 +42,7 @@ public class PluginUtility {
                     Constructor<?> constructor = clazz.getDeclaredConstructor();
                     T plugin = (T) constructor.newInstance();
                     plugins.add(plugin);
-                } 
+                }
             }
         }
         return plugins;
@@ -54,12 +55,13 @@ public class PluginUtility {
      * @param  packageName      the package name of the file
      * @return                 return the instance of the class which has type Class
      */
-    public static Class<?> getClassInstance(File filePath, String packageName) throws IOException, ClassNotFoundException {
+    public static Class<?> getClassInstance(File filePath, String packageName)
+            throws IOException, ClassNotFoundException {
         String fileName = filePath.getName().split("\\.")[0];
         String extension = filePath.getName().split("\\.")[1];
         if (extension.equals("java")) {
             URL url = filePath.toURI().toURL();
-            URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{url});
+            URLClassLoader classLoader = URLClassLoader.newInstance(new URL[] { url });
             Class<?> clazz = classLoader.loadClass(packageName + "." + fileName);
             classLoader.close();
             return clazz;
@@ -76,8 +78,10 @@ public class PluginUtility {
      */
     public static List<File> getAllFilesFromDirectory(String relativePath) throws IOException {
         Path pluginDirectory = Paths.get(relativePath).toAbsolutePath();
+        System.out.println("absolute: " + pluginDirectory);
+        System.out.println("relative: " + relativePath);
         return Files.list(pluginDirectory)
                 .map(Path::toFile)
                 .collect(Collectors.toList());
-    } 
+    }
 }

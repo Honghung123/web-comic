@@ -1,12 +1,9 @@
 package com.group17.comic.exception;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindException;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -15,7 +12,6 @@ import com.group17.comic.dto.response.ErrorResponse;
 import com.group17.comic.exception.customs.InvalidTypeException;
 import com.group17.comic.exception.customs.ResourceNotFound;
 import com.group17.comic.log.Logger;
- 
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
