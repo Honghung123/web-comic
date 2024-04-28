@@ -2,12 +2,13 @@ package com.group17.comic.utils;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
+import java.io.FileOutputStream; 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+
+import lombok.SneakyThrows;
 
 public class FileUtility {
     public static boolean createDirectory(File file) {
@@ -31,6 +32,7 @@ public class FileUtility {
         return folder.delete();
     }
 
+    @SneakyThrows
     public static boolean createFile(String filePath, String content){ 
         if(content == null){
             content = "";
@@ -42,9 +44,8 @@ public class FileUtility {
             writer.write(content);
             return true;
         } catch (IOException e) {
-            e.printStackTrace(); 
-        }
-        return false;
+            throw new IOException("Failed to write to file: ", e);
+        } 
     } 
 
     public static void saveDownloadedBytesToFolder(byte[] fileBytes, File destinationFile) throws IOException

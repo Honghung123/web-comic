@@ -5,9 +5,9 @@ import lombok.Getter;
 
 @Getter
 public class ResourceNotFound extends RuntimeException implements CustomException {
-    private HttpStatus statusCode; 
+    private HttpStatus status; 
     public ResourceNotFound(String message) {
         super(message);
-        this.statusCode = HttpStatus.BAD_REQUEST;
+        this.status = HttpStatus.BAD_REQUEST;
     }    
 }

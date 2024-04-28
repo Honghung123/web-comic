@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.group17.comic.plugins.exporter.concretes.PdfConverter;
+import com.group17.comic.utils.StringUtility;
 
 import java.io.IOException;
 
@@ -20,6 +21,9 @@ class ComicApplicationTests {
 
 	@Test
 	void testPath () {
-//		PdfConverter.createUploadDir("plugins/exporter/uploads/");
+		String a = "dichdau-pha-thuong-khungfull";
+		String b = 	"truyen-dau-pha-thuong-khung";
+		String c = StringUtility.findLongestCommonSubstring(a, b);
+		System.out.println(c);
 	}
 }

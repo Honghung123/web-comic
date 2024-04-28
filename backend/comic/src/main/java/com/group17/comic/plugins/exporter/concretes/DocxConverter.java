@@ -13,7 +13,7 @@ import com.group17.comic.dto.request.ChapterDTO;
 import com.group17.comic.dto.response.ChapterFile;
 import com.group17.comic.plugins.exporter.IFileConverter;
 import com.group17.comic.utils.FileUtility;
-import com.group17.comic.utils.StringConverter;
+import com.group17.comic.utils.StringUtility;
 
 import lombok.SneakyThrows;
 import okhttp3.MediaType;
@@ -45,7 +45,7 @@ public class DocxConverter implements IFileConverter {
     @SneakyThrows
     @Override
     public ChapterFile getConvertedFile(ChapterDTO chapterDto) {
-        String formatedTitle = StringConverter.removeDiacriticalMarks(chapterDto.title()).replaceAll("[^a-zA-Z0-9]", "-").trim();
+        String formatedTitle = StringUtility.removeDiacriticalMarks(chapterDto.title()).replaceAll("[^a-zA-Z0-9]", "-").trim();
         String htmlFile = formatedTitle + ".html";
         String fileOutputName = formatedTitle + ".docx";     
         // Create a html file and save it to folder   

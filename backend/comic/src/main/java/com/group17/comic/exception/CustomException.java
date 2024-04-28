@@ -4,5 +4,5 @@ import org.springframework.http.HttpStatus;
 
 public interface CustomException {
     String getMessage();
-    HttpStatus getStatusCode();    
+    HttpStatus getStatus();    
 } 

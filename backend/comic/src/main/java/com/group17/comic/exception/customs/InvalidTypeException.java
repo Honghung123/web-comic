@@ -5,10 +5,10 @@ import lombok.Getter;
 
 @Getter
 public class InvalidTypeException extends RuntimeException implements CustomException{
-    private HttpStatus statusCode;
+    private HttpStatus status;
 
     public InvalidTypeException(String message) {
         super(message);
-        this.statusCode = HttpStatus.BAD_REQUEST;
+        this.status = HttpStatus.BAD_REQUEST;
     }
 }

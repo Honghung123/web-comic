@@ -20,7 +20,7 @@ import com.group17.comic.dto.response.ChapterFile;
 import com.group17.comic.log.Logger;
 import com.group17.comic.plugins.exporter.IFileConverter;
 import com.group17.comic.utils.FileUtility;
-import com.group17.comic.utils.StringConverter;
+import com.group17.comic.utils.StringUtility;
 
 import lombok.SneakyThrows;
 
@@ -40,7 +40,7 @@ public class EpubConverter implements IFileConverter {
     @SneakyThrows
     @Override
     public ChapterFile getConvertedFile(ChapterDTO chapterDto) {
-        String formatTitle = StringConverter.removeDiacriticalMarks(chapterDto.title());
+        String formatTitle = StringUtility.removeDiacriticalMarks(chapterDto.title());
         formatTitle = formatTitle.replaceAll("[^a-zA-Z0-9\\s]", "-").trim();
         String fileName = formatTitle + ".epub";
         // Wirte content to epub file and save it to folder 
@@ -92,8 +92,7 @@ public class EpubConverter implements IFileConverter {
             zos.write(contentOpf.getBytes());
             System.out.println("Created EPUB file: " + epubFileName);
         } catch (IOException e) {
-            Logger.logError("Error to create Epub file", e);
-            throw e;
+            throw new IOException("Error to create Epub file", e);
         } 
     }
 }

@@ -34,6 +34,9 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         String term = keyword.trim().replace(" ", "%20");
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "ket-qua-tim-kiem?term=" + term);
         Elements elements = doc.select("#rank-view-list .book-img-text ul li");
+        if(elements == null) { // null khac voi 0 nha
+            throw new ResourceNotFound("Failed to get comic list from Tang Thu Vien");
+        }
         for (Element element : elements) {
             String image = element.selectFirst(".book-img-box a img").attr("src");
             String comicUrl = element.selectFirst(".book-mid-info h4 a").attr("href");
@@ -90,6 +93,9 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         List<Genre> genres = new ArrayList<Genre>();
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL);
         Elements elements = doc.select("div#classify-list dd a");
+        if(elements == null) {  
+            throw new ResourceNotFound("Failed to get genre list from Tang Thu Vien");
+        }
         for (Element element : elements) {
             String url = element.attr("href");
             if (url.contains("the-loai")) {
@@ -106,9 +112,11 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
     @Override
     public DataModel<Integer, List<ComicModel>> getLastedComics(int currentPage) {
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "tong-hop?tp=cv&page=" + currentPage);
-
         List<ComicModel> lastedComics = new ArrayList<>();
         Elements elements = doc.select("div#rank-view-list ul li");
+        if(elements == null) {
+            throw new ResourceNotFound("Failed to get lasted comics from Tang Thu Vien");
+        }
         for (Element element : elements) {
             String image = element.selectFirst(".book-img-box a img").attr("src");
             String comicUrl = element.selectFirst(".book-mid-info h4 a").attr("href");
@@ -161,7 +169,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "doc-truyen/" + comicTagId);
         Element element = doc.selectFirst("div.book-information");
         if(element == null){
-            throw new ResourceNotFound("Comic not found");
+            throw new ResourceNotFound("Failed to get chapter content from Tang Thu Vien");
         }
         String image = element.select(".book-img img").attr("src");
         String title = element.selectFirst(".book-info h1").text();
@@ -182,7 +190,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         Element descriptionElement = doc.selectFirst(".book-info-detail > .book-intro");
         String description = descriptionElement.html(); 
         Element statusElement = doc.selectFirst(".book-info .tag span.blue");
-        boolean isFull = StringConverter.removeDiacriticalMarks(statusElement.text()).equals("Da hoan thanh");
+        boolean isFull = StringUtility.removeDiacriticalMarks(statusElement.text()).equals("Da hoan thanh");
         var comic = Comic.builder()
                 .tagId(comicTagId)
                 .title(title)
@@ -243,17 +251,13 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         Document doc = this
                 .getDocumentInstanceFromUrl(TRUYEN_URL + "doc-truyen/" + comicTagId + "/chuong-" + currentChapter);
         var elementTitle = doc.selectFirst(".chapter-c-content h5 a");
-        if (elementTitle == null) {
-            Logger.logError(this.getClass().getSimpleName() + " Can't get chapter content",
-                    new Exception("Can't get chapter content"));
-            throw new ResourceNotFound("Can't get chapter content");
+        if (elementTitle == null) { 
+            throw new ResourceNotFound("Can't get chapter content from Tang Thu Vien");
         }
         String title = elementTitle.text().substring(elementTitle.text().lastIndexOf(":") + 1).trim();
         var elementContent = doc.selectFirst(".chapter-c-content .box-chap");
-        if (elementContent == null) {
-            Logger.logError(this.getClass().getSimpleName() + " Can't get chapter content",
-                    new Exception("Can't get chapter content"));
-            throw new ResourceNotFound("Can't get chapter content");
+        if (elementContent == null) { 
+            throw new ResourceNotFound("Can't get chapter content from Tang Thu Vien");
         }
         String content = elementContent.html();
         Pagination<Integer> paginationTemp = getChapters(comicTagId, 1).getPagination();
@@ -265,19 +269,62 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         return result;
     }
 
+    @SneakyThrows
     @Override
     public DataModel<?, ComicChapterContent> getComicChapterContentOnOtherServer(AlternatedChapterDTO altChapterDto) {
         // AE tìm truyện cùng tên truyện và cùng tên tác giả, tìm chương có chapterNo chỉ định(ví dụ chương 4),
         // thì ae tìm chương chỉ chứa số 4 trả về chapter 4 và pagination - trang trước và trang kế tiếp 
-        // Start coding here
-        int currentChapter = altChapterDto.chapterNo();
-        String title = "";
-        String comicTagId = "";
-        String content = ""; 
-        Pagination<Integer> pagination = new Pagination<>(currentChapter, 1, -1, -1);
-        DataModel<Integer, ComicChapterContent> result = new DataModel<>(pagination,
-                new ComicChapterContent(title, content, comicTagId));
-        // End coding here
-        return result;    
+        // Tìm truyện chứa tên và cùng tác giả
+        String keyword = altChapterDto.title();
+        keyword = StringUtility.removeDiacriticalMarks(keyword).toLowerCase()
+                .replace("[dich]", "").replaceAll("- suu tam", "");
+        keyword = keyword.substring(0, keyword.lastIndexOf("-")).trim().replace(" ", "%20");
+        Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "ket-qua-tim-kiem?term=" + keyword);
+        var formattedAuthor = StringUtility.removeDiacriticalMarks(altChapterDto.authorName()).toLowerCase().trim();
+        Elements comicElements = doc.select("#rank-view-list .book-img-text ul li");
+        if(comicElements == null) {
+            throw new ResourceNotFound("Failed to get comic list from Tang Thu Vien");
+        }
+        String tagId = "";
+        for (Element element : comicElements) { 
+            String comicUrl = element.selectFirst(".book-mid-info h4 a").attr("href");
+            String comicTagId = comicUrl.substring(comicUrl.lastIndexOf("/") + 1); 
+            var authorTag = element.select(".book-mid-info .author a:nth-of-type(1)");
+            String authorName = authorTag.text(); 
+            String authorFormattedName = StringUtility.removeDiacriticalMarks(authorName).toLowerCase();
+            String commonTag = StringUtility.findLongestCommonSubstring(comicTagId, altChapterDto.comicTagId());
+            if(authorFormattedName.equals(formattedAuthor) && 
+                commonTag.length() >= 0.5 * altChapterDto.comicTagId().length()) {
+                tagId = comicTagId;
+                break;        
+            }
+        }
+        if(tagId.isEmpty()){
+            throw new ResourceNotFound("Failed to get comic tag id from Tang Thu Vien");
+        }
+        // Tìm chapter
+        String chapterUrl = "";
+        int currentPage = 1;
+        while(true){
+            DataModel<Integer, List<Chapter>> result = this.getChapters(tagId, currentPage);
+            List<Chapter> chapters = result.getData();
+            if(chapters == null) {
+                throw new ResourceNotFound("Failed to get chapter list from Tang Thu Vien");
+            }
+            if(chapters.isEmpty()) {
+                break;
+            }
+            for (Chapter chapter : chapters) {
+                if(chapter.getChapterNo().contains(String.valueOf(altChapterDto.chapterNo()))) {
+                    chapterUrl = chapter.getChapterNo();
+                    break;
+                }
+            }
+            if(chapterUrl.length() > 0) {
+                break;
+            }
+            currentPage++;
+        }
+        return this.getComicChapterContent(tagId, chapterUrl);    
     }
 }

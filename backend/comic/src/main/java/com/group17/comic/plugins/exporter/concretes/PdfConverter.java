@@ -8,11 +8,14 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.group17.comic.utils.FileUtility;
-import com.group17.comic.utils.StringConverter;
+import com.group17.comic.utils.StringUtility;
 import lombok.SneakyThrows;
 import okhttp3.*;
+
+import org.jsoup.HttpStatusException;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.web.client.ResourceAccessException;
 
 import com.group17.comic.dto.request.ChapterDTO;
 import com.group17.comic.dto.response.ChapterFile;
@@ -41,7 +44,7 @@ public class PdfConverter implements IFileConverter {
     @Override
     @SneakyThrows
     public ChapterFile getConvertedFile(ChapterDTO chapterDto) {
-        String formatTitile = StringConverter.removeDiacriticalMarks(chapterDto.title());
+        String formatTitile = StringUtility.removeDiacriticalMarks(chapterDto.title());
         formatTitile = formatTitile.replaceAll("[^a-zA-Z0-9]", "-").trim();
         String fileName = formatTitile + ".pdf";
         // Convert html to pdf online, and download it afterwards 
@@ -104,13 +107,12 @@ public class PdfConverter implements IFileConverter {
                 return fileBytes;
             } else {
                 // Display service reported error
-                System.out.println(json.get("message").getAsString());
+                throw new IOException(json.get("message").getAsString());
             }
         } else {
             // Display request error
-            System.out.println(response.code() + " " + response.message());
-        }
-        return null;
+            throw new HttpStatusException(response.code() + " " + response.message(), response.code(), url);
+        } 
     }
 
 }

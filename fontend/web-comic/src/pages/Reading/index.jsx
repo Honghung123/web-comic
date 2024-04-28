@@ -16,11 +16,11 @@ const comicContent = `
 
 export default function Reading() {
   const [content, setContent] = useState("");
-  const converterSize = 3;
+  const converterSize = 4;
   const handleSubmit = async (event) => {
     event.preventDefault();
     const payload = {
-      title: comicTitle,
+      title: "",
       content: comicContent,
     };
     const headers = {
@@ -32,6 +32,7 @@ export default function Reading() {
         responseType: "blob" ,
         headers
       });
+      console.log("----------");
       console.log(response);
       const blob = new Blob([response.data], { type: "application/pdf" });
       const windowUrl = window.URL || window.webkitURL;
@@ -44,7 +45,9 @@ export default function Reading() {
       // Xóa URL sau khi đã tải xuống
       window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
-      alert(error);
+        console.log(error);
+        console.log(error.response.status);
+        alert(error);
     }
   };
   return (

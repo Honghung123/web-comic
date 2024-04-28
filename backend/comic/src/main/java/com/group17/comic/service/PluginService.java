@@ -1,12 +1,14 @@
 package com.group17.comic.service;
-
-import org.apache.coyote.BadRequestException;
-import org.springframework.beans.factory.annotation.Value; 
+ 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 
 import com.group17.comic.dto.request.AlternatedChapterDTO;
 import com.group17.comic.dto.request.ChapterDTO;
-import com.group17.comic.dto.response.ChapterFile; 
+import com.group17.comic.dto.response.ChapterFile;
+import com.group17.comic.exception.customs.InvalidPluginListException;
 import com.group17.comic.model.*;
 import com.group17.comic.plugins.crawler.IDataCrawler;
 import com.group17.comic.plugins.exporter.IFileConverter;
@@ -129,16 +131,16 @@ public class PluginService {
     @SneakyThrows
     public void checkCrawlerServerSize(int crawlersSize) {
         checkCrawlerPlugins();
-        if (crawlersSize > crawlers.size()) {
-            throw new BadRequestException("Server has changed. Please fresh your page");
+        if (crawlersSize != crawlers.size()) {
+            throw new InvalidPluginListException("Server has changed. Please refresh your page", HttpStatus.NOT_ACCEPTABLE);
         }
     }
 
     @SneakyThrows
     public void checkConverterPluginSize(int convertersSize) {
         checkConverterPlugins();
-        if (convertersSize > converters.size()) {
-            throw new BadRequestException("Converter has changed. Please fresh your page");
+        if (convertersSize != converters.size()) {
+            throw new InvalidPluginListException("Converter has changed. Please refresh your page", HttpStatus.NOT_ACCEPTABLE);
         }    
     }
 }

@@ -77,9 +77,7 @@ public class PluginUtility {
      * @throws IOException   if an I/O error occurs
      */
     public static List<File> getAllFilesFromDirectory(String relativePath) throws IOException {
-        Path pluginDirectory = Paths.get(relativePath).toAbsolutePath();
-        System.out.println("absolute: " + pluginDirectory);
-        System.out.println("relative: " + relativePath);
+        Path pluginDirectory = Paths.get(relativePath).toAbsolutePath(); 
         return Files.list(pluginDirectory)
                 .map(Path::toFile)
                 .collect(Collectors.toList());
