@@ -53,7 +53,7 @@ public class ComicController {
 
     @GetMapping("/lasted-comic")
     @Operation(summary = "Get lasted comics", description = "Get lasted comics with specific server id. Default server id is 0 - plugin's index in plugin list Default current page is 1")
-    public SuccessfulResponse<List<ComicModel>> getNewestCommic(
+    public SuccessfulResponse<List<ComicModel>> getLatestCommic(
             @RequestParam(name = "server_id", defaultValue = "0") @PositiveOrZero int serverId,
             @RequestParam(name = "page", defaultValue = "1") @Positive int page, 
             @RequestHeader(name = "crawler-size", defaultValue = "3") @PositiveOrZero int crawlerSize) {
@@ -66,15 +66,26 @@ public class ComicController {
     @Operation(summary = "Search comic", description = "Search comic base on keyword(by title, author or published year) or only genres with specific server id. Default server id is 0 - plugin's index in plugin list. Default the current page is 1.")
     public SuccessfulResponse<List<ComicModel>> searchComic(
             @RequestParam(name = "keyword", defaultValue = "") String keyword,
-            @RequestParam(name = "genres", defaultValue = "") String byGenres,
-            @RequestParam(name = "authors", defaultValue = "") String byAuthorTagId,
+            @RequestParam(name = "genre", defaultValue = "") String byGenre, 
             @RequestParam(name = "server_id", defaultValue = "0") @PositiveOrZero int serverId,
             @RequestParam(name = "page", defaultValue = "1") @Positive int currentPage,
             @RequestHeader(name = "crawler-size", defaultValue = "3") @PositiveOrZero int crawlerSize) {
         pluginService.checkCrawlerServerSize(crawlerSize);
-        var dataDto = pluginService.searchComic(serverId, keyword, byGenres, byAuthorTagId, currentPage);
+        var dataDto = pluginService.searchComic(serverId, keyword, byGenre, currentPage);
         return new SuccessfulResponse<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData(),
                 dataDto.getMeta());
+    }
+
+    @GetMapping("/author/{authorId}")
+    @Operation(summary = "Get author's comics", description = "Get author's comics base on author id with specific server id. Default server id is 0 - plugin's index in plugin list.")
+    public SuccessfulResponse<List<ComicModel>> getComicsOfAnAuthor(
+            @PathVariable(name = "authorId", required = true) String authorId,
+            @RequestParam(name = "page", defaultValue = "1") @Positive int page,
+            @RequestParam(name = "server_id", defaultValue = "0") @PositiveOrZero int serverId,
+            @RequestHeader(name = "crawler-size", defaultValue = "3") @PositiveOrZero int crawlerSize) {
+        pluginService.checkCrawlerServerSize(crawlerSize);
+        var dataDto = pluginService.getComicsOfAnAuthor(serverId, authorId, page); 
+        return new SuccessfulResponse<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
     }
 
     @GetMapping("/reading/{tagId}")

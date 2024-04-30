@@ -2,8 +2,7 @@ package com.group17.comic.service;
  
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.ResourceAccessException;
+import org.springframework.stereotype.Service; 
 
 import com.group17.comic.dto.request.AlternatedChapterDTO;
 import com.group17.comic.dto.request.ChapterDTO;
@@ -15,6 +14,8 @@ import com.group17.comic.plugins.exporter.IFileConverter;
 import com.group17.comic.utils.PluginUtility;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.SneakyThrows; 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,9 +77,9 @@ public class PluginService {
 
     @SneakyThrows
     public DataSearchModel<Integer, List<ComicModel>, List<Author>> searchComic(int serverId,
-            String keyword, String byGenres, String byAuthorTagId, int currentPage){
+            String keyword, String byGenres, int currentPage){
         checkCrawlerPlugins();
-        var result = crawlers.get(serverId).search(keyword, byGenres, byAuthorTagId, currentPage);
+        var result = crawlers.get(serverId).search(keyword, byGenres, currentPage);
         return result;
     }
 
@@ -143,4 +144,10 @@ public class PluginService {
             throw new InvalidPluginListException("Converter has changed. Please refresh your page", HttpStatus.NOT_ACCEPTABLE);
         }    
     }
+
+public DataModel<Integer, List<ComicModel>> getComicsOfAnAuthor(int serverId, String authorId, int page) {
+    checkCrawlerPlugins();
+    var result = crawlers.get(serverId).getComicsByAuthor(authorId, page);
+    return result;
+}
 }

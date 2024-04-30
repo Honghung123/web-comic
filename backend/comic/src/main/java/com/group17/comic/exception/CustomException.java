@@ -2,7 +2,14 @@ package com.group17.comic.exception;
 
 import org.springframework.http.HttpStatus;
 
-public interface CustomException {
-    String getMessage();
-    HttpStatus getStatus();    
+import lombok.Getter;
+
+@Getter
+public class CustomException extends RuntimeException{
+    private String message;
+    private HttpStatus status;
+    public CustomException(HttpStatus status, String message) {
+        super(message);
+        this.status = status;
+    }   
 } 
