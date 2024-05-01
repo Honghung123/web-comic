@@ -1,7 +1,6 @@
 package com.group17.comic.service;
  
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service; 
 
 import com.group17.comic.dto.request.AlternatedChapterDTO;
@@ -13,9 +12,7 @@ import com.group17.comic.plugins.crawler.IDataCrawler;
 import com.group17.comic.plugins.exporter.IFileConverter;
 import com.group17.comic.utils.PluginUtility;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.NotNull; 
 import lombok.SneakyThrows; 
 import java.util.ArrayList;
 import java.util.List;
@@ -133,7 +130,7 @@ public class PluginService {
     public void checkCrawlerServerSize(int crawlersSize) {
         checkCrawlerPlugins();
         if (crawlersSize != crawlers.size()) {
-            throw new InvalidPluginListException("Server has changed. Please refresh your page", HttpStatus.NOT_ACCEPTABLE);
+            throw new InvalidPluginListException("Server has changed. Please refresh your page");
         }
     }
 
@@ -141,7 +138,7 @@ public class PluginService {
     public void checkConverterPluginSize(int convertersSize) {
         checkConverterPlugins();
         if (convertersSize != converters.size()) {
-            throw new InvalidPluginListException("Converter has changed. Please refresh your page", HttpStatus.NOT_ACCEPTABLE);
+            throw new InvalidPluginListException("Converter has changed. Please refresh your page");
         }    
     }
 

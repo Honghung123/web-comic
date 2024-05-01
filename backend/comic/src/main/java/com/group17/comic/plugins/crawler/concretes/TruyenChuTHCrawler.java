@@ -8,8 +8,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.util.StringUtils;
 
-import com.group17.comic.dto.request.AlternatedChapterDTO;
-import com.group17.comic.exception.customs.IllegalParameterException;
+import com.group17.comic.dto.request.AlternatedChapterDTO; 
 import com.group17.comic.exception.customs.ResourceNotFound;
 import com.group17.comic.model.*;
 import com.group17.comic.plugins.crawler.IDataCrawler;
@@ -37,7 +36,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
         } else if (StringUtils.hasLength(keyword) && byGenre.isEmpty()) {
             return searchOnlyByKeyword(keyword, currentPage);
         } else {
-            throw new IllegalParameterException("Invalid search params");
+            return this.getHotOrPromoteComics(currentPage);
         }
     }
 
@@ -69,7 +68,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
     private DataSearchModel<Integer, List<ComicModel>, List<Author>> searchOnlyByGenre(String byGenre,
             int currentPage) {
         List<ComicModel> listMatchedComic = new ArrayList<>();
-        String requestUrl = TRUYEN_URL + "loadmore?type=Theloai&cat=" + byGenre + "&page=" + currentPage;
+        String requestUrl = TRUYEN_URL + "loadmore?type=Theloai&cat=" + byGenre + "&p=" + currentPage;
         Document doc = this.getDocumentInstanceFromUrl(requestUrl);
         Elements comicElements = doc.select(".list-row-img");
         if (comicElements == null) {
@@ -146,7 +145,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
                     .build();
             listMatchedComic.add(comicModel);
         }
-        Pagination<Integer> pagination = new Pagination<Integer>(currentPage, listMatchedComic.size(), 1, -1);
+        Pagination<Integer> pagination = new Pagination<Integer>(currentPage, listMatchedComic.size(), 20, -1);
         DataSearchModel<Integer, List<ComicModel>, List<Author>> result = new DataSearchModel<>(pagination,
                 listMatchedComic, authorList);
         return result;
@@ -250,6 +249,44 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
                 .isFull(isFull)
                 .build();
         return comic;
+    }
+
+    @SneakyThrows
+    private DataSearchModel<Integer, List<ComicModel>, List<Author>> getHotOrPromoteComics(int currentPage) {
+        List<ComicModel> listMatchedComic = new ArrayList<>();
+        String requestUrl = TRUYEN_URL + "loadmore?type=TruyenHay&cat=truyen-hay" + "&p=" + currentPage;
+        Document doc = this.getDocumentInstanceFromUrl(requestUrl);
+        Elements comicElements = doc.select(".list-row-img");
+        if (comicElements == null) {
+            throw new ResourceNotFound("Failed to get comic list from Truyen Chu TH");
+        }
+        for (Element element : comicElements) {
+            String image = element.selectFirst(".row-image a img").attr("src");
+            String comicUrl = element.selectFirst(".row-info h3 a").attr("href");
+            String comicTagId = comicUrl.substring(comicUrl.lastIndexOf("/") + 1);
+            String title = element.selectFirst(".row-info h3 a").text();
+            String authorName = element.select(".row-author").text();
+            String authorId = StringUtility.removeDiacriticalMarks(authorName).trim()
+                    .toLowerCase().replaceAll(" ", "-");
+            Author author = new Author(authorId, authorName);
+            List<Genre> genres = new ArrayList<>();
+            boolean isFull = false;
+            var comicModel = ComicModel.builder()
+                    .tagId(comicTagId)
+                    .title(title)
+                    .image(image)
+                    .alternateImage(this.alternateImage)
+                    .genres(genres)
+                    .author(author)
+                    .isFull(isFull)
+                    .build();
+            listMatchedComic.add(comicModel);
+        }
+        Pagination<Integer> pagination = new Pagination<Integer>(currentPage, listMatchedComic.size(), 1, -1);
+        PaginationUtility.updatePagination(pagination);
+        DataSearchModel<Integer, List<ComicModel>, List<Author>> result = new DataSearchModel<>(pagination,
+                listMatchedComic, null);
+        return result;    
     }
 
     @SneakyThrows
