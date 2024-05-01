@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import Button from "@mui/material/Button";
-import axios from "axios";
+import React, { useState } from 'react';
+import Button from '@mui/material/Button';
+import axios from 'axios';
 
-const comicTitle = "Chương 01: Thiên địa dị tượng, luyện thể thiên phú?";
+const comicTitle = 'Chương 01: Thiên địa dị tượng, luyện thể thiên phú?';
 const comicContent = `
 <p>Hàng Châu tam trung trên bãi tập, các học sinh líu ríu.<br> <br> Ngay tại tổ chức, là Lam Tinh mỗi người đến mười tám tuổi liền muốn tiến hành thức tỉnh khảo thí.<br> 
 <br> Mà lần này thiên phú thức tỉnh.<br> 
@@ -15,46 +15,48 @@ const comicContent = `
 `;
 
 export default function Reading() {
-  const [content, setContent] = useState("");
-  const converterSize = 4;
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const payload = {
-      title: "",
-      content: comicContent,
+    const [content, setContent] = useState('');
+    const converterSize = 4;
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        const payload = {
+            title: '',
+            content: comicContent,
+        };
+        const headers = {
+            'converter-size': converterSize,
+        };
+        const url = `http://localhost:8080/api/v1/comic/export-file?converter_id=2`;
+        try {
+            const response = await axios.post(url, payload, {
+                responseType: 'blob',
+                headers,
+            });
+            console.log('----------');
+            console.log(response);
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const windowUrl = window.URL || window.webkitURL;
+            const downloadUrl = windowUrl.createObjectURL(blob);
+            const anchor = document.createElement('a');
+            anchor.href = downloadUrl;
+            anchor.download = comicTitle;
+            document.body.appendChild(anchor);
+            anchor.click();
+            // Xóa URL sau khi đã tải xuống
+            window.URL.revokeObjectURL(downloadUrl);
+        } catch (error) {
+            console.log(error);
+            console.log(error.response.status);
+            alert(error);
+        }
     };
-    const headers = {
-        "converter-size": converterSize,
-    }
-    const url = `http://localhost:8080/api/v1/comic/export-file?converter_id=2`;
-    try {
-      const response = await axios.post(url, payload, {
-        responseType: "blob" ,
-        headers
-      });
-      console.log("----------");
-      console.log(response);
-      const blob = new Blob([response.data], { type: "application/pdf" });
-      const windowUrl = window.URL || window.webkitURL;
-      const downloadUrl = windowUrl.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = downloadUrl;
-      anchor.download = comicTitle;
-      document.body.appendChild(anchor);
-      anchor.click();
-      // Xóa URL sau khi đã tải xuống
-      window.URL.revokeObjectURL(downloadUrl);
-    } catch (error) {
-        console.log(error);
-        console.log(error.response.status);
-        alert(error);
-    }
-  };
-  return (
-    <>
-      <h1>This is the Reading page. Read content of a chapter of a novel.</h1>
-      <Button variant="contained" onClick={handleSubmit}>Download file PDF</Button>
-      <br />
-    </>
-  );
+    return (
+        <>
+            <h1>This is the Reading page. Read content of a chapter of a novel.</h1>
+            <Button variant="contained" onClick={handleSubmit}>
+                Download file PDF
+            </Button>
+            <br />
+        </>
+    );
 }

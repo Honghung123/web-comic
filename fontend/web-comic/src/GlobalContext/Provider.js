@@ -1,31 +1,37 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import Context from './Context';
 
 import * as request from '../utils'
+import { reducer as serverReducer, UPDATE_LIST, UPDATE_PRIORITY } from './servers';
 
 function Provider({ children }) {
 
     let availableServers = JSON.parse(localStorage.getItem('servers'));
-    const [servers, setServers] = useState(availableServers || []);
+    const [servers, serversDispatch] = useReducer(serverReducer, availableServers || []);
+    const [genre, setGenre] = useState('');
+    const [keyword, setKeyword] = useState('');
 
     useEffect(() => {
-        // lay danh sach cac server tu backend
+        // lay danh sach cac serverE tu backend
         request.get('/api/v1/comic/crawler-plugins').then(response => {
-            console.log('response', response);
             if (response.statusCode === 200) {
-                if (!availableServers) {
-                    setServers(response.data);
-                    localStorage.setItem('servers', JSON.stringify(response.data));
+                if (servers.length === 0) {
+                    serversDispatch({
+                        type: UPDATE_LIST,
+                        payload: response.data
+                    })
                 }
                 else {
                     //them server moi duoc plugin vao
-                    if (response.data.length > availableServers.length) {
+                    if (response.data.length > servers.length) {
                         // tam thoi xu ly nhu vay
                         // chua luu tru duoc thu tu uu tien
                         // can phai sua lai ....
                         // cho sua backend r sua cai nay sau
-                        setServers(response.data);
-                        localStorage.setItem('servers', JSON.stringify(response.data));
+                        serversDispatch({
+                            type: UPDATE_LIST,
+                            payload: response.data
+                        })
                     }
                 }
             }
@@ -38,7 +44,9 @@ function Provider({ children }) {
 
 
     return (
-        <Context.Provider value={[servers, setServers]}>
+        <Context.Provider value={{
+            servers, serversDispatch, genre, setGenre, keyword, setKeyword
+        }}>
             {children}
         </Context.Provider>
     );
