@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest; 
 
 import com.group17.comic.dto.response.ErrorResponse;
+import com.group17.comic.exception.customs.IllegalParameterException;
 import com.group17.comic.exception.customs.InvalidPluginListException;
 import com.group17.comic.exception.customs.InvalidTypeException;
 import com.group17.comic.exception.customs.ResourceNotFound;
@@ -49,20 +50,9 @@ public class GlobalExceptionHandler {
                 new ErrorResponse(httpStatus.value(), error, message, timestamp, path));
     }
 
-    @ExceptionHandler({ ResourceNotFound.class, InvalidTypeException.class })
+    @ExceptionHandler({ ResourceNotFound.class, InvalidTypeException.class, IllegalParameterException.class,
+                        InvalidPluginListException.class })
     public ResponseEntity<ErrorResponse> handleCustomException(CustomException ex, WebRequest request) {
-        Logger.logError(ex.getMessage(), null);
-        String message = ex.getMessage();
-        var httpStatus = ex.getStatus();
-        String error = httpStatus.getReasonPhrase();
-        LocalDateTime timestamp = LocalDateTime.now();
-        String path = request.getDescription(false).replace("uri=", "");
-        return ResponseEntity.status(httpStatus).body(
-                new ErrorResponse(httpStatus.value(), error, message, timestamp, path));
-    }
-
-    @ExceptionHandler({ InvalidPluginListException.class, })
-    public ResponseEntity<ErrorResponse> handleResourceException(InvalidPluginListException ex, WebRequest request) {
         Logger.logError(ex.getMessage(), null);
         String message = ex.getMessage();
         var httpStatus = ex.getStatus();

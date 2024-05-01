@@ -2,9 +2,12 @@ package com.group17.comic;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.util.StringUtils;
 
 import com.group17.comic.plugins.exporter.concretes.PdfConverter;
 import com.group17.comic.utils.StringUtility;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 
@@ -21,9 +24,18 @@ class ComicApplicationTests {
 
 	@Test
 	void testPath () {
-		String a = "dichdau-pha-thuong-khungfull";
-		String b = 	"truyen-dau-pha-thuong-khung";
-		String c = StringUtility.findLongestCommonSubstring(a, b);
-		System.out.println(c);
+	  String keyword = "";
+        String byGenre = "";
+	  int result = 0;
+        if (StringUtils.hasLength(keyword) && StringUtils.hasLength(byGenre)) {
+            result = 1;
+        } else if (keyword.isEmpty() && StringUtils.hasLength(byGenre)) {
+            result = 2;
+        } else if (StringUtils.hasLength(keyword) && byGenre.isEmpty()) {
+            result = 3;
+        } else {
+            System.out.println("None of them has value");
+        }
+	  assertEquals(0, result);
 	}
 }
