@@ -9,9 +9,10 @@ public interface IDataCrawler {
     String getPluginName();
     List<Genre> getGenres();
     DataModel<Integer, List<Chapter>> getChapters(String comicTagId, int currentPage);
-    DataSearchModel<Integer, List<ComicModel>, List<Author>> search(String keyword, String byGenres, String byAuthorTagId, int currentPage);
+    DataSearchModel<Integer, List<ComicModel>, List<Author>> search(String keyword, String byGenres, int currentPage);
     DataModel<Integer, List<ComicModel>> getLastedComics(int currentPage);
     Comic getComicInfo(String comicTagId);
     DataModel<?, ComicChapterContent> getComicChapterContent(String comicTagId, String currentChapter);
     DataModel<?, ComicChapterContent> getComicChapterContentOnOtherServer(AlternatedChapterDTO altChapterDto);
+    DataModel<Integer, List<ComicModel>> getComicsByAuthor(String authorId, int currentPage);
 }

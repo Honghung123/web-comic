@@ -4,11 +4,8 @@ import com.group17.comic.exception.CustomException;
 import lombok.Getter;
 
 @Getter
-public class InvalidTypeException extends RuntimeException implements CustomException{
-    private HttpStatus status;
-
+public class InvalidTypeException extends CustomException{
     public InvalidTypeException(String message) {
-        super(message);
-        this.status = HttpStatus.BAD_REQUEST;
+        super(HttpStatus.BAD_REQUEST, message); 
     }
 }

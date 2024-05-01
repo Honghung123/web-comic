@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import lombok.Getter;
 
 @Getter
-public class InvalidPluginListException  extends RuntimeException {
+public class InvalidPluginListException extends RuntimeException {
       private HttpStatus status;
 
     public InvalidPluginListException(String message, HttpStatus status) {

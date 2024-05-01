@@ -9,4 +9,5 @@ public class ComicChapterContent {
     private String title;
     private String content;
     private String comicTagId;
+    private Author author;
 }

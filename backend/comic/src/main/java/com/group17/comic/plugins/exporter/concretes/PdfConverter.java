@@ -14,8 +14,7 @@ import okhttp3.*;
 
 import org.jsoup.HttpStatusException;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.web.client.ResourceAccessException;
+import org.springframework.http.HttpHeaders; 
 
 import com.group17.comic.dto.request.ChapterDTO;
 import com.group17.comic.dto.response.ChapterFile;

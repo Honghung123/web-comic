@@ -6,12 +6,15 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jsoup.HttpStatusException;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.ResourceAccessException;
 
 import com.google.gson.Gson;
@@ -19,9 +22,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.group17.comic.dto.request.AlternatedChapterDTO;
+import com.group17.comic.exception.customs.IllegalParameterException;
 import com.group17.comic.exception.customs.InvalidTypeException;
-import com.group17.comic.exception.customs.ResourceNotFound;
-import com.group17.comic.log.Logger;
+import com.group17.comic.exception.customs.ResourceNotFound; 
 import com.group17.comic.model.*; 
 import com.group17.comic.plugins.crawler.IDataCrawler;
 import com.group17.comic.plugins.crawler.WebCrawler;
@@ -31,17 +34,181 @@ import lombok.SneakyThrows;
 
 public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     private final String TRUYEN_API = "https://api.truyenfull.vn/";
-    private final String TRUYEN_URL = "https://truyenfull.vn/";
+    private final String TRUYEN_URL = "https://truyenfull.vn/"; 
 
     @Override
     public String getPluginName() {
         return "Truyen Full";
     }
 
+    private Map<String, Integer> initialCategoryList() {
+        Map<String, Integer> categories = new HashMap<>();
+        var genreList = this.getGenres();
+        int categoryId = 1;
+        for (Genre genre : genreList) {
+            categories.put(genre.getTag(), categoryId++);
+        }
+        return categories;     
+    }
+
+    private Integer getCategoryId(String genre) {
+        Map<String, Integer> categories = initialCategoryList();
+        if(categories.containsKey(genre)) {
+            return categories.get(genre);
+        }else {
+            throw new InvalidTypeException("Invalid genre: " + genre);
+        }
+    }
+
     @SneakyThrows
     @Override
     public DataSearchModel<Integer, List<ComicModel>, List<Author>> search(String keyword,
-            String byGenres, String byAuthorTagId, int currentPage) {
+            String byGenre, int currentPage) {
+        if(StringUtils.hasLength(keyword) && StringUtils.hasLength(byGenre)) {
+            return searchByKeywordAndGenre(keyword, byGenre, currentPage);
+        }else if(keyword.isEmpty() && StringUtils.hasLength(byGenre)) {
+            return searchOnlyByGenre(byGenre, currentPage);
+        }else if(StringUtils.hasLength(keyword) && byGenre.isEmpty()) {
+            return searchOnlyByKeyword(keyword, currentPage);
+        }else {
+            throw new IllegalParameterException("Invalid search params");
+        } 
+    }
+
+    @SneakyThrows
+    private DataSearchModel<Integer, List<ComicModel>, List<Author>> searchByKeywordAndGenre(String keyword, String byGenre, int currentPage) {
+        List<ComicModel> listMatchedComic = new ArrayList<>();
+        String term = keyword.trim().replace(" ", "%20");
+        Integer categoryId = this.getCategoryId(byGenre); 
+        String apiUrl = TRUYEN_API + "v1/tim-kiem?title=" + term + "&category=[" + categoryId + "]";
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
+        Pagination<Integer> pagination = null; 
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                String responseBody = response.body(); 
+                JsonObject jsonObject = new Gson().fromJson(responseBody, JsonObject.class);
+                JsonArray jsonArray = jsonObject.getAsJsonArray("data");
+                for (JsonElement element : jsonArray) {
+                    var jsonObj = element.getAsJsonObject(); 
+                    String comicTagId = jsonObj.get("id").getAsString();
+                    String title = jsonObj.get("title").getAsString();
+                    String image = jsonObj.get("image").getAsString();
+                    String[] categories = jsonObj.get("categories").getAsString().split("[,]");
+                    List<Genre> genres = new ArrayList<>();
+                    for (String untrimedCategory : categories) {
+                        String category = untrimedCategory.trim();
+                        String convertedCategory = StringUtility.removeDiacriticalMarks(category).toLowerCase()
+                                .replaceAll(" ", "-");
+                        genres.add(new Genre(category, convertedCategory, "the-loai/" + convertedCategory));
+                    }
+                    String authorName = jsonObj.get("author").getAsString();
+                    String authorId = StringUtility.removeDiacriticalMarks(authorName)
+                                                    .toLowerCase().replace(" ", "-");
+                    var author = new Author(authorId, authorName);
+                    int newestChapter = jsonObj.get("total_chapters").getAsInt();
+                    String updatedTime = jsonObj.get("time").getAsString();
+                    boolean isFull = false;
+                    var comicModel = ComicModel.builder()
+                            .tagId(comicTagId)
+                            .title(title)
+                            .image(image)
+                            .alternateImage(this.alternateImage)
+                            .genres(genres)
+                            .author(author)
+                            .newestChapter(newestChapter)
+                            .totalChapter(newestChapter)
+                            .updatedTime(updatedTime)
+                            .isFull(isFull)
+                            .build();
+                    listMatchedComic.add(comicModel);
+                    
+                }
+                var paginationObject = jsonObject.getAsJsonObject("meta").getAsJsonObject("pagination");
+                int totalItems = paginationObject.get("total").getAsInt();
+                int perPage = paginationObject.get("per_page").getAsInt();
+                int totalPages = paginationObject.get("total_pages").getAsInt();
+                pagination = new Pagination<>(currentPage, perPage, totalPages, totalItems);
+                PaginationUtility.updatePagination(pagination);
+            } else { 
+                throw new ResourceNotFound("Failed to get data from TruyenFull.");
+            }
+        } catch (Exception e) {
+            throw new HttpStatusException("Cannot make request to get data from TruyenFull", 500, apiUrl);
+        }
+        DataSearchModel<Integer, List<ComicModel>, List<Author>> result = new DataSearchModel<>(pagination,
+                listMatchedComic, null);
+        return result;
+    }
+
+    @SneakyThrows
+    private DataSearchModel<Integer, List<ComicModel>, List<Author>> searchOnlyByGenre(String byGenre, int currentPage) {
+        List<ComicModel> listMatchedComic = new ArrayList<>(); 
+        String apiUrl = TRUYEN_API + "/v1/story/cate?cate="+ byGenre +"&type=story_new&page=" + currentPage;
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
+        Pagination<Integer> pagination = null; 
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                String responseBody = response.body(); 
+                JsonObject jsonObject = new Gson().fromJson(responseBody, JsonObject.class);
+                JsonArray jsonArray = jsonObject.getAsJsonArray("data");
+                for (JsonElement element : jsonArray) {
+                    var jsonObj = element.getAsJsonObject(); 
+                    String comicTagId = jsonObj.get("id").getAsString();
+                    String title = jsonObj.get("title").getAsString();
+                    String image = jsonObj.get("image").getAsString();
+                    String[] categories = jsonObj.get("categories").getAsString().split("[,]");
+                    List<Genre> genres = new ArrayList<>();
+                    for (String untrimedCategory : categories) {
+                        String category = untrimedCategory.trim();
+                        String convertedCategory = StringUtility.removeDiacriticalMarks(category).toLowerCase()
+                                .replaceAll(" ", "-");
+                        genres.add(new Genre(category, convertedCategory, "the-loai/" + convertedCategory));
+                    }
+                    String authorName = jsonObj.get("author").getAsString();
+                    String authorId = StringUtility.removeDiacriticalMarks(authorName)
+                                                    .toLowerCase().replace(" ", "-");
+                    var author = new Author(authorId, authorName);
+                    int newestChapter = jsonObj.get("total_chapters").getAsInt();
+                    String updatedTime = jsonObj.get("time").getAsString();
+                    boolean isFull = false;
+                    var comicModel = ComicModel.builder()
+                            .tagId(comicTagId)
+                            .title(title)
+                            .image(image)
+                            .alternateImage(this.alternateImage)
+                            .genres(genres)
+                            .author(author)
+                            .newestChapter(newestChapter)
+                            .totalChapter(newestChapter)
+                            .updatedTime(updatedTime)
+                            .isFull(isFull)
+                            .build();
+                    listMatchedComic.add(comicModel);
+                    
+                }
+                var paginationObject = jsonObject.getAsJsonObject("meta").getAsJsonObject("pagination");
+                int totalItems = paginationObject.get("total").getAsInt();
+                int perPage = paginationObject.get("per_page").getAsInt();
+                int totalPages = paginationObject.get("total_pages").getAsInt();
+                pagination = new Pagination<>(currentPage, perPage, totalPages, totalItems);
+                PaginationUtility.updatePagination(pagination);
+            } else { 
+                throw new ResourceNotFound("Failed to get data from TruyenFull.");
+            }
+        } catch (Exception e) {
+            throw new HttpStatusException("Cannot make request to get data from TruyenFull", 500, apiUrl);
+        }
+        DataSearchModel<Integer, List<ComicModel>, List<Author>> result = new DataSearchModel<>(pagination,
+                listMatchedComic, null);
+        return result;
+    }
+
+    @SneakyThrows
+    private DataSearchModel<Integer, List<ComicModel>, List<Author>> searchOnlyByKeyword(String keyword, int currentPage) {
         List<ComicModel> listMatchedComic = new ArrayList<>();
         String term = keyword.trim().replace(" ", "%20");
         String apiUrl = TRUYEN_API + "/v1/tim-kiem?title=" + term;
@@ -71,6 +238,10 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                                     .replaceAll(" ", "-");
                             genres.add(new Genre(category, convertedCategory, "the-loai/" + convertedCategory));
                         }
+                        String authorName = jsonObj.get("author").getAsString();
+                        String authorId = StringUtility.removeDiacriticalMarks(authorName).toLowerCase().replace(" ",
+                                "-");
+                        var author = new Author(authorId, authorName);
                         int newestChapter = jsonObj.get("total_chapters").getAsInt();
                         String updatedTime = jsonObj.get("time").getAsString();
                         boolean isFull = false;
@@ -80,7 +251,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                                 .image(image)
                                 .alternateImage(this.alternateImage)
                                 .genres(genres)
-                                .author(null)
+                                .author(author)
                                 .newestChapter(newestChapter)
                                 .totalChapter(newestChapter)
                                 .updatedTime(updatedTime)
@@ -306,7 +477,8 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                 }
                 String title = jsonObject.get("story_name").getAsString();
                 String content = jsonObject.get("content").getAsString();
-                chapterContent = new ComicChapterContent(title, content, comicTagId);
+                Author author = this.getAuthorOfComic(comicTagId);
+                chapterContent = new ComicChapterContent(title, content, comicTagId, author);
             } else {
                 throw new ResourceNotFound("Failed to get chapter content from TruyenFull");
             }
@@ -315,6 +487,27 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         }
         DataModel<Integer, ComicChapterContent> result = new DataModel<>(pagination, chapterContent);
         return result;
+    }
+
+    @SneakyThrows
+    private Author getAuthorOfComic(String comicTagId) { 
+        String apiUrl = TRUYEN_API + "v1/story/detail/" + comicTagId;
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                String responseBody = response.body(); 
+                JsonObject jsonObject = new Gson().fromJson(responseBody, JsonObject.class).getAsJsonObject("data");
+                String authorName = jsonObject.get("author").getAsString();
+                String authorId = StringUtility.removeDiacriticalMarks(authorName).toLowerCase().replace(" ", "-");
+                return new Author(authorId, authorName);
+            } else {
+                throw new ResourceNotFound("Failed to request comic information from TruyenFull");
+            }
+        } catch (Exception e) {
+            throw new HttpStatusException("Cannot make request to get comic information from TruyenFull", 500, apiUrl);
+        }
     }
 
     @Override
@@ -377,5 +570,41 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
             currentPage++;
         }
         return this.getComicChapterContent(tagId, chapterUrl);     
+    }
+
+    @Override
+    @SneakyThrows
+    public DataModel<Integer, List<ComicModel>> getComicsByAuthor(String authorId, int currentPage) {
+        List<ComicModel> lastedComics = new ArrayList<>();
+        Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "tac-gia/" + authorId);
+        Elements elements = doc.select(".col-truyen-main .list-truyen .row");
+        if (elements == null) {
+            throw new ResourceNotFound("Failed to get lasted chapters from Truyen Chu TH");
+        }
+        for (Element element : elements) {
+            String image = element.selectFirst(".col-xs-3 div[data-image]").attr("data-image");
+            var comicAnchor = element.selectFirst(".col-xs-7 .truyen-title a");
+            String title = comicAnchor.text();
+            String comicUrl = comicAnchor.attr("href");
+            String tagId = comicUrl.substring(comicUrl.lastIndexOf("vn/") + 3, comicUrl.lastIndexOf("/")); 
+            String authorName = element.selectFirst(".col-xs-7 .author span").text();
+            var author = new Author(authorId, authorName);
+            List<Genre> genres = new ArrayList<>();
+            boolean isFull = false;
+            var comicModel = ComicModel.builder()
+                    .tagId(tagId)
+                    .title(title)
+                    .image(image)
+                    .alternateImage(this.alternateImage)
+                    .genres(genres)
+                    .author(author)
+                    .isFull(isFull)
+                    .build();
+            lastedComics.add(comicModel);
+        }
+        int perPage = elements.size();
+        Pagination<Integer> pagination = new Pagination<>(currentPage, perPage, 1, -1);
+        DataModel<Integer, List<ComicModel>> result = new DataModel<>(pagination, lastedComics);
+        return result;
     }
 }
