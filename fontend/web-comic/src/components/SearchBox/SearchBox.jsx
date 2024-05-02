@@ -4,9 +4,11 @@ import { useContext, useEffect, useState } from 'react';
 
 import * as request from '../../utils';
 import { Context } from '../../GlobalContext';
+import { useSearchParams } from 'react-router-dom';
 
 function SearchBox() {
     const { servers, serversDispatch, keyword, setKeyword, genre, setGenre } = useContext(Context);
+    const [searchParams, setSearchParams] = useSearchParams();
     const [listGenres, setListGenres] = useState([
         {
             tag: 'all',
@@ -14,12 +16,41 @@ function SearchBox() {
             fullTag: '',
         },
     ]);
+    const [tempKeyword, setTempKeyword] = useState('');
 
     const handleGenreChange = (e) => {
+        if (e.target.value === 'all') {
+            setGenre('');
+            setSearchParams((prev) => {
+                prev.delete('genre');
+                return prev;
+            });
+            return;
+        }
+        setSearchParams((prev) => {
+            prev.set('genre', e.target.value);
+            return prev;
+        });
         setGenre(e.target.value);
     };
     const handleKeywordChange = (e) => {
-        setKeyword(e.target.value);
+        setTempKeyword(e.target.value);
+    };
+    const handleSubmit = (e) => {
+        if (tempKeyword === '') {
+            setSearchParams((prev) => {
+                prev.delete('keyword');
+                prev.delete('page');
+                return prev;
+            });
+        } else {
+            setSearchParams((prev) => {
+                prev.set('keyword', tempKeyword);
+                prev.delete('page');
+                return prev;
+            });
+        }
+        setKeyword(tempKeyword);
     };
 
     useEffect(() => {
@@ -47,7 +78,7 @@ function SearchBox() {
     }, [servers]);
 
     return (
-        <div style={{ margin: 20 }}>
+        <div className="flex" style={{ margin: 20 }}>
             <FormControl sx={{ minWidth: 120 }}>
                 <InputLabel id="genres-label">Thể loại</InputLabel>
                 <Select
@@ -87,7 +118,7 @@ function SearchBox() {
             <FormControl sx={{ minWidth: 400 }}>
                 <TextField
                     id="keyword-input"
-                    value={keyword}
+                    value={tempKeyword}
                     onChange={handleKeywordChange}
                     placeholder="Tìm kiếm theo tên truyện, tên tác giả"
                     variant="outlined"
@@ -111,13 +142,14 @@ function SearchBox() {
             <FormControl sx={{ minWidth: 80 }}>
                 <Button
                     variant="contained"
+                    onClick={handleSubmit}
                     sx={{
                         height: 56,
                         backgroundColor: 'rgba(155, 86, 244, 0.5)',
                         borderRadius: '0 20px 20px 0',
                         boxShadow: 'none',
                         '&:hover': {
-                            backgroundColor: 'rgba(155, 86, 244, 0.5)',
+                            backgroundColor: 'rgba(155, 86, 244, 0.7)',
                             transform: 'none',
                             transition: 'none',
                             boxShadow: 'none',

@@ -1,14 +1,11 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-
-import SettingServer from '../../components/SettingServer/SettingServer';
-import ListBook from '../../components/ListBook/ListBook';
+import SettingServer from '../../components/SettingServer';
+import ListComics from '../../components/ListComics';
 
 export default function Home() {
     return (
-        <div className="xl:px-48 lg:px-36 sm:px-8 py-8">
+        <div className="px-4 py-8">
             <SettingServer />
-            <ListBook></ListBook>
+            <ListComics />
         </div>
     );
 }

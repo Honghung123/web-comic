@@ -9,7 +9,7 @@ import Reading from "./../pages/Reading";
 // Public routes
 const publicRoutes = [
     { path: "/", component: Home },
-    { path: "/info", component: ComicInfo },
+    { path: "/info/:tagId", component: ComicInfo },
     { path: "/reading", component: Reading },
 ];
 

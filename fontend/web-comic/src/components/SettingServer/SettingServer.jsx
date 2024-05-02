@@ -1,16 +1,22 @@
 import { Button } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { useContext } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import { Context, UPDATE_LIST, UPDATE_PRIORITY } from '../../GlobalContext';
 
 function SettingServer() {
-    const { servers, serversDispatch } = useContext(Context);
+    const { servers, serversDispatch, setGenre } = useContext(Context);
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const handleChangeServer = (e) => {
         const newHighestPriority = Number(e.target.id[e.target.id.length - 1]);
-        console.log(newHighestPriority);
-        console.log(servers);
+        setGenre('');
+        setSearchParams((prev) => {
+            prev.delete('page');
+            prev.delete('genre');
+            return prev;
+        });
         serversDispatch({
             type: UPDATE_PRIORITY,
             payload: servers[newHighestPriority],
@@ -18,9 +24,9 @@ function SettingServer() {
     };
 
     return (
-        <div className="w-2/3 lg:w-1/2 border-2 rounded-lg mx-auto p-4 pt-2">
+        <div className="border-2 rounded-lg mx-auto p-4 pt-2" style={{ maxWidth: 520 }}>
             <div className="flex">
-                <h2 className="text-2xl flex-1 text-center">Danh sach server</h2>
+                <h2 className="text-2xl flex-1 text-center">Danh sách server</h2>
                 <SettingsIcon />
             </div>
             <div className="flex justify-center gap-8 mt-4">
