@@ -23,7 +23,7 @@ function Provider({ children }) {
                 }
                 else {
                     //them server moi duoc plugin vao
-                    if (response.data.length > servers.length) {
+                    if (response.data.length != servers.length) {
                         // tam thoi xu ly nhu vay
                         // chua luu tru duoc thu tu uu tien
                         // can phai sua lai ....

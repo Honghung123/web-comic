@@ -80,7 +80,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         List<ComicModel> listMatchedComic = new ArrayList<>();
         String term = keyword.trim().replace(" ", "%20");
         Integer categoryId = this.getCategoryId(byGenre); 
-        String apiUrl = TRUYEN_API + "v1/tim-kiem?title=" + term + "&category=[" + categoryId + "]";
+        String apiUrl = TRUYEN_API + "v1/tim-kiem?title=" + term + "&category=[" + categoryId + "]&page=" + currentPage;
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
         Pagination<Integer> pagination = null; 
@@ -122,8 +122,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                             .updatedTime(updatedTime)
                             .isFull(isFull)
                             .build();
-                    listMatchedComic.add(comicModel);
-                    
+                    listMatchedComic.add(comicModel);                    
                 }
                 var paginationObject = jsonObject.getAsJsonObject("meta").getAsJsonObject("pagination");
                 int totalItems = paginationObject.get("total").getAsInt();
@@ -210,7 +209,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     private DataSearchModel<Integer, List<ComicModel>, List<Author>> searchOnlyByKeyword(String keyword, int currentPage) {
         List<ComicModel> listMatchedComic = new ArrayList<>();
         String term = keyword.trim().replace(" ", "%20");
-        String apiUrl = TRUYEN_API + "/v1/tim-kiem?title=" + term;
+        String apiUrl = TRUYEN_API + "/v1/tim-kiem?title=" + term + "&page=" + currentPage;
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
         Pagination<Integer> pagination = null;

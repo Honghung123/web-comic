@@ -31,7 +31,7 @@ export const reducer = (state, action) => {
                     server.priority = 0;
                 }
             }
-        });
+        }); 
         localStorage.setItem('servers', JSON.stringify(newList));
         return newList;
     }

@@ -18,7 +18,8 @@ function ListComics() {
 
     useEffect(() => {
         if (servers && servers.length > 0) {
-            console.log('use effce');
+            console.log('use effect: ');
+            console.log(servers);
             const server_id = servers.find((server) => server.priority === 1).id;
             axios
                 .get(`http://localhost:8080/api/v1/comic/search`, {

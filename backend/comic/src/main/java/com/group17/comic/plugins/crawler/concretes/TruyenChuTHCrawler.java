@@ -145,7 +145,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
                     .build();
             listMatchedComic.add(comicModel);
         }
-        Pagination<Integer> pagination = new Pagination<Integer>(currentPage, listMatchedComic.size(), 20, -1);
+        Pagination<Integer> pagination = new Pagination<Integer>(currentPage, listMatchedComic.size(), 1, -1);
         DataSearchModel<Integer, List<ComicModel>, List<Author>> result = new DataSearchModel<>(pagination,
                 listMatchedComic, authorList);
         return result;

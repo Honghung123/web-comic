@@ -153,7 +153,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
             int currentPage) {
         List<ComicModel> listMatchedComic = new ArrayList<>();
         String term = keyword.trim().replace(" ", "%20");
-        Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "ket-qua-tim-kiem?term=" + term);
+        Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "ket-qua-tim-kiem?term=" + term + "&page=" + currentPage);
         Elements elements = doc.select("#rank-view-list .book-img-text ul li");
         if (elements == null) { // null khac voi 0 nha
             throw new ResourceNotFound("Failed to get comic list from Tang Thu Vien");
@@ -210,7 +210,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
 
     @SneakyThrows
     private DataSearchModel<Integer, List<ComicModel>, List<Author>> getHotOrPromoteComics(int currentPage) {
-        Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "tong-hop?rank=nm&time=m");
+        Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "tong-hop?rank=nm&time=m&page=" + currentPage);
         List<ComicModel> lastedComics = new ArrayList<>();
         Elements elements = doc.select("div#rank-view-list ul li");
         if (elements == null) {
