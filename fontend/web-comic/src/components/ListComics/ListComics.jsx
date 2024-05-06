@@ -7,12 +7,14 @@ import { Context } from '../../GlobalContext';
 import ComicItem from '../ComicItem';
 
 function ListComics() {
-    const { servers, genre, keyword } = useContext(Context);
+    const { servers } = useContext(Context);
 
     const [comicsData, setComicsData] = useState({});
 
     const [searchParams] = useSearchParams();
     const page = parseInt(searchParams.get('page')) || 1;
+    const genre = searchParams.get('genre') || '';
+    const keyword = searchParams.get('keyword') || '';
 
     useEffect(() => {
         if (servers && servers.length > 0) {
