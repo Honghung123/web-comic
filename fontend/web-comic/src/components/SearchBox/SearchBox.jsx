@@ -127,9 +127,7 @@ function SearchBox() {
                 </Select>
             </FormControl>
 
-            <FormControl>
-                <Divider orientation="vertical"></Divider>
-            </FormControl>
+            <Divider variant="middle" flexItem orientation="vertical"></Divider>
 
             <FormControl sx={{ minWidth: 400 }}>
                 <TextField
