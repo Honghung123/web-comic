@@ -1,14 +1,11 @@
 import { useContext, useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { Button } from '@mui/material';
 
 import { Context } from '../../GlobalContext';
 
-function ComicDetail() {
+function ComicDetail({ tagId }) {
     const { servers } = useContext(Context);
-    const location = useLocation();
-    const { pathname } = location;
-    const tagId = pathname.substring(pathname.lastIndexOf('/') + 1);
     const [comicData, setComicData] = useState();
     const [showFullDescription, setShowFullDescription] = useState(false);
     const toggleDescription = () => {
@@ -43,11 +40,15 @@ function ComicDetail() {
     }, []);
 
     return (
-        <div className="min-h-96 mt-8 mx-auto relative" style={{ maxWidth: 1200 }}>
+        <div className="min-h-96 mt-16 mx-auto relative" style={{ maxWidth: 1200 }}>
             {comicData && (
                 <div className="flex flex-wrap">
-                    <div className="md:w-1/4 sm:w-1/3 w-full">
-                        <img className="w-full object-cover" src={comicData.image} alt={comicData.tagId} />
+                    <div className="md:w-1/4 sm:w-1/3 w-full overflow-hidden">
+                        <img
+                            className="w-full object-cover hover:transform hover:scale-110 transition-all duration-300 shadow-lg"
+                            src={comicData.image}
+                            alt={comicData.tagId}
+                        />
                     </div>
                     <div className="md:w-3/4 sm:w-2/3 w-full sm:pl-8">
                         <div className="text-3xl font-semibold">{comicData.title}</div>
@@ -56,15 +57,29 @@ function ComicDetail() {
                             dangerouslySetInnerHTML={{
                                 __html: showFullDescription
                                     ? comicData.description
-                                    : truncate(comicData.description, 800),
+                                    : truncate(comicData.description, 750),
                             }}
                         ></span>
-                        {!showFullDescription && <div onClick={toggleDescription}>...More</div>}
-                        {showFullDescription && <div onClick={toggleDescription}>...Show less</div>}
-                        <div className="flex">
-                            <div>button1</div>
-                            <div>button1</div>
-                            <div>button1</div>
+                        {!showFullDescription && (
+                            <div className="text-stone-400 hover:cursor-pointer" onClick={toggleDescription}>
+                                ...Xem thêm
+                            </div>
+                        )}
+                        {showFullDescription && (
+                            <div className="text-stone-400 hover:cursor-pointer" onClick={toggleDescription}>
+                                Ẩn bớt
+                            </div>
+                        )}
+                        <div className="flex gap-2 mt-8">
+                            <Button variant="contained" color="success" sx={{ borderRadius: 40 }}>
+                                Đọc từ đầu
+                            </Button>
+                            <Button variant="contained" color="success" sx={{ borderRadius: 40 }}>
+                                Tiếp tục
+                            </Button>
+                            <Button variant="contained" color="success" sx={{ borderRadius: 40 }}>
+                                Đọc mới nhất
+                            </Button>
                         </div>
                     </div>
                     <div className="w-full h-32 mt-4">
