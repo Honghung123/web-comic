@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Context } from '../../GlobalContext';
 
-function ListChapters({ tagId }) {
+function ListChapters({ tagId, headerSize = 'text-3xl' }) {
     const { servers } = useContext(Context);
     const [chapters, setChapters] = useState();
     const [page, setPage] = useState(1);
@@ -43,8 +43,8 @@ function ListChapters({ tagId }) {
     }, [page]);
 
     return (
-        <div className="min-h-32 mt-16 mx-auto relative" style={{ maxWidth: 1200 }}>
-            <div className="text-3xl font-semibold">Danh sách chương: </div>
+        <div className="min-h-32 mx-auto relative" style={{ maxWidth: 1200 }}>
+            <div className={`${headerSize} font-semibold`}>Danh sách chương: </div>
             <Divider orientation="horizontal" className="h-4" />
             <ul>
                 {chapters &&

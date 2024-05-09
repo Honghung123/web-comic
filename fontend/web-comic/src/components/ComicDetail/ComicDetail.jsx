@@ -40,7 +40,7 @@ function ComicDetail({ tagId }) {
     }, []);
 
     return (
-        <div className="min-h-96 mt-16 mx-auto relative" style={{ maxWidth: 1200 }}>
+        <div className="min-h-96 my-16 mx-auto relative" style={{ maxWidth: 1200 }}>
             {comicData && (
                 <div className="flex flex-wrap">
                     <div className="md:w-1/4 sm:w-1/3 w-full overflow-hidden">
