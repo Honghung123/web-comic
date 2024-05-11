@@ -5,6 +5,7 @@ import { Pagination, PaginationItem, Stack } from '@mui/material';
 
 import { Context } from '../../GlobalContext';
 import ComicItem from '../ComicItem';
+import Loading from '../Loading';
 
 function ListComics() {
     const { servers } = useContext(Context);
@@ -16,8 +17,13 @@ function ListComics() {
     const genre = searchParams.get('genre') || '';
     const keyword = searchParams.get('keyword') || '';
 
+    const [loading, setLoading] = useState(false);
+
     useEffect(() => {
+        window.scrollTo(0, 0);
+        setComicsData({});
         if (servers && servers.length > 0) {
+            setLoading(true);
             const server_id = servers.find((server) => server.priority === 1).id;
             axios
                 .get(`http://localhost:8080/api/v1/comic/search`, {
@@ -34,11 +40,16 @@ function ListComics() {
                             comics: response.data.data,
                             pagination: response.data.pagination,
                         });
+                    } else {
+                        // thong bao loi
+                        console.log(response.data.message);
                     }
+                    setLoading(false);
                 })
                 .catch((error) => {
                     //thong bao loi
                     console.log(error);
+                    setLoading(false);
                 });
         }
     }, [servers, genre, keyword, page]);
@@ -57,6 +68,7 @@ function ListComics() {
 
     return (
         <div className="min-h-96 mt-8 mx-auto relative" style={{ maxWidth: 1200 }}>
+            <Loading loading={loading} />
             <h2 className="text-3xl font-semibold underline">Tìm kiếm cho: {keyword}</h2>
 
             <div className="flex flex-wrap min-h-full" style={{ marginLeft: '-1rem', marginRight: '-1rem' }}>

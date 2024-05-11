@@ -3,11 +3,14 @@ import axios from 'axios';
 import { Button } from '@mui/material';
 
 import { Context } from '../../GlobalContext';
+import * as Utils from '../../utils';
+import { Link } from 'react-router-dom';
 
 function ComicDetail({ tagId }) {
     const { servers } = useContext(Context);
     const [comicData, setComicData] = useState();
     const [showFullDescription, setShowFullDescription] = useState(false);
+    const [chapterBound, setChapterBound] = useState();
     const toggleDescription = () => {
         setShowFullDescription(!showFullDescription);
     };
@@ -15,9 +18,13 @@ function ComicDetail({ tagId }) {
         return text.length > length ? text.slice(0, length) : text;
     };
 
+    let server_id;
+    if (servers && servers.length > 0) {
+        server_id = servers.find((server) => server.priority === 1).id;
+    }
+
     useEffect(() => {
-        if (servers && servers.length > 0) {
-            const server_id = servers.find((server) => server.priority === 1).id;
+        if (server_id !== undefined) {
             axios
                 .get(`http://localhost:8080/api/v1/comic/reading/${tagId}`, {
                     params: { server_id },
@@ -36,9 +43,49 @@ function ComicDetail({ tagId }) {
                     //thong bao loi
                     console.log(err);
                 });
+
+            axios
+                .get(`http://localhost:8080/api/v1/comic/reading/${tagId}/chapters`, {
+                    params: {
+                        server_id,
+                        page: 1,
+                    },
+                })
+                .then((response) => {
+                    const responseData = response.data;
+                    if (responseData.statusCode === 200) {
+                        console.log('chapter bound: ', responseData);
+                        setChapterBound({ first: responseData.data[0] });
+                        axios
+                            .get(`http://localhost:8080/api/v1/comic/reading/${tagId}/chapters`, {
+                                params: {
+                                    server_id,
+                                    page: responseData.pagination?.totalPages,
+                                },
+                            })
+                            .then((response) => {
+                                if (response.data.statusCode === 200) {
+                                    setChapterBound((prev) => {
+                                        return {
+                                            ...prev,
+                                            last: response.data.data[response.data.data.length - 1],
+                                        };
+                                    });
+                                }
+                            });
+                    } else {
+                        // khong can thong bao loi
+                        console.log(responseData.message);
+                    }
+                })
+                .catch((err) => {
+                    // khong can thong bao loi
+                    console.log(err);
+                });
         }
     }, []);
 
+    console.log('pagination of chapter bound: ', chapterBound);
     return (
         <div className="min-h-96 my-16 mx-auto relative" style={{ maxWidth: 1200 }}>
             {comicData && (
@@ -71,13 +118,40 @@ function ComicDetail({ tagId }) {
                             </div>
                         )}
                         <div className="flex gap-2 mt-8">
-                            <Button variant="contained" color="success" sx={{ borderRadius: 40 }}>
+                            <Button
+                                component={Link}
+                                to={
+                                    chapterBound && chapterBound.first
+                                        ? `/reading/${tagId}/${chapterBound.first.chapterNo}`
+                                        : `/info/${tagId}`
+                                }
+                                variant="contained"
+                                color="success"
+                                sx={{ borderRadius: 40 }}
+                            >
                                 Đọc từ đầu
                             </Button>
-                            <Button variant="contained" color="success" sx={{ borderRadius: 40 }}>
+                            <Button
+                                disabled={Utils.getLastReadingChapter(tagId, server_id) === undefined}
+                                component={Link}
+                                to={`/reading/${tagId}/${Utils.getLastReadingChapter(tagId, server_id)}`}
+                                variant="contained"
+                                color="success"
+                                sx={{ borderRadius: 40 }}
+                            >
                                 Tiếp tục
                             </Button>
-                            <Button variant="contained" color="success" sx={{ borderRadius: 40 }}>
+                            <Button
+                                component={Link}
+                                to={
+                                    chapterBound && chapterBound.last
+                                        ? `/reading/${tagId}/${chapterBound.last.chapterNo}`
+                                        : `/info/${tagId}`
+                                }
+                                variant="contained"
+                                color="success"
+                                sx={{ borderRadius: 40 }}
+                            >
                                 Đọc mới nhất
                             </Button>
                         </div>

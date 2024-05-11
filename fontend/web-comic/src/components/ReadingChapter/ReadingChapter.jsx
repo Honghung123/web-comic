@@ -15,6 +15,8 @@ import axios from 'axios';
 
 import { Context } from '../../GlobalContext';
 import ListChapters from '../ListChapters/ListChapters';
+import Loading from '../Loading';
+import * as Utils from '../../utils';
 
 function ReadingChapter() {
     const location = useLocation();
@@ -23,9 +25,8 @@ function ReadingChapter() {
     const tempStr = pathname.substring(pathname.indexOf('/', 1) + 1);
     const tagId = tempStr.substring(0, tempStr.indexOf('/'));
     const chapter = tempStr.substring(tempStr.indexOf('/') + 1);
-    // luu truyen: tagId__chapterNo
+    // luu truyen: serverid_tagId
     // luu bgColor: bgColor
-
     const { servers } = useContext(Context);
     const [openSetting, setOpenSetting] = useState(false);
     const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 });
@@ -40,12 +41,17 @@ function ReadingChapter() {
 
     const [chapterData, setChapterData] = useState();
     const [showListChapters, setShowListChapters] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const contentRef = useRef();
 
     // fetch data
     useEffect(() => {
         if (servers && servers.length > 0) {
+            setLoading(true);
+            if (chapterData) {
+                setChapterData({ ...chapterData, data: {} });
+            }
             const server_id = servers.find((server) => server.priority === 1).id;
 
             axios
@@ -58,6 +64,8 @@ function ReadingChapter() {
                     console.log('chapter: ', response);
                     const responseData = response.data;
                     if (responseData.statusCode === 200) {
+                        // save chapter into history
+                        Utils.addChapter(chapter, tagId, server_id);
                         setChapterData({
                             data: responseData.data,
                             pagination: responseData.pagination,
@@ -66,10 +74,12 @@ function ReadingChapter() {
                         // thong bao loi
                         console.log(responseData.message);
                     }
+                    setLoading(false);
                 })
                 .catch((err) => {
                     // thong bao loi
                     console.log(err);
+                    setLoading(false);
                 });
         }
     }, [pathname]);
@@ -89,7 +99,7 @@ function ReadingChapter() {
                             sx={{ width: 180, textAlign: 'center', padding: '8px 0' }}
                         >
                             <NavigateBeforeRoundedIcon />
-                            Chuong truoc
+                            Chương trước
                         </Button>
 
                         <Button
@@ -104,16 +114,17 @@ function ReadingChapter() {
                             color="success"
                             sx={{ width: 180, textAlign: 'center', padding: '8px 0' }}
                         >
-                            Chuong sau
+                            Chương sau
                             <NavigateNextRoundedIcon />
                         </Button>
                     </div>
 
                     {/* content + setting properties */}
                     <div className="w-full mx-auto px-16 mt-8 relative">
+                        <Loading loading={loading} />
                         <div
                             ref={contentRef}
-                            className={`w-full ${bgColor} sm:p-4 p-2`}
+                            className={`w-full min-h-72 ${bgColor} sm:p-4 p-2`}
                             style={{ fontSize, lineHeight }}
                             dangerouslySetInnerHTML={{
                                 __html: chapterData.data.content,
