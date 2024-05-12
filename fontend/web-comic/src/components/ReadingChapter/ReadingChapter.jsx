@@ -17,6 +17,7 @@ import { Context } from '../../GlobalContext';
 import ListChapters from '../ListChapters/ListChapters';
 import Loading from '../Loading';
 import * as Utils from '../../utils';
+import DownloadModal from './DownloadModal';
 
 function ReadingChapter() {
     const location = useLocation();
@@ -25,11 +26,11 @@ function ReadingChapter() {
     const tempStr = pathname.substring(pathname.indexOf('/', 1) + 1);
     const tagId = tempStr.substring(0, tempStr.indexOf('/'));
     const chapter = tempStr.substring(tempStr.indexOf('/') + 1);
-    // luu truyen: serverid_tagId
-    // luu bgColor: bgColor
     const { servers } = useContext(Context);
     const [openSetting, setOpenSetting] = useState(false);
     const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 });
+    const [openListChapters, setOpenListChapters] = useState(false);
+    const [openDownload, setOpenDownload] = useState(false);
 
     const bgColors = ['bg-white', 'bg-yellow-100', 'bg-green-100', 'bg-blue-100', 'bg-gray-100'];
     const [bgColor, setBgColor] = useState(localStorage.getItem('bgColor') || 'bg-green-100');
@@ -40,7 +41,6 @@ function ReadingChapter() {
     const [fontSize, setFontSize] = useState(Number(localStorage.getItem('fontSize') || '20'));
 
     const [chapterData, setChapterData] = useState();
-    const [showListChapters, setShowListChapters] = useState(false);
     const [loading, setLoading] = useState(false);
 
     const contentRef = useRef();
@@ -134,11 +134,11 @@ function ReadingChapter() {
                             <div
                                 onClick={(e) => {
                                     const rect = contentRef.current.getBoundingClientRect();
-                                    setShowListChapters(true);
+                                    setOpenListChapters(true);
                                     setModalPosition({ x: rect.left - 4, y: rect.top - 4 });
                                 }}
                                 className={`flex justify-center items-center cursor-pointer ${
-                                    showListChapters ? 'text-purple-500' : ''
+                                    openListChapters ? 'text-purple-500' : ''
                                 }`}
                                 style={{ width: 50, height: 50 }}
                             >
@@ -148,7 +148,6 @@ function ReadingChapter() {
                             <div
                                 onClick={(e) => {
                                     let rect = contentRef.current.getBoundingClientRect();
-                                    console.log(rect);
                                     setOpenSetting(true);
                                     setModalPosition({ x: rect.left - 4, y: rect.top - 4 });
                                 }}
@@ -161,16 +160,23 @@ function ReadingChapter() {
                             </div>
                             <Divider orientation="horizontal" variant="middle" />
                             <div
-                                className="flex justify-center items-center cursor-pointer"
+                                onClick={(e) => {
+                                    let rect = contentRef.current.getBoundingClientRect();
+                                    setOpenDownload(true);
+                                    setModalPosition({ x: rect.left - 4, y: rect.top - 4 });
+                                }}
+                                className={`flex justify-center items-center cursor-pointer ${
+                                    openDownload ? 'text-purple-500' : ''
+                                }`}
                                 style={{ width: 50, height: 50 }}
                             >
                                 <FileDownloadIcon />
                             </div>
                         </div>
                         <Modal
-                            open={showListChapters}
+                            open={openListChapters}
                             onClose={() => {
-                                setShowListChapters(false);
+                                setOpenListChapters(false);
                             }}
                             aria-labelledby="modal-modal-title"
                             aria-describedby="modal-modal-description"
@@ -200,9 +206,8 @@ function ReadingChapter() {
                                 className="bg-white rounded p-4"
                                 style={{ boxShadow: '0 0 8px rgba(0, 0, 0, 0.6)', width: 360 }}
                             >
-                                <div className="text-xl" font-medium>
-                                    Tùy chỉnh
-                                </div>
+                                <div className="text-xl font-semibold">Tùy chỉnh:</div>
+                                <Divider orientation="horizontal" className="h-2" />
                                 <div className="flex justify-between mt-4">
                                     <div className="">Theme</div>
                                     <div className="flex gap-4">
@@ -316,6 +321,13 @@ function ReadingChapter() {
                                 </div>
                             </div>
                         </Modal>
+
+                        <DownloadModal
+                            position={modalPosition}
+                            open={openDownload}
+                            setOpen={setOpenDownload}
+                            chapter={chapterData?.data}
+                        />
                     </div>
                 </div>
             )}

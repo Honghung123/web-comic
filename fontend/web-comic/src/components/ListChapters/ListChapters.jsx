@@ -56,7 +56,7 @@ function ListChapters({ tagId, headerSize = 'text-3xl' }) {
         <div className="min-h-32 mx-auto relative" style={{ maxWidth: 1200 }}>
             <Loading loading={loading} />
             <div className={`${headerSize} font-semibold`}>Danh sách chương: </div>
-            <Divider orientation="horizontal" className="h-4" />
+            <Divider orientation="horizontal" className={`${headerSize === 'text-xl' ? 'h-2' : 'h-4'}`} />
             <ul>
                 {chapters &&
                     chapters.map((chapter) => (
