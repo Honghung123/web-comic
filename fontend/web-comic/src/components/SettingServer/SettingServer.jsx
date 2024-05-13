@@ -3,15 +3,14 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import { useContext } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-import { Context, UPDATE_LIST, UPDATE_PRIORITY } from '../../GlobalContext';
+import { Context, UPDATE_PRIORITY } from '../../GlobalContext';
 
 function SettingServer() {
-    const { servers, serversDispatch, setGenre } = useContext(Context);
+    const { servers, serversDispatch } = useContext(Context);
     const [searchParams, setSearchParams] = useSearchParams();
 
     const handleChangeServer = (e) => {
         const newHighestPriority = Number(e.target.id[e.target.id.length - 1]);
-        setGenre('');
         setSearchParams((prev) => {
             prev.delete('page');
             prev.delete('genre');
@@ -31,7 +30,7 @@ function SettingServer() {
             </div>
             <div className="flex justify-center gap-8 mt-4">
                 {servers.map((item, index) => {
-                    if (item.priority == 1) {
+                    if (item.priority === 1) {
                         return (
                             <Button
                                 onClick={handleChangeServer}

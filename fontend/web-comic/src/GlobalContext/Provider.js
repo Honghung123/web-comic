@@ -8,8 +8,7 @@ function Provider({ children }) {
 
     let availableServers = JSON.parse(localStorage.getItem('servers'));
     const [servers, serversDispatch] = useReducer(serverReducer, availableServers || []);
-    const [genre, setGenre] = useState('');
-    const [keyword, setKeyword] = useState('');
+    const [currentPage, setCurrentPage] = useState('');
 
     useEffect(() => {
         // lay danh sach cac serverE tu backend
@@ -45,7 +44,7 @@ function Provider({ children }) {
 
     return (
         <Context.Provider value={{
-            servers, serversDispatch, genre, setGenre, keyword, setKeyword
+            servers, serversDispatch, currentPage, setCurrentPage
         }}>
             {children}
         </Context.Provider>

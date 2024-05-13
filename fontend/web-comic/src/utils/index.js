@@ -11,4 +11,6 @@ export const get = async (url, options = {}) => {
     return response.data;
 }
 
-export default request
+export default request;
+
+export * from './StorageUtil';

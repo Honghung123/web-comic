@@ -10,7 +10,7 @@ import Reading from "./../pages/Reading";
 const publicRoutes = [
     { path: "/", component: Home },
     { path: "/info/:tagId", component: ComicInfo },
-    { path: "/reading", component: Reading },
+    { path: "/reading/:tagId/:chapter", component: Reading },
 ];
 
 // Private routes
