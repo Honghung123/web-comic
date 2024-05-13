@@ -7,6 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class ComicChapterContent {
     private String title;
+    private String chapterTitle;
     private String content;
     private String comicTagId;
     private Author author;

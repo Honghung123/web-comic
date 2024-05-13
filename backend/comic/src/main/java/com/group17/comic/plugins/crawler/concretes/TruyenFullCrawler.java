@@ -537,9 +537,11 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                     pagination.setNextPage(jsonObject.get("chapter_next").getAsInt());
                 }
                 String title = jsonObject.get("story_name").getAsString();
+                String chapterTitle = jsonObject.get("chapter_name").getAsString();
+                chapterTitle = chapterTitle.substring(chapterTitle.indexOf(":") + 1).trim();
                 String content = jsonObject.get("content").getAsString();
                 Author author = this.getAuthorOfComic(comicTagId);
-                chapterContent = new ComicChapterContent(title, content, comicTagId, author);
+                chapterContent = new ComicChapterContent(title, chapterTitle, content, comicTagId, author);
             } else {
                 throw new ResourceNotFound("Failed to get chapter content from TruyenFull");
             }
@@ -574,12 +576,13 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     @Override
     @SneakyThrows
     public DataModel<?, ComicChapterContent> getComicChapterContentOnOtherServer(AlternatedChapterDTO altChapterDto) {
-        // AE tìm truyện cùng tên truyện và cùng tên tác giả, tìm chương có chapterNo chỉ định(ví dụ chương 4),
-        // thì ae tìm chương chỉ chứa số 4 trả về chapter 4 và pagination - trang trước và trang kế tiếp 
         String keyword = altChapterDto.title();
         keyword = StringUtility.removeDiacriticalMarks(keyword).toLowerCase()
                 .replace("[dich]", "").replaceAll("- suu tam", "");
-        String term = keyword.substring(0, keyword.lastIndexOf("-")).trim().replace(" ", "%20");
+        if(keyword.contains("-")){
+            keyword = keyword.substring(0, keyword.lastIndexOf("-")).trim();
+        }
+        String term = keyword.replace(" ", "%20");
         var formattedAuthor = StringUtility.removeDiacriticalMarks(altChapterDto.authorName()).toLowerCase().trim();
         String apiUrl = TRUYEN_API + "/v1/tim-kiem?title=" + term;
         HttpClient client = HttpClient.newHttpClient();
@@ -607,7 +610,10 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
             }
         } catch (Exception e) {
             throw new HttpStatusException("Failed to make request to get chapter content from TruyenFull", 500, apiUrl);
-        }      
+        }     
+        if(tagId == ""){
+            throw new ResourceNotFound("Not found any comic on TruyenFull.");
+        } 
         String chapterUrl = ""; 
         int currentPage = 1;
         while(true){

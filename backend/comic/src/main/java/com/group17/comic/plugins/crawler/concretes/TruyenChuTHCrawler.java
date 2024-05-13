@@ -323,12 +323,17 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
     @Override
     public DataModel<String, ComicChapterContent> getComicChapterContent(String comicTagId, String currentChapter) {
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + comicTagId + "/" + currentChapter);
-        var elementTitle = doc.selectFirst(".chapter-header ul li:nth-of-type(3) h3");
+        var elementTitle = doc.selectFirst(".chapter-header ul li:nth-of-type(1) h2 a");
         if (elementTitle == null) {
             throw new ResourceNotFound("Can't get chapter title from Truyen Chu TH");
         }
-        String title = elementTitle.text();
-        title = title.substring(title.indexOf(":") + 1).trim();
+        String title = elementTitle.text(); 
+        var elementChapterTitle = doc.selectFirst(".chapter-header ul li:nth-of-type(3) h3");
+        if (elementChapterTitle == null) {
+            throw new ResourceNotFound("Can't get chapter title from Truyen Chu TH");
+        }
+        String chapterTitle = elementChapterTitle.text();
+        chapterTitle = chapterTitle.substring(chapterTitle.indexOf(":") + 1).trim();
         var elementContent = doc.selectFirst("#content");
         if (elementContent == null) {
             throw new ResourceNotFound("Can't get chapter content from Truyen Chu TH");
@@ -353,7 +358,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
             pagination.setNextPage(nextPage);
         }
         DataModel<String, ComicChapterContent> result = new DataModel<>(pagination,
-                new ComicChapterContent(title, content, comicTagId, author));
+                new ComicChapterContent(title, chapterTitle, content, comicTagId, author));
         return result;
     }
 
@@ -365,7 +370,10 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
         String keyword = altChapterDto.title();
         keyword = StringUtility.removeDiacriticalMarks(keyword).toLowerCase()
                 .replace("[dich]", "").replaceAll("- suu tam", "");
-        keyword = keyword.substring(0, keyword.lastIndexOf("-")).trim().replace(" ", "+");
+        if(keyword.contains("-")){
+            keyword = keyword.substring(0, keyword.lastIndexOf("-")).trim();
+        }
+        keyword = keyword.replace(" ", "+");
         var formattedAuthor = StringUtility.removeDiacriticalMarks(altChapterDto.authorName()).toLowerCase().trim();
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "searching?key=" + keyword);
         Elements comicElements = doc.select(".list-story .list-content .list-row-img");

@@ -425,28 +425,34 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
     public DataModel<Integer, ComicChapterContent> getComicChapterContent(String comicTagId, String currentChapter) {
         Document doc = this
                 .getDocumentInstanceFromUrl(TRUYEN_URL + "doc-truyen/" + comicTagId + "/chuong-" + currentChapter);
-        var elementTitle = doc.selectFirst(".chapter-c-content h5 a");
+        var elementTitle =  doc.selectFirst("h1.truyen-title a");
         if (elementTitle == null) {
             throw new ResourceNotFound("Can't get chapter content from Tang Thu Vien");
         }
-        String title = elementTitle.text().substring(elementTitle.text().lastIndexOf(":") + 1).trim();
+        String title = elementTitle.text();
+        var elementChapterTitle = doc.selectFirst(".chapter-c-content h5 a");
+        if (elementChapterTitle == null) {
+            throw new ResourceNotFound("Can't get chapter content from Tang Thu Vien");
+        }
+        String chapterTitle = elementChapterTitle.text()
+                    .substring(elementChapterTitle.text().lastIndexOf(":") + 1).trim();
         var elementContent = doc.selectFirst(".chapter-c-content .box-chap");
         if (elementContent == null) {
             throw new ResourceNotFound("Can't get chapter content from Tang Thu Vien");
         }
         String content = elementContent.html();
-        Author author = this.getAuthorOfComic(comicTagId);
+        var author = this.getAuthorOfComic(comicTagId); 
         Pagination<Integer> paginationTemp = getChapters(comicTagId, 1).getPagination();
         Pagination<Integer> pagination = new Pagination<>(Integer.parseInt(currentChapter), 1,
                 paginationTemp.getTotalItems(), paginationTemp.getTotalItems());
         PaginationUtility.updatePagination(pagination);
         DataModel<Integer, ComicChapterContent> result = new DataModel<>(pagination,
-                new ComicChapterContent(title, content, comicTagId, author));
+                new ComicChapterContent(title, chapterTitle, content, comicTagId, author));
         return result;
     }
 
     @SneakyThrows
-    private Author getAuthorOfComic(String comicTagId) {
+    private Author getAuthorOfComic(String comicTagId) { 
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "doc-truyen/" + comicTagId);
         Element element = doc.selectFirst("div.book-information");
         if (element == null) {
@@ -455,7 +461,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         var authorTag = element.select(".book-info .tag a:nth-of-type(1)");
         String authorId = authorTag.attr("href").substring(authorTag.attr("href").lastIndexOf("=") + 1);
         String authorName = authorTag.text();
-        return new Author(authorId, authorName);
+        return new Author(authorId, authorName); 
     }
 
     @SneakyThrows
@@ -465,7 +471,10 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         String keyword = altChapterDto.title();
         keyword = StringUtility.removeDiacriticalMarks(keyword).toLowerCase()
                 .replace("[dich]", "").replaceAll("- suu tam", "");
-        keyword = keyword.substring(0, keyword.lastIndexOf("-")).trim().replace(" ", "%20");
+        if(keyword.contains("-")){
+            keyword = keyword.substring(0, keyword.lastIndexOf("-")).trim();
+        }
+        keyword = keyword.replace(" ", "%20");
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "ket-qua-tim-kiem?term=" + keyword);
         var formattedAuthor = StringUtility.removeDiacriticalMarks(altChapterDto.authorName()).toLowerCase().trim();
         Elements comicElements = doc.select("#rank-view-list .book-img-text ul li");
