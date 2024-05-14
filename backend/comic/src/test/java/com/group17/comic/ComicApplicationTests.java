@@ -24,18 +24,13 @@ class ComicApplicationTests {
 
 	@Test
 	void testPath () {
-	  String keyword = "";
-        String byGenre = "";
-	  int result = 0;
-        if (StringUtils.hasLength(keyword) && StringUtils.hasLength(byGenre)) {
-            result = 1;
-        } else if (keyword.isEmpty() && StringUtils.hasLength(byGenre)) {
-            result = 2;
-        } else if (StringUtils.hasLength(keyword) && byGenre.isEmpty()) {
-            result = 3;
-        } else {
-            System.out.println("None of them has value");
-        }
-	  assertEquals(0, result);
+	  String a = "Chương 1 Nghịch thiên tà thần";
+        String b = "Chương"; 
+	  assertEquals(false, a.contains(b));
+	  if(a.contains(b)){
+		a = a.replace(b, "").trim();
+		a = a.substring(a.indexOf(" ") + 1);
+	  }
+	  assertEquals(false, a.contains(b));
 	}
 }

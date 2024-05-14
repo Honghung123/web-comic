@@ -37,6 +37,7 @@ public class StringUtility {
     public static int extractNumberFromString(String str){
         // Replace all non-digit characters with empty string
         String numberStr = str.replaceAll("\\D+", "");
+        // if(numberStr.isBlank()) return 1;
         // Convert the remaining string to integer
         return Integer.parseInt(numberStr);
     }

@@ -64,6 +64,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     @Override
     public DataSearchModel<Integer, List<ComicModel>, List<Author>> search(String keyword,
             String byGenre, int currentPage) {
+        keyword = StringUtility.removeDiacriticalMarks(keyword);
         if(StringUtils.hasLength(keyword) && StringUtils.hasLength(byGenre)) {
             return searchByKeywordAndGenre(keyword, byGenre, currentPage);
         }else if(keyword.isEmpty() && StringUtils.hasLength(byGenre)) {

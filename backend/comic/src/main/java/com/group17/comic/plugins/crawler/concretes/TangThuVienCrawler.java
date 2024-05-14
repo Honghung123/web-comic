@@ -53,6 +53,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
     @Override
     public DataSearchModel<Integer, List<ComicModel>, List<Author>> search(String keyword,
             String byGenre, int currentPage) {
+        keyword = StringUtility.removeDiacriticalMarks(keyword);
         if (StringUtils.hasLength(keyword) && StringUtils.hasLength(byGenre)) {
             return searchByKeywordAndGenre(keyword, byGenre, currentPage);
         } else if (keyword.isEmpty() && StringUtils.hasLength(byGenre)) {
@@ -437,9 +438,15 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         String chapterTitleText = elementChapterTitle.text();
         String chapterTitle = chapterTitleText
         .substring(chapterTitleText.lastIndexOf(":") + 1).trim();
-        int chapterNumber = StringUtility.extractNumberFromString(chapterTitle);
-        chapterTitle = chapterTitle.substring(chapterTitle.indexOf(" ") + 1);
-        chapterTitle = chapterTitle.substring(chapterTitle.indexOf(" ") + 1);
+        int chapterNumber = 1;
+        String replacer = "Chương";
+        if(chapterTitle.contains(replacer)){
+            chapterNumber = StringUtility.extractNumberFromString(chapterTitle);
+            chapterTitle = chapterTitle.replace(replacer, "").trim();
+            chapterTitle = chapterTitle.substring(chapterTitle.indexOf(" ") + 1);
+        }else{
+            chapterNumber = StringUtility.extractNumberFromString(chapterTitleText);
+        }
         var elementContent = doc.selectFirst(".chapter-c-content .box-chap");
         if (elementContent == null) {
             throw new ResourceNotFound("Can't get chapter content from Tang Thu Vien");
