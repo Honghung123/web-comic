@@ -434,8 +434,12 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         if (elementChapterTitle == null) {
             throw new ResourceNotFound("Can't get chapter content from Tang Thu Vien");
         }
-        String chapterTitle = elementChapterTitle.text()
-                    .substring(elementChapterTitle.text().lastIndexOf(":") + 1).trim();
+        String chapterTitleText = elementChapterTitle.text();
+        String chapterTitle = chapterTitleText
+        .substring(chapterTitleText.lastIndexOf(":") + 1).trim();
+        int chapterNumber = StringUtility.extractNumberFromString(chapterTitle);
+        chapterTitle = chapterTitle.substring(chapterTitle.indexOf(" ") + 1);
+        chapterTitle = chapterTitle.substring(chapterTitle.indexOf(" ") + 1);
         var elementContent = doc.selectFirst(".chapter-c-content .box-chap");
         if (elementContent == null) {
             throw new ResourceNotFound("Can't get chapter content from Tang Thu Vien");
@@ -447,7 +451,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
                 paginationTemp.getTotalItems(), paginationTemp.getTotalItems());
         PaginationUtility.updatePagination(pagination);
         DataModel<Integer, ComicChapterContent> result = new DataModel<>(pagination,
-                new ComicChapterContent(title, chapterTitle, content, comicTagId, author));
+                new ComicChapterContent(title, chapterTitle, content, comicTagId, author, chapterNumber));
         return result;
     }
 

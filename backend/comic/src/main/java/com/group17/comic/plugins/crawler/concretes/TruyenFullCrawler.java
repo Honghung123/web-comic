@@ -538,10 +538,12 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                 }
                 String title = jsonObject.get("story_name").getAsString();
                 String chapterTitle = jsonObject.get("chapter_name").getAsString();
+                int chapterNumber = StringUtility.extractNumberFromString(chapterTitle);
                 chapterTitle = chapterTitle.substring(chapterTitle.indexOf(":") + 1).trim();
                 String content = jsonObject.get("content").getAsString();
                 Author author = this.getAuthorOfComic(comicTagId);
-                chapterContent = new ComicChapterContent(title, chapterTitle, content, comicTagId, author);
+                chapterContent = new ComicChapterContent(title, 
+                                chapterTitle, content, comicTagId, author, chapterNumber);
             } else {
                 throw new ResourceNotFound("Failed to get chapter content from TruyenFull");
             }

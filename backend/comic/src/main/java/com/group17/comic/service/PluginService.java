@@ -90,7 +90,7 @@ public class PluginService {
     @SneakyThrows
     public DataModel<?, ComicChapterContent> getComicChapterContent(int serverId, String tagId, String currentChapter) {
         checkCrawlerPlugins();
-        var result = crawlers.get(serverId).getComicChapterContent(tagId, currentChapter);
+            var result = crawlers.get(serverId).getComicChapterContent(tagId, currentChapter);
         return result;
     }
 

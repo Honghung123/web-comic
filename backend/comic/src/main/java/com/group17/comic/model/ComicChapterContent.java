@@ -11,4 +11,5 @@ public class ComicChapterContent {
     private String content;
     private String comicTagId;
     private Author author;
+    private int chapterNumber;
 }

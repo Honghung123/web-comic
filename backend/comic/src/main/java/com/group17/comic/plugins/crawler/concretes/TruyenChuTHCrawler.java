@@ -333,6 +333,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
             throw new ResourceNotFound("Can't get chapter title from Truyen Chu TH");
         }
         String chapterTitle = elementChapterTitle.text();
+        int chapterNumber = StringUtility.extractNumberFromString(chapterTitle);
         chapterTitle = chapterTitle.substring(chapterTitle.indexOf(":") + 1).trim();
         var elementContent = doc.selectFirst("#content");
         if (elementContent == null) {
@@ -358,7 +359,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
             pagination.setNextPage(nextPage);
         }
         DataModel<String, ComicChapterContent> result = new DataModel<>(pagination,
-                new ComicChapterContent(title, chapterTitle, content, comicTagId, author));
+                new ComicChapterContent(title, chapterTitle, content, comicTagId, author, chapterNumber));
         return result;
     }
 

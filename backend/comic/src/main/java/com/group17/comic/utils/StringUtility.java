@@ -33,4 +33,11 @@ public class StringUtility {
         }        
         return str1.substring(endIndexStr1 - maxLength, endIndexStr1);
     }
+
+    public static int extractNumberFromString(String str){
+        // Replace all non-digit characters with empty string
+        String numberStr = str.replaceAll("\\D+", "");
+        // Convert the remaining string to integer
+        return Integer.parseInt(numberStr);
+    }
 }
