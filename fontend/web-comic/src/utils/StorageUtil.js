@@ -4,9 +4,17 @@ export const addChapter = (chapterNo, tagId, serverId) => {
     if (serverId !== null && serverId !== undefined && tagId) {
         let listChapters = localStorage.getItem(`${serverId}_${tagId}`);
         listChapters = listChapters ? JSON.parse(listChapters) : [];
-        if (listChapters.indexOf(chapterNo) === -1) {
+        const index = listChapters.indexOf(chapterNo);
+        if (index === -1) {
             listChapters.push(chapterNo);
             localStorage.setItem(`${serverId}_${tagId}`, JSON.stringify(listChapters));
+        }
+        else {
+            if (index !== listChapters.length - 1) {
+                listChapters.splice(index, 1);
+                listChapters.push(chapterNo);
+                localStorage.setItem(`${serverId}_${tagId}`, JSON.stringify(listChapters));
+            }
         }
     }
 }

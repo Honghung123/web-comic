@@ -1,5 +1,5 @@
 import { Button } from '@mui/material';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
@@ -18,25 +18,27 @@ import ListChapters from '../ListChapters/ListChapters';
 import Loading from '../Loading';
 import * as Utils from '../../utils';
 import DownloadModal from './DownloadModal';
+import { fontFamilies, bgColors, lineHeights } from './constants';
 
 function ReadingChapter() {
     const location = useLocation();
     const { pathname } = location;
     console.log(pathname);
+    const navigate = useNavigate();
     const tempStr = pathname.substring(pathname.indexOf('/', 1) + 1);
     const tagId = tempStr.substring(0, tempStr.indexOf('/'));
     const chapter = tempStr.substring(tempStr.indexOf('/') + 1);
     const { servers } = useContext(Context);
+
+    // state for modal
     const [openSetting, setOpenSetting] = useState(false);
-    const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 });
     const [openListChapters, setOpenListChapters] = useState(false);
     const [openDownload, setOpenDownload] = useState(false);
+    const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 });
 
-    const bgColors = ['bg-white', 'bg-yellow-100', 'bg-green-100', 'bg-blue-100', 'bg-gray-100'];
+    // state for custom
     const [bgColor, setBgColor] = useState(localStorage.getItem('bgColor') || 'bg-green-100');
-    const fontFamilies = ['Arial', 'Times', 'Georgia', 'Palatino'];
-    const [fontFamily, setFontFamily] = useState(localStorage.getItem('fontFamily') || 'Arial');
-    const lineHeights = ['100%', '125%', '150%', '200%', '250%', '300%'];
+    const [fontFamily, setFontFamily] = useState(localStorage.getItem('fontFamily') || fontFamilies[0].value);
     const [lineHeight, setLineHeight] = useState(localStorage.getItem('lineHeight') || '150%');
     const [fontSize, setFontSize] = useState(Number(localStorage.getItem('fontSize') || '20'));
 
@@ -61,7 +63,7 @@ function ReadingChapter() {
                     },
                 })
                 .then((response) => {
-                    console.log('chapter: ', response);
+                    console.log('chapter response: ', response);
                     const responseData = response.data;
                     if (responseData.statusCode === 200) {
                         // save chapter into history
@@ -84,11 +86,59 @@ function ReadingChapter() {
         }
     }, [pathname]);
 
+    console.log('chapterdata: ', chapterData);
+    // change server when reading
+    useEffect(() => {
+        if (chapterData?.data && servers && servers.length > 0) {
+            const server_id = servers.find((server) => server.priority === 1).id;
+            console.log('post body: ', {
+                title: chapterData.data.title,
+                authorName: chapterData.data.author?.name,
+                comicTagId: chapterData.data.comicTagId,
+                chapterNo: chapterData.data.chapterNo || 1,
+            });
+            setLoading(true);
+            axios
+                .post(
+                    'http://localhost:8080/api/v1/comic/reading/change-server',
+                    {
+                        title: chapterData.data.title,
+                        authorName: chapterData.data.author?.name,
+                        comicTagId: chapterData.data.comicTagId,
+                        chapterNo: chapterData.data.chapterNumber,
+                    },
+                    {
+                        params: {
+                            server_id,
+                        },
+                    },
+                )
+                .then((response) => {
+                    console.log('change server: ', response);
+                    const responseData = response.data;
+                    if (responseData.statusCode === 200) {
+                        navigate(`/reading/${responseData.data.comicTagId}/${responseData.pagination.currentPage}`);
+                    } else {
+                        // thong bao loi
+                        console.log(responseData.message);
+                        setLoading(false);
+                        alert(responseData.message);
+                    }
+                })
+                .catch((err) => {
+                    // thong bao loi
+                    alert(err.message);
+                    setLoading(false);
+                    console.log(err);
+                });
+        }
+    }, [servers]);
+
     return (
         <>
             {chapterData && (
                 <div className="min-h-96 mt-16 mx-auto" style={{ maxWidth: 1200 }}>
-                    <h1 className="text-3xl text-center font-semibold">{chapterData.data.title}</h1>
+                    <h1 className="text-3xl text-center font-semibold">{chapterData.data.chapterTitle}</h1>
                     <div className="flex justify-center gap-4 mt-4">
                         <Button
                             disabled={!chapterData.pagination.link.prevPage}
@@ -125,7 +175,7 @@ function ReadingChapter() {
                         <div
                             ref={contentRef}
                             className={`w-full min-h-72 ${bgColor} sm:p-4 p-2`}
-                            style={{ fontSize, lineHeight }}
+                            style={{ fontSize, lineHeight, fontFamily }}
                             dangerouslySetInnerHTML={{
                                 __html: chapterData.data.content,
                             }}
@@ -250,8 +300,8 @@ function ReadingChapter() {
                                         className="bg-white"
                                     >
                                         {fontFamilies.map((font) => (
-                                            <MenuItem value={font} key={font}>
-                                                {font}
+                                            <MenuItem value={font.value} key={font.value}>
+                                                {font.title}
                                             </MenuItem>
                                         ))}
                                     </Select>
