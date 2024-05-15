@@ -12,5 +12,5 @@ public record AlternatedChapterDTO(
       @NotBlank(message = "Tag id cannot be blank")
       String comicTagId, 
       @Min(value = 1, message = "Chapter number must be greater than 1")
-      int chapterNo) {
+      int chapterNumber) {
 } 

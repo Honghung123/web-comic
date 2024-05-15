@@ -41,4 +41,14 @@ public class StringUtility {
         // Convert the remaining string to integer
         return Integer.parseInt(numberStr);
     }
+
+    public static int extractChapterNoFromString(String str) throws Exception{
+        String regex = "\\d+"; 
+	    var matcher = Pattern.compile(regex).matcher(str);
+	    if(matcher.find()){
+		    return Integer.parseInt(matcher.group(0));
+	    }else{
+            throw new Exception("Can't get chapter number");
+        }
+    }
 }

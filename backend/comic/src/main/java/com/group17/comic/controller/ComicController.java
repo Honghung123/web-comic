@@ -111,6 +111,17 @@ public class ComicController {
         return new SuccessfulResponse<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
     }
 
+    @PostMapping("/reading/change-server-comic-info")
+    @Operation(summary = "Change comic info on other server", description = "Get comic content base of a chapter on alternate server with specific server id. Default server id is 0 - plugin's index in plugin list.")
+    public SuccessfulResponse<Comic> getComicInfoOnOtherServer(
+            @Valid @RequestBody AlternatedChapterDTO altChapterDto,
+            @RequestParam(name = "server_id", defaultValue = "0") @PositiveOrZero int serverId,
+            @RequestHeader(name = "crawler-size", defaultValue = "3") @PositiveOrZero int crawlerSize) {
+        pluginService.checkCrawlerServerSize(crawlerSize);
+        var comic = pluginService.getComicInfoOnOtherServer(serverId, altChapterDto);
+        return new SuccessfulResponse<>(HttpStatus.OK, "Success", comic);
+    }
+
     @GetMapping("/reading/{tagId}/chapters/{chapter}")
     @Operation(summary = "Get comic infomation", description = "Get comic content of a chapter base on tag url with specific server id. Default server id is 0 - plugin's index in plugin list.")
     public SuccessfulResponse<ComicChapterContent> getComicChapterContent(
@@ -123,7 +134,7 @@ public class ComicController {
         return new SuccessfulResponse<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
     }
 
-    @PostMapping("/reading/change-server")
+    @PostMapping("/reading/change-server-chapter-content")
     @Operation(summary = "Change comic server", description = "Get comic content base of a chapter on alternate server with specific server id. Default server id is 0 - plugin's index in plugin list.")
     public SuccessfulResponse<ComicChapterContent> getComicChapterContentOnOtherServer(
             @Valid @RequestBody AlternatedChapterDTO altChapterDto,

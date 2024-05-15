@@ -95,17 +95,17 @@ function ReadingChapter() {
                 title: chapterData.data.title,
                 authorName: chapterData.data.author?.name,
                 comicTagId: chapterData.data.comicTagId,
-                chapterNo: chapterData.data.chapterNo || 1,
+                chapterNumber: chapterData.data.chapterNo || 1,
             });
             setLoading(true);
             axios
                 .post(
-                    'http://localhost:8080/api/v1/comic/reading/change-server',
+                    'http://localhost:8080/api/v1/comic/reading/change-server-chapter-content',
                     {
                         title: chapterData.data.title,
                         authorName: chapterData.data.author?.name,
                         comicTagId: chapterData.data.comicTagId,
-                        chapterNo: chapterData.data.chapterNumber,
+                        chapterNumber: chapterData.data.chapterNumber,
                     },
                     {
                         params: {

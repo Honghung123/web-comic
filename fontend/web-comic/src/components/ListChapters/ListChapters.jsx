@@ -68,7 +68,7 @@ function ListChapters({ tagId, headerSize = 'text-3xl' }) {
                                         : 'text-purple-500'
                                 }`}
                             >
-                                Chương {chapter.chapterNo}: {chapter.title}
+                                Chương {chapter.chapterNumber}: {chapter.title}
                             </div>
                         </Link>
                     ))}

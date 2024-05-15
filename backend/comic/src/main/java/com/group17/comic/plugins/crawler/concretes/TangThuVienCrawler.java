@@ -11,7 +11,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.util.StringUtils;
 
-import com.group17.comic.dto.request.AlternatedChapterDTO; 
+import com.group17.comic.dto.request.AlternatedChapterDTO;
 import com.group17.comic.exception.customs.InvalidTypeException;
 import com.group17.comic.exception.customs.ResourceNotFound;
 import com.group17.comic.log.Logger;
@@ -154,7 +154,8 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
             int currentPage) {
         List<ComicModel> listMatchedComic = new ArrayList<>();
         String term = keyword.trim().replace(" ", "%20");
-        Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "ket-qua-tim-kiem?term=" + term + "&page=" + currentPage);
+        Document doc = this
+                .getDocumentInstanceFromUrl(TRUYEN_URL + "ket-qua-tim-kiem?term=" + term + "&page=" + currentPage);
         Elements elements = doc.select("#rank-view-list .book-img-text ul li");
         if (elements == null) { // null khac voi 0 nha
             throw new ResourceNotFound("Failed to get comic list from Tang Thu Vien");
@@ -259,7 +260,8 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         }
         var pagination = new Pagination<Integer>(currentPage, perPage, totalPages, totalItems);
         PaginationUtility.updatePagination(pagination);
-        DataSearchModel<Integer, List<ComicModel>, List<Author>> result = new DataSearchModel<>(pagination, lastedComics,null);
+        DataSearchModel<Integer, List<ComicModel>, List<Author>> result = new DataSearchModel<>(pagination,
+                lastedComics, null);
         return result;
     }
 
@@ -387,31 +389,26 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "doc-truyen/" + comicTagId);
         Pagination<Integer> pagination = null;
         List<Chapter> chapters = new ArrayList<>();
-        String totalItemsText = doc.getElementById("j-bookCatalogPage").text();
-        int totalItems = 0;
-        var totalItemMatcher = Pattern.compile("\\((\\d+) chương\\)").matcher(totalItemsText);
-        if (totalItemMatcher.find()) {
-            totalItems = Integer.parseInt(totalItemMatcher.group(1)) - 5;
-        } else {
-            Logger.logError(this.getClass().getSimpleName()
-                    + " Can't get total items", null);
-        }
+        String totalItemsText = doc.selectFirst(".volume:nth-of-type(1) ul li:nth-of-type(1) a").attr("title");
+        int totalItems = StringUtility.extractNumberFromString(totalItemsText);
         int comicId = Integer.parseInt(doc.getElementById("story_id_hidden").val());
         Document chaperListDoc = this
                 .getDocumentInstanceFromUrl(TRUYEN_URL + "doc-truyen/page/" + comicId + "?page=" + (currentPage - 1));
         Elements elements = chaperListDoc.select(".col-md-6 ul li a span");
         for (Element element : elements) {
-            String chapterNo = "";
-            String title = "";
-            var chapterMatcher = Pattern.compile("Chương\\s*(\\d+)\\s*:\\s*(.*)").matcher(element.text());
-            if (chapterMatcher.find()) {
-                chapterNo = chapterMatcher.group(1);
-                title = chapterMatcher.group(2);
-                chapters.add(new Chapter(chapterNo, title));
+            int chapterNumber = StringUtility.extractChapterNoFromString(element.text());
+            String chapterNo = chapterNumber + "";
+            String title = element.text();
+            if (title.contains(":")) {
+                title = title.substring(title.indexOf(":") + 1).trim();
             } else {
-                Logger.logError(this.getClass().getSimpleName() + " Can't get chapter number and title",
-                        new Exception("Can't get chapter number"));
+                title = title.substring(title.indexOf(" ")).trim();
+                title = title.substring(title.indexOf(" ")).trim();
             }
+            if (title.startsWith("-") || title.startsWith(":")) {
+                title = title.substring(title.indexOf(" ")).trim();
+            }
+            chapters.add(new Chapter(chapterNumber, chapterNo, title));
         }
         int perPage = elements.size();
         int totalPages = totalItems / perPage + (totalItems % perPage == 0 ? 0 : 1);
@@ -421,12 +418,62 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         return result;
     }
 
+    @Override
+    @SneakyThrows
+    public Comic getComicInfoOnOtherServer(AlternatedChapterDTO altChapterDto) {
+        String tagId = this.getTagIdComicFromTitleAndAuthor(altChapterDto.title(),
+                altChapterDto.authorName(), altChapterDto.comicTagId());
+        return this.getComicInfo(tagId);
+    }
+
+    private String getTagIdComicFromTitleAndAuthor(String _title, String _authorName, String _tagId) throws Exception {
+        // Tìm truyện chứa tên và cùng tác giả
+        String keyword = _title;
+        keyword = StringUtility.removeDiacriticalMarks(keyword).toLowerCase()
+                .replace("[dich]", "").replaceAll("- suu tam", "");
+        if (keyword.contains("-")) {
+            keyword = keyword.substring(0, keyword.lastIndexOf("-")).trim();
+        }
+        keyword = keyword.replace(" ", "%20");
+        Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "ket-qua-tim-kiem?term=" + keyword);
+        var formattedAuthor = StringUtility.removeDiacriticalMarks(_authorName).toLowerCase().trim();
+        Elements comicElements = doc.select("#rank-view-list .book-img-text ul li");
+        if (comicElements == null) {
+            throw new ResourceNotFound("Failed to get comic list from Tang Thu Vien");
+        } else if (comicElements.size() == 0) {
+            throw new ResourceNotFound("Failed to get comic tag id from Tang Thu Vien");
+        }
+        String tagId = "";
+        for (Element element : comicElements) {
+            var comicUrlElement = element.selectFirst(".book-mid-info h4 a");
+            if (comicUrlElement == null) {
+                throw new ResourceNotFound("Comic not found from Tang Thu Vien");
+            }
+            String comicUrl = comicUrlElement.attr("href");
+            String comicTagId = comicUrl.substring(comicUrl.lastIndexOf("/") + 1);
+            var authorTag = element.select(".book-mid-info .author a:nth-of-type(1)");
+            String authorName = authorTag.text();
+            String authorFormattedName = StringUtility.removeDiacriticalMarks(authorName).toLowerCase();
+            String commonTag = StringUtility.findLongestCommonSubstring(comicTagId, _tagId);
+            if (authorFormattedName.equals(formattedAuthor) &&
+                    (commonTag.length() >= 0.5 * _tagId.length() ||
+                            _tagId.length() >= 0.5 * commonTag.length())) {
+                tagId = comicTagId;
+                break;
+            }
+        }
+        if (tagId.isEmpty()) {
+            throw new ResourceNotFound("Failed to get comic tag id from Tang Thu Vien");
+        }
+        return tagId;
+    }
+
     @SneakyThrows
     @Override
     public DataModel<Integer, ComicChapterContent> getComicChapterContent(String comicTagId, String currentChapter) {
         Document doc = this
                 .getDocumentInstanceFromUrl(TRUYEN_URL + "doc-truyen/" + comicTagId + "/chuong-" + currentChapter);
-        var elementTitle =  doc.selectFirst("h1.truyen-title a");
+        var elementTitle = doc.selectFirst("h1.truyen-title a");
         if (elementTitle == null) {
             throw new ResourceNotFound("Can't get chapter content from Tang Thu Vien");
         }
@@ -436,23 +483,25 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
             throw new ResourceNotFound("Can't get chapter content from Tang Thu Vien");
         }
         String chapterTitleText = elementChapterTitle.text();
-        String chapterTitle = chapterTitleText
-        .substring(chapterTitleText.lastIndexOf(":") + 1).trim();
-        int chapterNumber = 1;
+        int chapterNumber = StringUtility.extractChapterNoFromString(chapterTitleText);
+        String chapterTitle = "";
         String replacer = "Chương";
-        if(chapterTitle.contains(replacer)){
-            chapterNumber = StringUtility.extractNumberFromString(chapterTitle);
+        if (chapterTitleText.contains(":")) {
+            chapterTitle = chapterTitleText.substring(chapterTitleText.indexOf(":") + 1).trim();
+        }
+        if (chapterTitle.contains(replacer)) {
             chapterTitle = chapterTitle.replace(replacer, "").trim();
             chapterTitle = chapterTitle.substring(chapterTitle.indexOf(" ") + 1);
-        }else{
-            chapterNumber = StringUtility.extractNumberFromString(chapterTitleText);
+        }
+        if (chapterTitle.contains("-") || chapterTitle.contains(":")) {
+            chapterTitle = chapterTitle.substring(chapterTitle.indexOf(" ")).trim();
         }
         var elementContent = doc.selectFirst(".chapter-c-content .box-chap");
         if (elementContent == null) {
             throw new ResourceNotFound("Can't get chapter content from Tang Thu Vien");
         }
         String content = elementContent.html();
-        var author = this.getAuthorOfComic(comicTagId); 
+        var author = this.getAuthorOfComic(comicTagId);
         Pagination<Integer> paginationTemp = getChapters(comicTagId, 1).getPagination();
         Pagination<Integer> pagination = new Pagination<>(Integer.parseInt(currentChapter), 1,
                 paginationTemp.getTotalItems(), paginationTemp.getTotalItems());
@@ -463,7 +512,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
     }
 
     @SneakyThrows
-    private Author getAuthorOfComic(String comicTagId) { 
+    private Author getAuthorOfComic(String comicTagId) {
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "doc-truyen/" + comicTagId);
         Element element = doc.selectFirst("div.book-information");
         if (element == null) {
@@ -472,43 +521,14 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         var authorTag = element.select(".book-info .tag a:nth-of-type(1)");
         String authorId = authorTag.attr("href").substring(authorTag.attr("href").lastIndexOf("=") + 1);
         String authorName = authorTag.text();
-        return new Author(authorId, authorName); 
+        return new Author(authorId, authorName);
     }
 
     @SneakyThrows
     @Override
     public DataModel<?, ComicChapterContent> getComicChapterContentOnOtherServer(AlternatedChapterDTO altChapterDto) {
-        // Tìm truyện chứa tên và cùng tác giả
-        String keyword = altChapterDto.title();
-        keyword = StringUtility.removeDiacriticalMarks(keyword).toLowerCase()
-                .replace("[dich]", "").replaceAll("- suu tam", "");
-        if(keyword.contains("-")){
-            keyword = keyword.substring(0, keyword.lastIndexOf("-")).trim();
-        }
-        keyword = keyword.replace(" ", "%20");
-        Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "ket-qua-tim-kiem?term=" + keyword);
-        var formattedAuthor = StringUtility.removeDiacriticalMarks(altChapterDto.authorName()).toLowerCase().trim();
-        Elements comicElements = doc.select("#rank-view-list .book-img-text ul li");
-        if (comicElements == null) {
-            throw new ResourceNotFound("Failed to get comic list from Tang Thu Vien");
-        }
-        String tagId = "";
-        for (Element element : comicElements) {
-            String comicUrl = element.selectFirst(".book-mid-info h4 a").attr("href");
-            String comicTagId = comicUrl.substring(comicUrl.lastIndexOf("/") + 1);
-            var authorTag = element.select(".book-mid-info .author a:nth-of-type(1)");
-            String authorName = authorTag.text();
-            String authorFormattedName = StringUtility.removeDiacriticalMarks(authorName).toLowerCase();
-            String commonTag = StringUtility.findLongestCommonSubstring(comicTagId, altChapterDto.comicTagId());
-            if (authorFormattedName.equals(formattedAuthor) &&
-                    commonTag.length() >= 0.5 * altChapterDto.comicTagId().length()) {
-                tagId = comicTagId;
-                break;
-            }
-        }
-        if (tagId.isEmpty()) {
-            throw new ResourceNotFound("Failed to get comic tag id from Tang Thu Vien");
-        }
+        String tagId = this.getTagIdComicFromTitleAndAuthor(altChapterDto.title(),
+                altChapterDto.authorName(), altChapterDto.comicTagId());
         // Tìm chapter
         String chapterUrl = "";
         int currentPage = 1;
@@ -522,7 +542,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
                 break;
             }
             for (Chapter chapter : chapters) {
-                if (chapter.getChapterNo().contains(String.valueOf(altChapterDto.chapterNo()))) {
+                if (chapter.getChapterNumber() == altChapterDto.chapterNumber()) {
                     chapterUrl = chapter.getChapterNo();
                     break;
                 }
@@ -550,7 +570,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
             String comicTagId = comicUrl.substring(comicUrl.lastIndexOf("/") + 1);
             String title = element.selectFirst(".book-mid-info h4 a").text();
             var authorTag = element.select(".book-mid-info .author a:nth-of-type(1)");
-            String authorName = authorTag.text(); 
+            String authorName = authorTag.text();
             Author author = new Author(authorId, authorName);
             List<Genre> genres = new ArrayList<>();
             var genreTag = element.select(".book-mid-info .author a:nth-of-type(2)");
@@ -579,12 +599,12 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         // int totalPages = 1;
         // int totalItems = perPage;
         // if (lastAnchorTag.size() == 1) {
-        //     totalPages = Integer.parseInt(lastAnchorTag.text());
-        //     totalItems = totalPages * perPage;
+        // totalPages = Integer.parseInt(lastAnchorTag.text());
+        // totalItems = totalPages * perPage;
         // }
         var pagination = new Pagination<Integer>(currentPage, perPage, 1, -1);
         // PaginationUtility.updatePagination(pagination);
         DataModel<Integer, List<ComicModel>> result = new DataModel<>(pagination, lastedComics);
-        return result;    
+        return result;
     }
 }

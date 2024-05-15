@@ -8,7 +8,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.util.StringUtils;
 
-import com.group17.comic.dto.request.AlternatedChapterDTO; 
+import com.group17.comic.dto.request.AlternatedChapterDTO;
 import com.group17.comic.exception.customs.ResourceNotFound;
 import com.group17.comic.model.*;
 import com.group17.comic.plugins.crawler.IDataCrawler;
@@ -287,7 +287,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
         PaginationUtility.updatePagination(pagination);
         DataSearchModel<Integer, List<ComicModel>, List<Author>> result = new DataSearchModel<>(pagination,
                 listMatchedComic, null);
-        return result;    
+        return result;
     }
 
     @SneakyThrows
@@ -304,20 +304,73 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
             String comicUrl = element.attr("href");
             String chapterNo = comicUrl.substring(comicUrl.lastIndexOf("/") + 1);
             String title = element.text();
-            chapters.add(new Chapter(chapterNo, title));
+            int chapterNumber = StringUtility.extractChapterNoFromString(title);
+            if (title.contains(":")) {
+                title = title.substring(title.indexOf(":") + 1).trim();
+            }
+            chapters.add(new Chapter(chapterNumber, chapterNo, title));
         }
         int perPage = elements.size();
         var lastPageTag = doc.select(".pagination ul.paging li.last a");
         var lastPageHref = lastPageTag.attr("href");
         int totalPages = Integer.parseInt(lastPageHref.substring(lastPageHref.lastIndexOf("=") + 1));
         var lastestChapterText = doc.selectFirst("#newchaps ul li:last-child").text();
-        int lastestChapter = Integer.parseInt(
-                lastestChapterText.substring(lastestChapterText.indexOf(" ") + 1, lastestChapterText.indexOf(":")));
+        int lastestChapter = StringUtility.extractNumberFromString(lastestChapterText);
         int totalItems = lastestChapter;
         pagination = new Pagination<>(currentPage, perPage, totalPages, totalItems);
         PaginationUtility.updatePagination(pagination);
         DataModel<Integer, List<Chapter>> result = new DataModel<>(pagination, chapters);
         return result;
+    }
+
+    @Override
+    @SneakyThrows
+    public Comic getComicInfoOnOtherServer(AlternatedChapterDTO altChapterDto) {
+        String tagId = this.getTagIdComicFromTitleAndAuthor(altChapterDto.title(),
+                altChapterDto.authorName(), altChapterDto.comicTagId());
+        return this.getComicInfo(tagId);
+    }
+
+    private String getTagIdComicFromTitleAndAuthor(String _title, String _authorName, String _comicTagId)
+            throws Exception {
+        String keyword = _title;
+        keyword = StringUtility.removeDiacriticalMarks(keyword).toLowerCase()
+                .replace("[dich]", "").replaceAll("- suu tam", "");
+        if (keyword.contains("-")) {
+            keyword = keyword.substring(0, keyword.lastIndexOf("-")).trim();
+        }
+        keyword = keyword.replace(" ", "+");
+        var formattedAuthor = StringUtility.removeDiacriticalMarks(_authorName).toLowerCase().trim();
+        Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "searching?key=" + keyword);
+        Elements comicElements = doc.select(".list-story .list-content .list-row-img");
+        if (comicElements == null) {
+            throw new ResourceNotFound("Failed to get comic list from Truyen Chu TH");
+        } else if (comicElements.size() == 0) {
+            throw new ResourceNotFound("Failed to get comic list from Truyen Chu TH");
+        }
+        String tagId = "";
+        for (Element element : comicElements) {
+            var comicUrlElement = element.selectFirst(".row-info h3 a");
+            if (comicUrlElement == null) {
+                throw new ResourceNotFound("Failed to get comic tag id from Truyen Chu TH");
+            }
+            String comicUrl = comicUrlElement.attr("href");
+            String comicTagId = comicUrl.substring(comicUrl.lastIndexOf("/") + 1);
+            // String title = element.selectFirst(".row-info h3 a").text();
+            String authorName = element.select(".row-author").text();
+            String authorFormattedName = StringUtility.removeDiacriticalMarks(authorName).toLowerCase();
+            String commonTag = StringUtility.findLongestCommonSubstring(comicTagId, _comicTagId);
+            if (authorFormattedName.equals(formattedAuthor) &&
+                    (commonTag.length() >= 0.5 * _comicTagId.length()
+                            || _comicTagId.length() >= 0.5 * commonTag.length())) {
+                tagId = comicTagId;
+                break;
+            }
+        }
+        if (tagId.isEmpty()) {
+            throw new ResourceNotFound("Failed to get comic tag id from Truyen Chu TH");
+        }
+        return tagId;
     }
 
     @SneakyThrows
@@ -328,24 +381,26 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
         if (elementTitle == null) {
             throw new ResourceNotFound("Can't get chapter title from Truyen Chu TH");
         }
-        String title = elementTitle.text(); 
+        String title = elementTitle.text();
         var elementChapterTitle = doc.selectFirst(".chapter-header ul li:nth-of-type(3) h3");
         if (elementChapterTitle == null) {
             throw new ResourceNotFound("Can't get chapter title from Truyen Chu TH");
         }
         String chapterTitle = elementChapterTitle.text();
-        int chapterNumber = StringUtility.extractNumberFromString(chapterTitle);
-        chapterTitle = chapterTitle.substring(chapterTitle.indexOf(":") + 1).trim();
+        int chapterNumber = StringUtility.extractChapterNoFromString(chapterTitle);
+        if (chapterTitle.contains(":")) {
+            chapterTitle = chapterTitle.substring(chapterTitle.indexOf(":") + 1).trim();
+        }
         var elementContent = doc.selectFirst("#content");
         if (elementContent == null) {
             throw new ResourceNotFound("Can't get chapter content from Truyen Chu TH");
         }
         String content = elementContent.html();
         var authorElement = doc.selectFirst(".chapter-header ul li:nth-of-type(2) h3 a");
-        String authorName= authorElement.text();
+        String authorName = authorElement.text();
         String authorUrl = authorElement.attr("href");
         String authorId = authorUrl.substring(authorUrl.lastIndexOf("/") + 1);
-        var author = new Author(authorId, authorName); 
+        var author = new Author(authorId, authorName);
         var nextChapElement = doc.getElementById("nextchap");
         var prevChapElement = doc.getElementById("prevchap");
         Pagination<String> pagination = new Pagination<>(currentChapter, 1, -1, -1);
@@ -369,36 +424,8 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
     public DataModel<String, ComicChapterContent> getComicChapterContentOnOtherServer(
             AlternatedChapterDTO altChapterDto) {
         // Tìm truyện chứa tên và cùng tác giả
-        String keyword = altChapterDto.title();
-        keyword = StringUtility.removeDiacriticalMarks(keyword).toLowerCase()
-                .replace("[dich]", "").replaceAll("- suu tam", "");
-        if(keyword.contains("-")){
-            keyword = keyword.substring(0, keyword.lastIndexOf("-")).trim();
-        }
-        keyword = keyword.replace(" ", "+");
-        var formattedAuthor = StringUtility.removeDiacriticalMarks(altChapterDto.authorName()).toLowerCase().trim();
-        Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "searching?key=" + keyword);
-        Elements comicElements = doc.select(".list-story .list-content .list-row-img");
-        if (comicElements == null) {
-            throw new ResourceNotFound("Failed to get comic list from Truyen Chu TH");
-        }
-        String tagId = "";
-        for (Element element : comicElements) {
-            String comicUrl = element.selectFirst(".row-info h3 a").attr("href");
-            String comicTagId = comicUrl.substring(comicUrl.lastIndexOf("/") + 1);
-            // String title = element.selectFirst(".row-info h3 a").text();
-            String authorName = element.select(".row-author").text();
-            String authorFormattedName = StringUtility.removeDiacriticalMarks(authorName).toLowerCase();
-            String commonTag = StringUtility.findLongestCommonSubstring(comicTagId, altChapterDto.comicTagId());
-            if (authorFormattedName.equals(formattedAuthor) &&
-                    commonTag.length() >= 0.5 * altChapterDto.comicTagId().length()) {
-                tagId = comicTagId;
-                break;
-            }
-        }
-        if (tagId.isEmpty()) {
-            throw new ResourceNotFound("Failed to get comic tag id from Truyen Chu TH");
-        }
+        String tagId = this.getTagIdComicFromTitleAndAuthor(altChapterDto.title(),
+                altChapterDto.authorName(), altChapterDto.comicTagId());
         // Tìm chapter
         String chapterUrl = "";
         int currentPage = 1;
@@ -412,7 +439,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
                 break;
             }
             for (Chapter chapter : chapters) {
-                if (chapter.getTitle().contains(" " + String.valueOf(altChapterDto.chapterNo()) + ":")) {
+                if (chapter.getChapterNumber() == altChapterDto.chapterNumber()) {
                     chapterUrl = chapter.getChapterNo();
                     break;
                 }

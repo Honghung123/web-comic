@@ -94,6 +94,7 @@ function ComicDetail({ tagId }) {
                         <img
                             className="w-full object-cover hover:transform hover:scale-110 transition-all duration-300 shadow-lg"
                             src={comicData.image}
+                            onError={(e) => (e.target.src = comicData.alternateImage)}
                             alt={comicData.tagId}
                         />
                     </div>

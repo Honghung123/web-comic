@@ -66,11 +66,23 @@ function ListComics() {
         return searchStr;
     };
 
+    let headerText = "Danh sách truyện đề cử:";
+    if(keyword != '' && genre != '') {
+        headerText = `Tìm kiếm cho: "${keyword}". Thể loại: ${genre.replace(/-/g, ' ')}.`
+    }else if(keyword != '' && genre == '') {
+        headerText = `Tìm kiếm cho: "${keyword}"`
+    }else if(keyword == '' && genre != '') {
+        headerText = `Tìm kiếm theo thể loại: "${genre.replace(/-/g, ' ')}"`
+    } 
     return (
         <div className="min-h-96 mt-8 mx-auto relative" style={{ maxWidth: 1200 }}>
             <Loading loading={loading} />
-            <h2 className="text-3xl font-semibold underline">Tìm kiếm cho: {keyword}</h2>
-
+            <h2 className="text-3xl font-semibold underline">{headerText}</h2>
+            {(keyword != '' && genre == '') && <>
+                <h3 className="text-xl font-semibold underline">Danh sách tác giả:</h3>
+                <p>Danh sách ....</p>
+                <h3 className="text-xl font-semibold underline">Danh sách truyện:</h3>
+            </>}
             <div className="flex flex-wrap min-h-full" style={{ marginLeft: '-1rem', marginRight: '-1rem' }}>
                 {comicsData.comics &&
                     comicsData.comics.map((comic) => (
