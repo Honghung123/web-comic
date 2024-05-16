@@ -4,9 +4,11 @@ import { Button } from '@mui/material';
 
 import { Context } from '../../GlobalContext';
 import * as Utils from '../../utils';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 function ComicDetail({ tagId }) {
+    const navigate = useNavigate();
     const { servers } = useContext(Context);
     const [comicData, setComicData] = useState();
     const [showFullDescription, setShowFullDescription] = useState(false);
@@ -83,9 +85,64 @@ function ComicDetail({ tagId }) {
                     console.log(err);
                 });
         }
-    }, []);
+    }, [tagId]);
 
-    console.log('pagination of chapter bound: ', chapterBound);
+    useEffect(() => {
+        if (comicData && servers && servers.length > 0) {
+            const { id: server_id, name: server_name } = servers.find((server) => server.priority === 1);
+
+            console.log('post body: ', {
+                title: comicData.title,
+                authorName: comicData.author?.name,
+                comicTagId: comicData.tagId,
+                chapterNumber: 1,
+            });
+
+            const fecthData = async () => {
+                try {
+                    const response = await axios.post(
+                        'http://localhost:8080/api/v1/comic/reading/change-server-comic-info',
+                        {
+                            title: comicData.title,
+                            authorName: comicData.author?.name,
+                            comicTagId: comicData.tagId,
+                            chapterNumber: 1,
+                        },
+                        {
+                            params: {
+                                server_id,
+                            },
+                        },
+                    );
+                    console.log('change server: ', response);
+                    const responseData = response.data;
+                    if (responseData.statusCode === 200) {
+                        // toast.success('Data fetched successfully!');
+                        navigate(`/info/${responseData.data.tagId}`);
+                    } else {
+                        // thong bao loi
+                        console.log(responseData.message);
+                        throw new Error(responseData.message);
+                        // alert(responseData.message);
+                    }
+                } catch (err) {
+                    // thong bao loi
+                    // alert(err.message);
+                    console.log(err);
+                    throw err;
+                }
+            };
+
+            toast.promise(fecthData(), {
+                pending: `Chuyển sang server ${server_name}`,
+                success: 'Chuyển server thành công',
+                error: `Không tìm thấy truyện trên ${server_name}`,
+            });
+        }
+    }, [servers]);
+
+    console.log('comic data: ', comicData);
+
     return (
         <div className="min-h-96 my-16 mx-auto relative" style={{ maxWidth: 1200 }}>
             {comicData && (
