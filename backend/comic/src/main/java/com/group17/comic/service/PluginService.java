@@ -3,24 +3,21 @@ package com.group17.comic.service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.group17.comic.dto.request.AlternatedChapterDTO;
 import com.group17.comic.dto.request.ChapterDTO;
 import com.group17.comic.dto.response.ChapterFile;
+import com.group17.comic.enums.Plugin;
 import com.group17.comic.exception.customs.InvalidPluginListException;
 import com.group17.comic.model.*;
 import com.group17.comic.plugins.crawler.IDataCrawler;
 import com.group17.comic.plugins.exporter.IFileConverter;
 import com.group17.comic.utils.PluginUtility;
-
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
+  
 import lombok.SneakyThrows;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
-public class PluginService {
+@Service("pluginServiceV1")
+public class PluginService implements IPluginService{
     @Value("${comic.base_dir}")
     String projectDirectory;
     @Value("${comic.plugin.crawler.crawler_package_name}")
@@ -32,15 +29,31 @@ public class PluginService {
     String converterPackageName;
     @Value("${comic.plugin.converter.converter_directory}")
     String converterDirectory;
-    private List<IFileConverter> converters = new ArrayList<>();
+    private List<IFileConverter> exporters = new ArrayList<>();
+
+    @Override
+    public Object getPlugin(Plugin plugin, int pluginId) {
+        switch (plugin) {
+            case CRAWLER -> {
+                return crawlers.get(pluginId);
+            }
+            case EXPORTER -> {
+                return exporters.get(pluginId);
+            }
+            default ->
+                throw new InvalidPluginListException("Plugin not found");
+        } 
+    }
 
     @SneakyThrows
-    private void checkCrawlerPlugins() {
+    @Override
+    public void checkCrawlerPlugins() {
         String pluginRelativePath = projectDirectory + crawlerDirectory;
         crawlers = PluginUtility.getAllPluginsFromFolder(pluginRelativePath, crawlerPackageName, IDataCrawler.class);
     }
 
     @SneakyThrows
+    @Override
     public List<CrawlerPlugin> getAllCrawlerPlugins() {
         checkCrawlerPlugins();
         List<CrawlerPlugin> pluginList = new ArrayList<>();
@@ -54,75 +67,19 @@ public class PluginService {
     }
 
     @SneakyThrows
-    public List<Genre> getAllGenres(int pluginId) {
-        checkCrawlerPlugins();
-        var result = crawlers.get(pluginId).getGenres();
-        return result;
-    }
-
-    @SneakyThrows
-    public DataModel<Integer, List<ComicModel>> getNewestCommic(int pluginId, int page) {
-        checkCrawlerPlugins();
-        var result = crawlers.get(pluginId).getLastedComics(page);
-        return result;
-    }
-
-    @SneakyThrows
-    public Comic getComicInfo(int pluginId, String tagUrl) {
-        checkCrawlerPlugins();
-        var comic = crawlers.get(pluginId).getComicInfo(tagUrl);
-        return comic;
-    }
-
-    @SneakyThrows
-    public DataSearchModel<Integer, List<ComicModel>, List<Author>> searchComic(int serverId,
-            String keyword, String byGenres, int currentPage) {
-        checkCrawlerPlugins();
-        var result = crawlers.get(serverId).search(keyword, byGenres, currentPage);
-        return result;
-    }
-
-    @SneakyThrows
-    public DataModel<Integer, List<Chapter>> getChapters(int serverId, String tagId, int currentPage) {
-        checkCrawlerPlugins();
-        var result = crawlers.get(serverId).getChapters(tagId, currentPage);
-        return result;
-    }
-
-    @SneakyThrows
-    public Comic getComicInfoOnOtherServer(@PositiveOrZero int serverId, @Valid AlternatedChapterDTO altChapterDto) {
-        checkCrawlerPlugins();
-        var result = crawlers.get(serverId).getComicInfoOnOtherServer(altChapterDto);
-        return result;
-    }
-
-    @SneakyThrows
-    public DataModel<?, ComicChapterContent> getComicChapterContent(int serverId, String tagId, String currentChapter) {
-        checkCrawlerPlugins();
-        var result = crawlers.get(serverId).getComicChapterContent(tagId, currentChapter);
-        return result;
-    }
-
-    public DataModel<?, ComicChapterContent> getComicChapterContentOnOtherServer(int serverId,
-            @NotNull AlternatedChapterDTO altChapterDto) {
-        checkCrawlerPlugins();
-        var result = crawlers.get(serverId).getComicChapterContentOnOtherServer(altChapterDto);
-        return result;
-    }
-
-    @SneakyThrows
     private void checkConverterPlugins() {
         String converterRelativePath = projectDirectory + converterDirectory;
-        converters = PluginUtility.getAllPluginsFromFolder(converterRelativePath, converterPackageName,
+        exporters = PluginUtility.getAllPluginsFromFolder(converterRelativePath, converterPackageName,
                 IFileConverter.class);
     }
 
     @SneakyThrows
+    @Override
     public List<ConverterPlugin> getAllConverterPlugins() {
         checkConverterPlugins();
         List<ConverterPlugin> pluginList = new ArrayList<>();
         int index = 0;
-        for (var converter : converters) {
+        for (var converter : exporters) {
             String pluginName = converter.getPluginName();
             String blobType = converter.getBlobType();
             pluginList.add(new ConverterPlugin(index, pluginName, blobType));
@@ -132,9 +89,10 @@ public class PluginService {
     }
 
     @SneakyThrows
+    @Override
     public ChapterFile exportFile(ChapterDTO chapterDto, int converterId) {
         checkConverterPlugins();
-        return converters.get(converterId).getConvertedFile(chapterDto);
+        return exporters.get(converterId).getConvertedFile(chapterDto);
     }
 
     @SneakyThrows
@@ -146,17 +104,11 @@ public class PluginService {
     }
 
     @SneakyThrows
+    @Override
     public void checkConverterPluginSize(int convertersSize) {
         checkConverterPlugins();
-        if (convertersSize != converters.size()) {
+        if (convertersSize != exporters.size()) {
             throw new InvalidPluginListException("Converter has changed. Please refresh your page");
         }
-    }
-
-    public DataModel<Integer, List<ComicModel>> getComicsOfAnAuthor(int serverId, String authorId, int page) {
-        checkCrawlerPlugins();
-        var result = crawlers.get(serverId).getComicsByAuthor(authorId, page);
-        return result;
-    }
-
+    } 
 }
