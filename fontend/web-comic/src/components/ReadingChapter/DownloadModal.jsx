@@ -6,8 +6,9 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import Button from '@mui/material/Button';
-import CircularProgress from '@mui/material/CircularProgress';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+
+import { toast } from 'react-toastify';
 
 function DownloadModal({ position, open, setOpen, chapter }) {
     const [converters, setConverters] = useState([]);
@@ -17,7 +18,7 @@ function DownloadModal({ position, open, setOpen, chapter }) {
     const handleDownload = async (e) => {
         setLoading(true);
         const payload = {
-            title: chapter?.title || '',
+            title: chapter?.chapterTitle || '',
             content: chapter?.content || '',
         };
         const url = `http://localhost:8080/api/v1/comic/export-file`;
@@ -40,7 +41,7 @@ function DownloadModal({ position, open, setOpen, chapter }) {
             const downloadUrl = windowUrl.createObjectURL(blob);
             const anchor = document.createElement('a');
             anchor.href = downloadUrl;
-            anchor.download = chapter.title || 'untitled';
+            anchor.download = chapter.chapterTitle || 'untitled';
             document.body.appendChild(anchor);
             anchor.click();
             // Xóa URL sau khi đã tải xuống
@@ -48,10 +49,21 @@ function DownloadModal({ position, open, setOpen, chapter }) {
         } catch (error) {
             console.log(error);
             console.log(error.response.status);
-            alert(error);
+            throw error;
+        } finally {
+            setOpen(false);
+            setLoading(false);
         }
-        setLoading(false);
-        setOpen(false);
+    };
+
+    const btnDownloadClick = () => {
+        if (!loading) {
+            toast.promise(handleDownload(), {
+                pending: 'Đang download...',
+                success: 'Download thành công!',
+                error: 'Download thất bại, vui lòng thử lại sau.',
+            });
+        }
     };
 
     console.log('converters: ', converters);
@@ -113,8 +125,13 @@ function DownloadModal({ position, open, setOpen, chapter }) {
                 </RadioGroup>
 
                 <div className="text-center">
-                    <Button variant="outlined" color="success" onClick={handleDownload}>
-                        {loading ? <CircularProgress size={24} color="success" /> : <FileDownloadIcon />}
+                    <Button
+                        variant="outlined"
+                        color="success"
+                        onClick={btnDownloadClick}
+                        sx={{ opacity: loading ? 0.5 : 1 }}
+                    >
+                        <FileDownloadIcon />
                     </Button>
                 </div>
             </div>

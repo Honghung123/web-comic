@@ -50,7 +50,7 @@ function ListChapters({ tagId, headerSize = 'text-3xl' }) {
                     setLoading(false);
                 });
         }
-    }, [page]);
+    }, [page, tagId]);
 
     return (
         <div className="min-h-32 mx-auto relative" style={{ maxWidth: 1200 }}>

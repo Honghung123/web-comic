@@ -2,6 +2,8 @@ import { Button } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { useContext } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import { Context, UPDATE_PRIORITY } from '../../GlobalContext';
 
@@ -24,6 +26,7 @@ function SettingServer() {
 
     return (
         <div className="border-2 rounded-lg mx-auto p-4 pt-2" style={{ maxWidth: 520 }}>
+            <ToastContainer />
             <div className="flex">
                 <h2 className="text-2xl flex-1 text-center">Danh sách server</h2>
                 <SettingsIcon />

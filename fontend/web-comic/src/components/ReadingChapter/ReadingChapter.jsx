@@ -12,6 +12,7 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import { useContext, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 import { Context } from '../../GlobalContext';
 import ListChapters from '../ListChapters/ListChapters';
@@ -90,53 +91,65 @@ function ReadingChapter() {
     // change server when reading
     useEffect(() => {
         if (chapterData?.data && servers && servers.length > 0) {
-            const server_id = servers.find((server) => server.priority === 1).id;
+            const { id: server_id, name: server_name } = servers.find((server) => server.priority === 1);
+
             console.log('post body: ', {
                 title: chapterData.data.title,
                 authorName: chapterData.data.author?.name,
                 comicTagId: chapterData.data.comicTagId,
                 chapterNumber: chapterData.data.chapterNo || 1,
             });
-            setLoading(true);
-            axios
-                .post(
-                    'http://localhost:8080/api/v1/comic/reading/change-server-chapter-content',
-                    {
-                        title: chapterData.data.title,
-                        authorName: chapterData.data.author?.name,
-                        comicTagId: chapterData.data.comicTagId,
-                        chapterNumber: chapterData.data.chapterNumber,
-                    },
-                    {
-                        params: {
-                            server_id,
+
+            const fecthData = async () => {
+                try {
+                    const response = await axios.post(
+                        'http://localhost:8080/api/v1/comic/reading/change-server-chapter-content',
+                        {
+                            title: chapterData.data.title,
+                            authorName: chapterData.data.author?.name,
+                            comicTagId: chapterData.data.comicTagId,
+                            chapterNumber: chapterData.data.chapterNumber,
                         },
-                    },
-                )
-                .then((response) => {
+                        {
+                            params: {
+                                server_id,
+                            },
+                        },
+                    );
                     console.log('change server: ', response);
                     const responseData = response.data;
                     if (responseData.statusCode === 200) {
+                        // toast.success('Data fetched successfully!');
                         navigate(`/reading/${responseData.data.comicTagId}/${responseData.pagination.currentPage}`);
                     } else {
                         // thong bao loi
                         console.log(responseData.message);
-                        setLoading(false);
-                        alert(responseData.message);
+                        throw new Error(responseData.message);
+                        // alert(responseData.message);
                     }
-                })
-                .catch((err) => {
+                } catch (err) {
                     // thong bao loi
-                    alert(err.message);
-                    setLoading(false);
+                    // alert(err.message);
                     console.log(err);
-                });
+                    throw err;
+                }
+            };
+
+            toast.promise(fecthData(), {
+                pending: `Chuyển sang server ${server_name}`,
+                success: 'Chuyển server thành công',
+                error: `Không tìm thấy truyện trên ${server_name}`,
+            });
         }
     }, [servers]);
 
     return (
         <>
-            {chapterData && (
+            {!chapterData ? (
+                <div className="min-h-96 mt-16 mx-auto relative" style={{ maxWidth: 1200 }}>
+                    <Loading loading={loading} />
+                </div>
+            ) : (
                 <div className="min-h-96 mt-16 mx-auto" style={{ maxWidth: 1200 }}>
                     <h1 className="text-3xl text-center font-semibold">{chapterData.data.chapterTitle}</h1>
                     <div className="flex justify-center gap-4 mt-4">
