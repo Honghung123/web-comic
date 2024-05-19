@@ -58,7 +58,7 @@ public class ComicController {
 
     @GetMapping("/lasted-comic")
     @Operation(summary = "Get lasted comics", description = "Get lasted comics with specific server id. Default server id is 0 - plugin's index in plugin list Default current page is 1")
-    public SuccessfulResponse<List<ComicModel>> getLatestCommic(
+    public SuccessfulResponse<List<ComicModel>> getLatestComics(
             @RequestParam(name = "server_id", defaultValue = "0") @PositiveOrZero int serverId,
             @RequestParam(name = "page", defaultValue = "1") @Positive int page, 
             @RequestHeader(name = "crawler-size", defaultValue = "3") @PositiveOrZero int crawlerSize) {
@@ -105,7 +105,7 @@ public class ComicController {
     }
 
     @GetMapping("/reading/{tagId}/chapters")
-    @Operation(summary = "Get comic infomation", description = "Get comic infomation base on tag url with specific server id. Default server id is 0 - plugin's index in plugin list.")
+    @Operation(summary = "Get chapters of a comic", description = "Get comic infomation base on tag url with specific server id. Default server id is 0 - plugin's index in plugin list.")
     public SuccessfulResponse<List<Chapter>> getChapters(
             @PathVariable(name = "tagId", required = true) String tagId,
             @RequestParam(name = "page", defaultValue = "1") @Positive int currentPage,

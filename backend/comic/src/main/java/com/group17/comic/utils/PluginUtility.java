@@ -27,25 +27,40 @@ public class PluginUtility {
      */
     @SuppressWarnings("unchecked")
     public static <T> List<T> getAllPluginsFromFolder(String concreteRelativePath, String pluginPackageName,
-            Class<?> intefaces) throws IOException, ClassNotFoundException, NoSuchMethodException,
+            Class<?> targetInterface) throws IOException, ClassNotFoundException, NoSuchMethodException,
             InvocationTargetException, InstantiationException, IllegalAccessException {
-        if (!intefaces.isInterface()) {
+        if (!targetInterface.isInterface()) {
+            throw new IllegalAccessException("The class is not an interface");
+        }
+        var pluginClasses = getAllPluginsFromFolderWithoutInstantiation(concreteRelativePath,
+                                                         pluginPackageName, targetInterface);
+        List<T> plugins = new ArrayList<>();
+        for (var clazz : pluginClasses) {
+            Constructor<?> constructor = clazz.getDeclaredConstructor();
+            T plugin = (T) constructor.newInstance();
+            plugins.add(plugin); 
+        }
+        return plugins;
+    }
+
+    public static List<Class<?>> getAllPluginsFromFolderWithoutInstantiation(String concreteRelativePath, String pluginPackageName,
+            Class<?> targetInterface) throws IOException, ClassNotFoundException, NoSuchMethodException,
+            InvocationTargetException, InstantiationException, IllegalAccessException {
+        if (!targetInterface.isInterface()) {
             throw new IllegalAccessException("The class is not an interface");
         }
         List<File> files = getAllFilesFromDirectory(concreteRelativePath);
-        List<T> plugins = new ArrayList<>();
+        List<Class<?>> pluginClasses = new ArrayList<>();
         for (File file : files) {
             var clazz = getClassInstance(file, pluginPackageName);
             if (clazz != null) {
-                boolean isImplemented = intefaces.isAssignableFrom(clazz); // not compatible for type T 
-                if (isImplemented) {
-                    Constructor<?> constructor = clazz.getDeclaredConstructor();
-                    T plugin = (T) constructor.newInstance();
-                    plugins.add(plugin);
+                boolean isImplemented = targetInterface.isAssignableFrom(clazz);
+                if (isImplemented) { 
+                    pluginClasses.add(clazz);
                 }
             }
         }
-        return plugins;
+        return pluginClasses;
     }
 
     /**

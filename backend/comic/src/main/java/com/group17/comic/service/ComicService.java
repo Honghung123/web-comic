@@ -23,24 +23,21 @@ public class ComicService implements IComicService{
 
     @SneakyThrows
     @Override
-    public List<Genre> getAllGenres(int pluginId) {
-        pluginService.checkCrawlerPlugins();
+    public List<Genre> getAllGenres(int pluginId) { 
         var result = this.getCrawlerPlugin(pluginId).getGenres();
         return result;
     }
 
     @SneakyThrows
     @Override
-    public DataModel<Integer, List<ComicModel>> getNewestCommic(int pluginId, int page) {
-        pluginService.checkCrawlerPlugins();
+    public DataModel<Integer, List<ComicModel>> getNewestCommic(int pluginId, int page) { 
         var result = this.getCrawlerPlugin(pluginId).getLastedComics(page);
         return result;
     }
 
     @SneakyThrows
     @Override
-    public Comic getComicInfo(int pluginId, String tagUrl) {
-        pluginService.checkCrawlerPlugins();
+    public Comic getComicInfo(int pluginId, String tagUrl) { 
         var comic = this.getCrawlerPlugin(pluginId).getComicInfo(tagUrl);
         return comic;
     }
@@ -48,8 +45,7 @@ public class ComicService implements IComicService{
     @SneakyThrows
     @Override
     public DataSearchModel<Integer, List<ComicModel>, List<Author>> searchComic(int pluginId,
-            String keyword, String byGenres, int currentPage) {
-        pluginService.checkCrawlerPlugins();
+            String keyword, String byGenres, int currentPage) { 
         var result = this.getCrawlerPlugin(pluginId).search(keyword, byGenres, currentPage);
         return result;
     }
@@ -57,7 +53,6 @@ public class ComicService implements IComicService{
     @SneakyThrows
     @Override
     public DataModel<Integer, List<Chapter>> getChapters(int pluginId, String tagId, int currentPage) {
-        pluginService.checkCrawlerPlugins();
         var result = this.getCrawlerPlugin(pluginId).getChapters(tagId, currentPage);
         return result;
     }
@@ -65,7 +60,6 @@ public class ComicService implements IComicService{
     @SneakyThrows
     @Override
     public Comic getComicInfoOnOtherServer(int pluginId, AlternatedChapterDTO altChapterDto) {
-        pluginService.checkCrawlerPlugins();
         var result = this.getCrawlerPlugin(pluginId).getComicInfoOnOtherServer(altChapterDto);
         return result;
     }
@@ -73,7 +67,6 @@ public class ComicService implements IComicService{
     @SneakyThrows
     @Override
     public DataModel<?, ComicChapterContent> getComicChapterContent(int pluginId, String tagId, String currentChapter) {
-        pluginService.checkCrawlerPlugins();
         var result = this.getCrawlerPlugin(pluginId).getComicChapterContent(tagId, currentChapter);
         return result;
     }
@@ -81,14 +74,12 @@ public class ComicService implements IComicService{
     @Override
     public DataModel<?, ComicChapterContent> getComicChapterContentOnOtherServer(int pluginId,
             AlternatedChapterDTO altChapterDto) {
-        pluginService.checkCrawlerPlugins();
         var result = this.getCrawlerPlugin(pluginId).getComicChapterContentOnOtherServer(altChapterDto);
         return result;
     }
 
     @Override
     public DataModel<Integer, List<ComicModel>> getComicsOfAnAuthor(int pluginId, String authorId, int page) {
-        pluginService.checkCrawlerPlugins();
         var result = this.getCrawlerPlugin(pluginId).getComicsByAuthor(authorId, page);
         return result;
     }

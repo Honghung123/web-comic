@@ -11,13 +11,13 @@ import com.group17.comic.model.*;
 import com.group17.comic.plugins.crawler.IDataCrawler;
 import com.group17.comic.plugins.exporter.IFileConverter;
 import com.group17.comic.utils.PluginUtility;
-  
+
 import lombok.SneakyThrows;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service("pluginServiceV1")
-public class PluginService implements IPluginService{
+public class PluginService implements IPluginService {
     @Value("${comic.base_dir}")
     String projectDirectory;
     @Value("${comic.plugin.crawler.crawler_package_name}")
@@ -34,28 +34,33 @@ public class PluginService implements IPluginService{
     @Override
     public Object getPlugin(Plugin plugin, int pluginId) {
         switch (plugin) {
-            case CRAWLER -> {
+            case CRAWLER -> { 
                 return crawlers.get(pluginId);
             }
-            case EXPORTER -> {
+            case EXPORTER -> { 
                 return exporters.get(pluginId);
             }
             default ->
                 throw new InvalidPluginListException("Plugin not found");
-        } 
+        }
     }
 
     @SneakyThrows
     @Override
     public void checkCrawlerPlugins() {
-        String pluginRelativePath = projectDirectory + crawlerDirectory;
-        crawlers = PluginUtility.getAllPluginsFromFolder(pluginRelativePath, crawlerPackageName, IDataCrawler.class);
+        String crawlerRelativePath = projectDirectory + crawlerDirectory;
+        var crawlerClasses = PluginUtility.getAllPluginsFromFolderWithoutInstantiation(
+                                crawlerRelativePath, crawlerPackageName, IDataCrawler.class);
+        if (crawlers.size() == 0 || crawlerClasses.size() != crawlers.size()) {
+            crawlers = PluginUtility.getAllPluginsFromFolder(crawlerRelativePath, crawlerPackageName,
+                    IDataCrawler.class);
+        }
     }
 
     @SneakyThrows
     @Override
     public List<CrawlerPlugin> getAllCrawlerPlugins() {
-        checkCrawlerPlugins();
+        this.checkCrawlerPlugins();
         List<CrawlerPlugin> pluginList = new ArrayList<>();
         int index = 0;
         for (var crawler : crawlers) {
@@ -69,14 +74,18 @@ public class PluginService implements IPluginService{
     @SneakyThrows
     private void checkConverterPlugins() {
         String converterRelativePath = projectDirectory + converterDirectory;
-        exporters = PluginUtility.getAllPluginsFromFolder(converterRelativePath, converterPackageName,
-                IFileConverter.class);
+        var exporterClasses = PluginUtility.getAllPluginsFromFolderWithoutInstantiation(
+                converterRelativePath, converterPackageName, IFileConverter.class);
+        if (exporters.size() == 0 || exporterClasses.size() != exporters.size()) {
+            exporters = PluginUtility.getAllPluginsFromFolder(converterRelativePath, 
+                        converterPackageName, IFileConverter.class);
+        }
     }
 
     @SneakyThrows
     @Override
     public List<ConverterPlugin> getAllConverterPlugins() {
-        checkConverterPlugins();
+        this.checkConverterPlugins();
         List<ConverterPlugin> pluginList = new ArrayList<>();
         int index = 0;
         for (var converter : exporters) {
@@ -91,13 +100,12 @@ public class PluginService implements IPluginService{
     @SneakyThrows
     @Override
     public ChapterFile exportFile(ChapterDTO chapterDto, int converterId) {
-        checkConverterPlugins();
         return exporters.get(converterId).getConvertedFile(chapterDto);
     }
 
     @SneakyThrows
     public void checkCrawlerServerSize(int crawlersSize) {
-        checkCrawlerPlugins();
+        this.checkCrawlerPlugins();
         if (crawlersSize != crawlers.size()) {
             throw new InvalidPluginListException("Server has changed. Please refresh your page");
         }
@@ -106,9 +114,9 @@ public class PluginService implements IPluginService{
     @SneakyThrows
     @Override
     public void checkConverterPluginSize(int convertersSize) {
-        checkConverterPlugins();
+        this.checkConverterPlugins();
         if (convertersSize != exporters.size()) {
             throw new InvalidPluginListException("Converter has changed. Please refresh your page");
         }
-    } 
+    }
 }
