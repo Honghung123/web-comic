@@ -18,6 +18,7 @@ import java.util.List;
 
 @Service("pluginServiceV1")
 public class PluginService implements IPluginService {
+    String baseDir = System.getProperty("user.dir");
     @Value("${comic.base_dir}")
     String projectDirectory;
     @Value("${comic.plugin.crawler.crawler_package_name}")
@@ -48,12 +49,13 @@ public class PluginService implements IPluginService {
     @SneakyThrows
     @Override
     public void checkCrawlerPlugins() {
-        String crawlerRelativePath = projectDirectory + crawlerDirectory;
+        baseDir = PluginUtility.resolveAbsolutePath(baseDir);
+        String crawlerAbsolutePath = baseDir + projectDirectory + crawlerDirectory;
         var crawlerClasses = PluginUtility.getAllPluginsFromFolderWithoutInstantiation(
-                                crawlerRelativePath, crawlerPackageName, IDataCrawler.class);
-        if (crawlers.size() == 0 || crawlerClasses.size() != crawlers.size()) {
-            crawlers = PluginUtility.getAllPluginsFromFolder(crawlerRelativePath, crawlerPackageName,
-                    IDataCrawler.class);
+                                crawlerAbsolutePath, crawlerPackageName, IDataCrawler.class);
+        if (crawlers.isEmpty() || crawlerClasses.size() != crawlers.size()) {
+            crawlers = PluginUtility.getAllPluginsFromFolder(crawlerAbsolutePath, crawlerPackageName,
+                                IDataCrawler.class);
         }
     }
 
@@ -73,11 +75,12 @@ public class PluginService implements IPluginService {
 
     @SneakyThrows
     private void checkConverterPlugins() {
-        String converterRelativePath = projectDirectory + converterDirectory;
+        baseDir = PluginUtility.resolveAbsolutePath(baseDir);
+        String converterAbsolutePath = baseDir + projectDirectory + converterDirectory;
         var exporterClasses = PluginUtility.getAllPluginsFromFolderWithoutInstantiation(
-                converterRelativePath, converterPackageName, IFileConverter.class);
-        if (exporters.size() == 0 || exporterClasses.size() != exporters.size()) {
-            exporters = PluginUtility.getAllPluginsFromFolder(converterRelativePath, 
+                            converterAbsolutePath, converterPackageName, IFileConverter.class);
+        if (exporters.isEmpty() || exporterClasses.size() != exporters.size()) {
+            exporters = PluginUtility.getAllPluginsFromFolder(converterAbsolutePath,
                         converterPackageName, IFileConverter.class);
         }
     }

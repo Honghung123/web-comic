@@ -26,13 +26,13 @@ public class PluginUtility {
      * @throws IllegalAccessException
      */
     @SuppressWarnings("unchecked")
-    public static <T> List<T> getAllPluginsFromFolder(String concreteRelativePath, String pluginPackageName,
+    public static <T> List<T> getAllPluginsFromFolder(String concretePath, String pluginPackageName,
             Class<?> targetInterface) throws IOException, ClassNotFoundException, NoSuchMethodException,
             InvocationTargetException, InstantiationException, IllegalAccessException {
         if (!targetInterface.isInterface()) {
             throw new IllegalAccessException("The class is not an interface");
         }
-        var pluginClasses = getAllPluginsFromFolderWithoutInstantiation(concreteRelativePath,
+        var pluginClasses = getAllPluginsFromFolderWithoutInstantiation(concretePath,
                                                          pluginPackageName, targetInterface);
         List<T> plugins = new ArrayList<>();
         for (var clazz : pluginClasses) {
@@ -43,13 +43,13 @@ public class PluginUtility {
         return plugins;
     }
 
-    public static List<Class<?>> getAllPluginsFromFolderWithoutInstantiation(String concreteRelativePath, String pluginPackageName,
+    public static List<Class<?>> getAllPluginsFromFolderWithoutInstantiation(String concretePath, String pluginPackageName,
             Class<?> targetInterface) throws IOException, ClassNotFoundException, NoSuchMethodException,
             InvocationTargetException, InstantiationException, IllegalAccessException {
         if (!targetInterface.isInterface()) {
             throw new IllegalAccessException("The class is not an interface");
         }
-        List<File> files = getAllFilesFromDirectory(concreteRelativePath);
+        List<File> files = getAllFilesFromDirectory(concretePath);
         List<Class<?>> pluginClasses = new ArrayList<>();
         for (File file : files) {
             var clazz = getClassInstance(file, pluginPackageName);
@@ -87,14 +87,22 @@ public class PluginUtility {
     /**
      * Retrieves all files in the specified directory.
      *
-     * @param  relativePath   the relative directory path
+     * @param  absolutePath   the relative directory path
      * @return               a list of files having type of File in the directory
      * @throws IOException   if an I/O error occurs
      */
-    public static List<File> getAllFilesFromDirectory(String relativePath) throws IOException {
-        Path pluginDirectory = Paths.get(relativePath).toAbsolutePath(); 
+    public static List<File> getAllFilesFromDirectory(String absolutePath) throws IOException {
+        Path pluginDirectory = Paths.get(absolutePath);
         return Files.list(pluginDirectory)
                 .map(Path::toFile)
                 .collect(Collectors.toList());
+    }
+
+    public static String resolveAbsolutePath(String absolutePath) {
+        String baseProject = "\\backend\\comic";
+        if (!absolutePath.endsWith(baseProject)) {
+            absolutePath = absolutePath + baseProject;
+        }
+        return absolutePath;
     }
 }
