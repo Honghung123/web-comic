@@ -2,8 +2,6 @@ import { Button } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { useContext } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 import { Context, UPDATE_PRIORITY } from '../../GlobalContext';
 
@@ -25,18 +23,16 @@ function SettingServer() {
     };
 
     return (
-        <div className="border-2 rounded-lg mx-auto p-4 pt-2" style={{ maxWidth: 520 }}>
-            <ToastContainer />
+        <div className="border-2 rounded-lg mx-auto p-4 pt-2" style={{ maxWidth: 500 }}>
             <div className="flex">
                 <h2 className="text-2xl flex-1 text-center">Danh sách server</h2>
                 <SettingsIcon />
             </div>
-            <div className="flex justify-center gap-8 mt-4">
+            <div className="flex flex-wrap justify-center gap-8 mt-4">
                 {servers.map((item, index) => {
                     if (item.priority === 1) {
                         return (
                             <Button
-                                onClick={handleChangeServer}
                                 id={`server-${index}`}
                                 key={index}
                                 className="w-1/4"

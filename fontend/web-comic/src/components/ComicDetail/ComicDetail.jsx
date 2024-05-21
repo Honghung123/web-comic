@@ -26,10 +26,14 @@ function ComicDetail({ tagId }) {
     }
 
     useEffect(() => {
+        window.scrollTo(0, 0);
         if (server_id !== undefined) {
             axios
                 .get(`http://localhost:8080/api/v1/comic/reading/${tagId}`, {
                     params: { server_id },
+                    headers: {
+                        'crawler-size': servers.length,
+                    },
                 })
                 .then((response) => {
                     const responseData = response.data;
@@ -39,11 +43,21 @@ function ComicDetail({ tagId }) {
                     } else {
                         //thong bao loi
                         console.log(responseData.message);
+                        toast.error(responseData.message);
                     }
                 })
                 .catch((err) => {
                     //thong bao loi
                     console.log(err);
+                    if (err.response?.status === 503) {
+                        // back end update list servers
+                        toast.error(err.response.data?.message, {
+                            toastId: 503,
+                            autoClose: false,
+                        });
+                    } else {
+                        toast.error('Internal server error');
+                    }
                 });
 
             axios
@@ -51,6 +65,9 @@ function ComicDetail({ tagId }) {
                     params: {
                         server_id,
                         page: 1,
+                    },
+                    headers: {
+                        'crawler-size': servers.length,
                     },
                 })
                 .then((response) => {
@@ -63,6 +80,9 @@ function ComicDetail({ tagId }) {
                                 params: {
                                     server_id,
                                     page: responseData.pagination?.totalPages,
+                                },
+                                headers: {
+                                    'crawler-size': servers.length,
                                 },
                             })
                             .then((response) => {
@@ -111,6 +131,9 @@ function ComicDetail({ tagId }) {
                         {
                             params: {
                                 server_id,
+                            },
+                            headers: {
+                                'crawler-size': servers.length,
                             },
                         },
                     );

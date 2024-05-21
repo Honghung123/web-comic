@@ -2,9 +2,10 @@ import { FormControl, MenuItem, Select, InputLabel, TextField, Button, Divider }
 import SearchIcon from '@mui/icons-material/Search';
 import { useContext, useEffect, useState } from 'react';
 
-import * as request from '../../utils';
 import { Context } from '../../GlobalContext';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 function SearchBox() {
     const navigate = useNavigate();
@@ -65,22 +66,40 @@ function SearchBox() {
         setGenre('');
         if (servers && servers.length > 0) {
             const server_id = servers.find((server) => server.priority === 1).id;
-            request
-                .get('/api/v1/comic/genres', {
+            axios
+                .get('http://localhost:8080/api/v1/comic/genres', {
                     params: {
                         server_id,
                     },
+                    headers: {
+                        'crawler-size': servers.length,
+                    },
                 })
-                .then((result) => {
-                    if (result.statusCode === 200) {
-                        result.data.unshift({
+                .then((response) => {
+                    const responseData = response.data;
+                    if (responseData.statusCode === 200) {
+                        responseData.data.unshift({
                             tag: 'all',
                             fullTag: '',
                             label: 'Tất cả',
                         });
-                        setListGenres(result.data);
+                        setListGenres(responseData.data);
                     } else {
-                        //Thong bao loi
+                        // Thong bao loi
+                        console.log(responseData.message);
+                        toast.error(responseData.message);
+                    }
+                })
+                .catch((err) => {
+                    console.log(err);
+                    if (err.response?.status === 503) {
+                        // back end update list servers
+                        toast.error(err.response.data?.message, {
+                            toastId: 503,
+                            autoClose: false,
+                        });
+                    } else {
+                        toast.error('Internal server error');
                     }
                 });
         }

@@ -48,8 +48,13 @@ function ReadingChapter() {
 
     const contentRef = useRef();
 
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     // fetch data
     useEffect(() => {
+        setOpenListChapters(false);
         if (servers && servers.length > 0) {
             setLoading(true);
             if (chapterData) {
@@ -61,6 +66,9 @@ function ReadingChapter() {
                 .get(`http://localhost:8080/api/v1/comic/reading/${tagId}/chapters/${chapter}`, {
                     params: {
                         server_id,
+                    },
+                    headers: {
+                        'crawler-size': servers.length,
                     },
                 })
                 .then((response) => {
@@ -76,12 +84,22 @@ function ReadingChapter() {
                     } else {
                         // thong bao loi
                         console.log(responseData.message);
+                        toast.error(responseData.message);
                     }
                     setLoading(false);
                 })
                 .catch((err) => {
                     // thong bao loi
                     console.log(err);
+                    if (err.response?.status === 503) {
+                        // back end update list servers
+                        toast.error(err.response.data?.message, {
+                            toastId: 503,
+                            autoClose: false,
+                        });
+                    } else {
+                        toast.error('Internal server error');
+                    }
                     setLoading(false);
                 });
         }
@@ -113,6 +131,9 @@ function ReadingChapter() {
                         {
                             params: {
                                 server_id,
+                            },
+                            headers: {
+                                'crawler-size': servers.length,
                             },
                         },
                     );
@@ -302,13 +323,24 @@ function ReadingChapter() {
                                 </div>
 
                                 <div className="flex justify-between gap-8 mt-4 items-center">
-                                    <div className="">Font chu</div>
+                                    <div style={{ width: 90 }}>Font chữ</div>
                                     <Select
                                         onChange={(e) => {
                                             localStorage.setItem('fontFamily', e.target.value);
                                             setFontFamily(e.target.value);
                                         }}
-                                        sx={{ flex: 1 }}
+                                        sx={{
+                                            flex: 1,
+                                            height: 40,
+                                            '&.MuiOutlinedInput-root': {
+                                                '&:hover fieldset': {
+                                                    borderColor: 'rgba(25, 118, 210, 0.5)',
+                                                },
+                                                '&.Mui-focused fieldset': {
+                                                    border: '1px solid rgba(25, 118, 210, 0.5)',
+                                                },
+                                            },
+                                        }}
                                         value={fontFamily}
                                         className="bg-white"
                                     >
@@ -321,13 +353,24 @@ function ReadingChapter() {
                                 </div>
 
                                 <div className="flex justify-between gap-8 mt-4 items-center">
-                                    <div className="">Cach dong</div>
+                                    <div style={{ width: 90 }}>Cách dòng</div>
                                     <Select
                                         onChange={(e) => {
                                             localStorage.setItem('lineHeight', e.target.value);
                                             setLineHeight(e.target.value);
                                         }}
-                                        sx={{ flex: 1 }}
+                                        sx={{
+                                            flex: 1,
+                                            height: 40,
+                                            '&.MuiOutlinedInput-root': {
+                                                '&:hover fieldset': {
+                                                    borderColor: 'rgba(25, 118, 210, 0.5)',
+                                                },
+                                                '&.Mui-focused fieldset': {
+                                                    border: '1px solid rgba(25, 118, 210, 0.5)',
+                                                },
+                                            },
+                                        }}
                                         value={lineHeight}
                                         className="bg-white"
                                     >
@@ -340,8 +383,8 @@ function ReadingChapter() {
                                 </div>
 
                                 <div className="flex justify-between gap-8 mt-4 items-center">
-                                    <div className="">Co chu</div>
-                                    <div className="flex grow pl-3">
+                                    <div style={{ width: 90 }}>Cỡ chữ</div>
+                                    <div className="flex grow">
                                         <Button
                                             onClick={(e) => {
                                                 setFontSize((prev) => {
@@ -359,7 +402,7 @@ function ReadingChapter() {
                                             -
                                         </Button>
                                         <div
-                                            className="border w-16 flex grow justify-center items-center"
+                                            className="border flex grow justify-center items-center"
                                             style={{ borderColor: 'rgba(25, 118, 210, 0.5)' }}
                                         >
                                             {fontSize}

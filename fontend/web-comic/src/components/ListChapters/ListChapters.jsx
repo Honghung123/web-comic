@@ -2,6 +2,8 @@ import { Divider, Pagination, Stack, PaginationItem } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
 import { Context } from '../../GlobalContext';
 import Loading from '../Loading';
 import * as Utils from '../../utils';
@@ -31,6 +33,9 @@ function ListChapters({ tagId, headerSize = 'text-3xl' }) {
                         server_id,
                         page,
                     },
+                    headers: {
+                        'crawler-size': servers.length,
+                    },
                 })
                 .then((response) => {
                     const responseData = response.data;
@@ -41,12 +46,22 @@ function ListChapters({ tagId, headerSize = 'text-3xl' }) {
                     } else {
                         // thong bao loi
                         console.log(responseData.message);
+                        toast.error(responseData.message);
                     }
                     setLoading(false);
                 })
                 .catch((err) => {
                     // thong bao loi
                     console.log(err);
+                    if (err.response?.status === 503) {
+                        // back end update list servers
+                        toast.error(err.response.data?.message, {
+                            toastId: 503,
+                            autoClose: false,
+                        });
+                    } else {
+                        toast.error('Internal server error');
+                    }
                     setLoading(false);
                 });
         }

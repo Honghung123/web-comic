@@ -2,6 +2,7 @@ import axios from 'axios';
 import { useContext, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Pagination, PaginationItem, Stack } from '@mui/material';
+import { toast } from 'react-toastify';
 
 import { Context } from '../../GlobalContext';
 import ComicItem from '../ComicItem';
@@ -33,22 +34,36 @@ function ListComics() {
                         genre,
                         keyword,
                     },
+                    headers: {
+                        'crawler-size': servers.length,
+                    },
                 })
                 .then((response) => {
-                    if (response.data.statusCode === 200) {
+                    const responseData = response.data;
+                    if (responseData.statusCode === 200) {
                         setComicsData({
-                            comics: response.data.data,
-                            pagination: response.data.pagination,
+                            comics: responseData.data,
+                            pagination: responseData.pagination,
                         });
                     } else {
                         // thong bao loi
-                        console.log(response.data.message);
+                        console.log(responseData.message);
+                        toast.error(responseData.message);
                     }
                     setLoading(false);
                 })
-                .catch((error) => {
+                .catch((err) => {
                     //thong bao loi
-                    console.log(error);
+                    console.log(err);
+                    if (err.response?.status === 503) {
+                        // back end update list servers
+                        toast.error(err.response.data?.message, {
+                            toastId: 503,
+                            autoClose: false,
+                        });
+                    } else {
+                        toast.error('Internal server error');
+                    }
                     setLoading(false);
                 });
         }
@@ -66,23 +81,25 @@ function ListComics() {
         return searchStr;
     };
 
-    let headerText = "Danh sách truyện đề cử:";
-    if(keyword != '' && genre != '') {
-        headerText = `Tìm kiếm cho: "${keyword}". Thể loại: ${genre.replace(/-/g, ' ')}.`
-    }else if(keyword != '' && genre == '') {
-        headerText = `Tìm kiếm cho: "${keyword}"`
-    }else if(keyword == '' && genre != '') {
-        headerText = `Tìm kiếm theo thể loại: "${genre.replace(/-/g, ' ')}"`
-    } 
+    let headerText = 'Danh sách truyện đề cử:';
+    if (keyword != '' && genre != '') {
+        headerText = `Tìm kiếm cho: "${keyword}". Thể loại: ${genre.replace(/-/g, ' ')}.`;
+    } else if (keyword != '' && genre == '') {
+        headerText = `Tìm kiếm cho: "${keyword}"`;
+    } else if (keyword == '' && genre != '') {
+        headerText = `Tìm kiếm theo thể loại: "${genre.replace(/-/g, ' ')}"`;
+    }
     return (
-        <div className="min-h-96 mt-8 mx-auto relative" style={{ maxWidth: 1200 }}>
+        <div className="min-h-96 p-2 mt-8 mx-auto relative" style={{ maxWidth: 1200 }}>
             <Loading loading={loading} />
-            <h2 className="text-3xl font-semibold underline">{headerText}</h2>
-            {(keyword != '' && genre == '') && <>
-                <h3 className="text-xl font-semibold underline">Danh sách tác giả:</h3>
-                <p>Danh sách ....</p>
-                <h3 className="text-xl font-semibold underline">Danh sách truyện:</h3>
-            </>}
+            <h2 className="text-3xl pt-2 font-semibold underline underline-offset-8">{headerText}</h2>
+            {keyword != '' && genre == '' && (
+                <div>
+                    <h3 className="text-xl font-semibold underline underline-offset-4">Danh sách tác giả:</h3>
+                    <p>Danh sách ....</p>
+                    <h3 className="text-xl font-semibold underline underline-offset-4">Danh sách truyện:</h3>
+                </div>
+            )}
             <div className="flex flex-wrap min-h-full" style={{ marginLeft: '-1rem', marginRight: '-1rem' }}>
                 {comicsData.comics &&
                     comicsData.comics.map((comic) => (
