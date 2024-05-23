@@ -9,5 +9,6 @@ import java.util.UUID;
 @AllArgsConstructor  
 public class CrawlerPlugin {
     UUID id;
-    String name; 
+    String name;
+
 }

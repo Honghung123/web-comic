@@ -40,7 +40,9 @@ public class PluginService implements IPluginService {
     public Object getPlugin(Plugin plugin, int pluginId) {
         switch (plugin) {
             case CRAWLER -> { 
-                return crawlers.get(pluginId);
+//                return crawlers.get(pluginId);
+                return crawlers.stream().filter(crawler -> crawler.getServerID() == pluginId).findFirst()
+                        .orElseThrow(() -> new InvalidPluginListException("Plugin not found"));
             }
             case EXPORTER -> { 
                 return exporters.get(pluginId);
@@ -53,7 +55,7 @@ public class PluginService implements IPluginService {
     @SneakyThrows
     @Override
     public void checkCrawlerPlugins() {
-        baseDir = PluginUtility.resolveAbsolutePath(baseDir);
+        baseDir = PluginUtility.resolveAbsolutePath(System.getProperty("user.dir"));
 //        String crawlerAbsolutePath = baseDir + projectDirectory + crawlerDirectory;
         Path crawlerAbsolutePath = Paths.get(baseDir, projectDirectory, crawlerDirectory);
         var crawlerClasses = PluginUtility.getAllPluginsFromFolderWithoutInstantiation(
@@ -69,17 +71,19 @@ public class PluginService implements IPluginService {
     public List<CrawlerPlugin> getAllCrawlerPlugins() {
         this.checkCrawlerPlugins();
         List<CrawlerPlugin> pluginList = new ArrayList<>();
+        int index = 0;
         for (var crawler : crawlers) {
             String pluginName = crawler.getPluginName();
-            UUID id = crawler.getUUID();
+            UUID id = crawler.getID();
             pluginList.add(new CrawlerPlugin(id, pluginName));
+            index++;
         }
         return pluginList;
     }
 
     @SneakyThrows
     private void checkConverterPlugins() {
-        baseDir = PluginUtility.resolveAbsolutePath(baseDir);
+        baseDir = PluginUtility.resolveAbsolutePath(System.getProperty("user.dir"));
 //        String converterAbsolutePath = baseDir + projectDirectory + converterDirectory;
         Path converterAbsolutePath = Paths.get(baseDir, projectDirectory, converterDirectory);
         var exporterClasses = PluginUtility.getAllPluginsFromFolderWithoutInstantiation(
@@ -95,11 +99,13 @@ public class PluginService implements IPluginService {
     public List<ConverterPlugin> getAllConverterPlugins() {
         this.checkConverterPlugins();
         List<ConverterPlugin> pluginList = new ArrayList<>();
+        int index = 0;
         for (var converter : exporters) {
             String pluginName = converter.getPluginName();
             String blobType = converter.getBlobType();
             UUID id = converter.getId();
-            pluginList.add(new ConverterPlugin(id, pluginName, blobType));
+            pluginList.add(new ConverterPlugin(index, pluginName, blobType));
+            index++;
         }
         return pluginList;
     }
@@ -126,4 +132,5 @@ public class PluginService implements IPluginService {
             throw new InvalidPluginListException("Converter has changed. Please refresh your page");
         }
     }
+
 }

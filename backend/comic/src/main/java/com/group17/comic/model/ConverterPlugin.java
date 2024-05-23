@@ -8,8 +8,10 @@ import java.util.UUID;
 @Getter 
 @AllArgsConstructor  
 public class ConverterPlugin {
-    UUID id;
+//    UUID id;
+    int id;
     String name;
-    String blobType; // Cái này dùng bên Client để download file 
+    String blobType; // Cái này dùng bên Client để download file
+
 }
 

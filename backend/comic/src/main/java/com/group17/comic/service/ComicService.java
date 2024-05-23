@@ -42,6 +42,7 @@ public class ComicService implements IComicService{
         return comic;
     }
 
+
     @SneakyThrows
     @Override
     public DataSearchModel<Integer, List<ComicModel>, List<Author>> searchComic(int pluginId,

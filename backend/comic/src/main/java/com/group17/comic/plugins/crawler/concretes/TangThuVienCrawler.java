@@ -21,9 +21,15 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
     private final String TRUYEN_URL = "https://truyen.tangthuvien.vn/";
     private final UUID id = UUID.randomUUID();
     @Override
-    public UUID getUUID() {
+    public UUID getID() {
         return id;
     }
+
+    @Override
+    public Integer getServerID() {
+        return 0;
+    }
+
     @Override
     public String getPluginName() {
         return "Tang Thu Vien";

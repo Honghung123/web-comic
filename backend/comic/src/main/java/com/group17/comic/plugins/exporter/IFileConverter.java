@@ -10,4 +10,5 @@ public interface IFileConverter {
     String getPluginName();
     String getBlobType();
     ChapterFile getConvertedFile(ChapterDTO chapterDto);
+
 }

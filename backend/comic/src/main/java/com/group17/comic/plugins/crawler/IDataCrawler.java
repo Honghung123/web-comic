@@ -7,7 +7,8 @@ import com.group17.comic.dto.request.AlternatedChapterDTO;
 import com.group17.comic.model.*; 
 
 public interface IDataCrawler {
-    UUID getUUID();
+    UUID getID();
+    Integer getServerID();
     String getPluginName();
     List<Genre> getGenres();
     DataModel<Integer, List<Chapter>> getChapters(String comicTagId, int currentPage);

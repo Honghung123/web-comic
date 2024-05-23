@@ -33,8 +33,13 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     private final String TRUYEN_URL = "https://truyenfull.vn/";
     private final UUID id = UUID.randomUUID();
     @Override
-    public UUID getUUID() {
+    public UUID getID() {
         return id;
+    }
+
+    @Override
+    public Integer getServerID() {
+        return 2;
     }
 
     @Override
