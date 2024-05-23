@@ -3,6 +3,7 @@ package com.group17.comic.plugins.exporter.concretes;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.UUID;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -29,6 +30,11 @@ import com.group17.comic.plugins.exporter.IFileConverter;
 
 public class PdfConverter implements IFileConverter {
     private static String uploadDir = "backend/comic/src/main/java/com/group17/comic/plugins/exporter/uploads/";
+    private final UUID id = UUID.randomUUID();
+    @Override
+    public UUID getId() {
+        return id;
+    }
 
     @Override
     public String getPluginName() {

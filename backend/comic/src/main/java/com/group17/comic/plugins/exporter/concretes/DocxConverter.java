@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.UUID;
 
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -31,7 +32,11 @@ import okhttp3.Response;
 
 public class DocxConverter implements IFileConverter {
     private static String uploadDir = "backend/comic/src/main/java/com/group17/comic/plugins/exporter/uploads/";
-
+    private final UUID id = UUID.randomUUID();
+    @Override
+    public UUID getId() {
+        return id;
+    }
     @Override
     public String getPluginName() {
         return "DOCX";

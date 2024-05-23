@@ -4,11 +4,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.jsoup.HttpStatusException;
 import org.jsoup.nodes.Document;
@@ -34,7 +30,12 @@ import lombok.SneakyThrows;
 
 public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     private final String TRUYEN_API = "https://api.truyenfull.vn/";
-    private final String TRUYEN_URL = "https://truyenfull.vn/"; 
+    private final String TRUYEN_URL = "https://truyenfull.vn/";
+    private final UUID id = UUID.randomUUID();
+    @Override
+    public UUID getUUID() {
+        return id;
+    }
 
     @Override
     public String getPluginName() {

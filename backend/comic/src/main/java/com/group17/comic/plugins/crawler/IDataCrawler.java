@@ -1,11 +1,13 @@
 package com.group17.comic.plugins.crawler;
  
 import java.util.List;
+import java.util.UUID;
 
 import com.group17.comic.dto.request.AlternatedChapterDTO;
 import com.group17.comic.model.*; 
 
-public interface IDataCrawler {     
+public interface IDataCrawler {
+    UUID getUUID();
     String getPluginName();
     List<Genre> getGenres();
     DataModel<Integer, List<Chapter>> getChapters(String comicTagId, int currentPage);

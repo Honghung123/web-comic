@@ -13,8 +13,12 @@ import com.group17.comic.plugins.exporter.IFileConverter;
 import com.group17.comic.utils.PluginUtility;
 
 import lombok.SneakyThrows;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service("pluginServiceV1")
 public class PluginService implements IPluginService {
@@ -50,11 +54,12 @@ public class PluginService implements IPluginService {
     @Override
     public void checkCrawlerPlugins() {
         baseDir = PluginUtility.resolveAbsolutePath(baseDir);
-        String crawlerAbsolutePath = baseDir + projectDirectory + crawlerDirectory;
+//        String crawlerAbsolutePath = baseDir + projectDirectory + crawlerDirectory;
+        Path crawlerAbsolutePath = Paths.get(baseDir, projectDirectory, crawlerDirectory);
         var crawlerClasses = PluginUtility.getAllPluginsFromFolderWithoutInstantiation(
-                                crawlerAbsolutePath, crawlerPackageName, IDataCrawler.class);
+                                crawlerAbsolutePath.toString(), crawlerPackageName, IDataCrawler.class);
         if (crawlers.isEmpty() || crawlerClasses.size() != crawlers.size()) {
-            crawlers = PluginUtility.getAllPluginsFromFolder(crawlerAbsolutePath, crawlerPackageName,
+            crawlers = PluginUtility.getAllPluginsFromFolder(crawlerAbsolutePath.toString(), crawlerPackageName,
                                 IDataCrawler.class);
         }
     }
@@ -64,11 +69,10 @@ public class PluginService implements IPluginService {
     public List<CrawlerPlugin> getAllCrawlerPlugins() {
         this.checkCrawlerPlugins();
         List<CrawlerPlugin> pluginList = new ArrayList<>();
-        int index = 0;
         for (var crawler : crawlers) {
             String pluginName = crawler.getPluginName();
-            pluginList.add(new CrawlerPlugin(index, pluginName));
-            index++;
+            UUID id = crawler.getUUID();
+            pluginList.add(new CrawlerPlugin(id, pluginName));
         }
         return pluginList;
     }
@@ -76,11 +80,12 @@ public class PluginService implements IPluginService {
     @SneakyThrows
     private void checkConverterPlugins() {
         baseDir = PluginUtility.resolveAbsolutePath(baseDir);
-        String converterAbsolutePath = baseDir + projectDirectory + converterDirectory;
+//        String converterAbsolutePath = baseDir + projectDirectory + converterDirectory;
+        Path converterAbsolutePath = Paths.get(baseDir, projectDirectory, converterDirectory);
         var exporterClasses = PluginUtility.getAllPluginsFromFolderWithoutInstantiation(
-                            converterAbsolutePath, converterPackageName, IFileConverter.class);
+                            converterAbsolutePath.toString(), converterPackageName, IFileConverter.class);
         if (exporters.isEmpty() || exporterClasses.size() != exporters.size()) {
-            exporters = PluginUtility.getAllPluginsFromFolder(converterAbsolutePath,
+            exporters = PluginUtility.getAllPluginsFromFolder(converterAbsolutePath.toString(),
                         converterPackageName, IFileConverter.class);
         }
     }
@@ -90,12 +95,11 @@ public class PluginService implements IPluginService {
     public List<ConverterPlugin> getAllConverterPlugins() {
         this.checkConverterPlugins();
         List<ConverterPlugin> pluginList = new ArrayList<>();
-        int index = 0;
         for (var converter : exporters) {
             String pluginName = converter.getPluginName();
             String blobType = converter.getBlobType();
-            pluginList.add(new ConverterPlugin(index, pluginName, blobType));
-            index++;
+            UUID id = converter.getId();
+            pluginList.add(new ConverterPlugin(id, pluginName, blobType));
         }
         return pluginList;
     }

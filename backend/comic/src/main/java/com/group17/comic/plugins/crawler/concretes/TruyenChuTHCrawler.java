@@ -2,6 +2,7 @@ package com.group17.comic.plugins.crawler.concretes;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -19,7 +20,11 @@ import lombok.SneakyThrows;
 
 public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
     private final String TRUYEN_URL = "https://truyenchuth.com/";
-
+    private final UUID id = UUID.randomUUID();
+    @Override
+    public UUID getUUID() {
+        return id;
+    }
     @Override
     public String getPluginName() {
         return "Truyen Chu TH";

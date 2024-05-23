@@ -1,9 +1,6 @@
 package com.group17.comic.plugins.crawler.concretes;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -22,7 +19,11 @@ import lombok.SneakyThrows;
 
 public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
     private final String TRUYEN_URL = "https://truyen.tangthuvien.vn/";
-
+    private final UUID id = UUID.randomUUID();
+    @Override
+    public UUID getUUID() {
+        return id;
+    }
     @Override
     public String getPluginName() {
         return "Tang Thu Vien";
