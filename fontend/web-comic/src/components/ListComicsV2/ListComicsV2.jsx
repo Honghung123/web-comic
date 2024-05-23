@@ -1,27 +1,40 @@
 import { useContext, useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import { Pagination, PaginationItem, Stack } from '@mui/material';
 
 import { Context } from '../../GlobalContext';
 function ListComicsV2() {
     const location = useLocation();
     const { pathname } = location;
-    const authorId = pathname.substring(pathname.lastIndexOf('/') + 1);
+    const isAuthorPage = pathname.startsWith('/author');
+    const authorId = isAuthorPage ? pathname.substring(pathname.lastIndexOf('/') + 1) : '';
+    const genre = isAuthorPage ? '' : pathname.substring(pathname.lastIndexOf('/') + 1);
     const { servers } = useContext(Context);
     const [comicsData, setComicsData] = useState({});
     const [page, setPage] = useState(1);
 
     useEffect(() => {
+        setPage(1);
+    }, [pathname]);
+
+    useEffect(() => {
         window.scrollTo(0, 0);
-        setComicsData({});
+        setComicsData({ ...comicsData, comics: undefined });
         if (servers && servers.length > 0) {
             const server_id = servers.find((server) => server.priority === 1).id;
+
+            let requestUrl = isAuthorPage
+                ? `http://localhost:8080/api/v1/comic/author/${authorId}`
+                : 'http://localhost:8080/api/v1/comic/search';
+
             axios
-                .get(`http://localhost:8080/api/v1/comic/author/${authorId}`, {
+                .get(requestUrl, {
                     params: {
                         server_id,
                         page,
+                        genre,
                     },
                     headers: {
                         'crawler-size': servers.length,
@@ -55,14 +68,15 @@ function ListComicsV2() {
                     }
                 });
         }
-    }, [page, authorId]);
+    }, [page, pathname]);
 
     return (
-        <div className="min-h-96 p-2 mx-auto relative" style={{ maxWidth: 1200 }}>
+        <div className="min-h-96 p-2 mx-auto relative" style={{ maxWidth: 1000 }}>
             {comicsData.comics && (
                 <>
                     <h2 className="text-3xl font-semibold underline underline-offset-8">
-                        {comicsData.comics.length && `Tác giả ${comicsData.comics[0].author.name}`}
+                        {comicsData.comics.length > 0 &&
+                            (isAuthorPage ? `Tác giả ${comicsData.comics[0].author.name}` : `Thể loại ${genre}`)}
                     </h2>
                     <div className="divide-y">
                         {comicsData.comics.map((comic) => {
@@ -76,18 +90,33 @@ function ListComicsV2() {
                                                 onError={(e) => {
                                                     e.target.src = comic.alternateImage;
                                                 }}
-                                                alt=""
+                                                alt={comic.tagId}
                                             />
                                         </div>
                                         <div className="px-4">
-                                            <h3 className="text-xl font-semibold">{comic.title}</h3>
-                                            <div>{comic.author.name}</div>
-                                            <div>
-                                                The loai:{' '}
-                                                {comic.genres.map((genre) => (
-                                                    <span>{genre.label}</span>
-                                                ))}
-                                            </div>
+                                            <Link to={`/info/${comic.tagId}`}>
+                                                <h3
+                                                    className="text-xl font-semibold hover:text-purple-500"
+                                                    style={{ maxWidth: 580 }}
+                                                >
+                                                    {comic.title}
+                                                </h3>
+                                            </Link>
+                                            <Link to={`/author/${comic.author.authorId}`}>
+                                                <div className="italic py-2 hover:text-purple-500">
+                                                    {comic.author.name}
+                                                </div>
+                                            </Link>
+                                            {comic.genres.length > 0 && (
+                                                <div>
+                                                    The loai:{' '}
+                                                    {comic.genres.map((genre) => (
+                                                        <Link to={`/genre/${genre.tag}`}>
+                                                            <span className="hover:text-purple-500">{genre.label}</span>
+                                                        </Link>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                     <div className="lg:pr-8 hidden sm:block font-semibold text-purple-500 text-lg">
@@ -98,6 +127,22 @@ function ListComicsV2() {
                         })}
                     </div>
                 </>
+            )}
+
+            {!isAuthorPage && (
+                <Stack spacing={2} className="mt-8" direction="row" justifyContent="center">
+                    <Pagination
+                        showFirstButton
+                        showLastButton
+                        variant="outlined"
+                        color="secondary"
+                        page={page}
+                        count={(comicsData.pagination && comicsData.pagination.totalPages) || 1}
+                        onChange={(event, value) => {
+                            setPage(value);
+                        }}
+                    />
+                </Stack>
             )}
         </div>
     );
