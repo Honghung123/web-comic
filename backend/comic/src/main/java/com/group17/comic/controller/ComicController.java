@@ -1,5 +1,12 @@
 package com.group17.comic.controller;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.group17.comic.dto.request.AlternatedChapterDTO;
 import com.group17.comic.dto.request.ChapterDTO;
 import com.group17.comic.dto.response.ChapterFile;
@@ -8,6 +15,7 @@ import com.group17.comic.model.*;
 import com.group17.comic.service.IComicService;
 import com.group17.comic.service.IPluginService;
 
+import com.group17.comic.utils.StringUtility;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid; 
@@ -26,10 +34,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.client.RestTemplate;
 
 // @Tag: A Swagger annotation used to categorize API endpoints related to the Plugin Controller.
 // @SneakyThrows: A Lombok annotation to silently throw checked exceptions
@@ -174,4 +185,32 @@ public class ComicController {
         var converters = pluginService.getAllConverterPlugins();
         return new SuccessfulResponse<>(HttpStatus.OK, "Success", converters);
     }
+//    @GetMapping("/test")
+//    public ResponseEntity<?> testing() throws IOException {
+//        final String BASE_API_URL = "https://otruyenapi.com/v1/api";
+//        String byGenres = "action";
+//        int currentPage = 1;
+//        String apiUrl = BASE_API_URL + "/the-loai" + "/" + byGenres + "?page=" + currentPage;
+//        List<ComicModel> matchedComics = new ArrayList<>();
+//        RestTemplate request = new RestTemplate();
+//        ResponseEntity<?> response = request.getForEntity(apiUrl, String.class);
+//        String responseBody = "";
+//        if(response.getStatusCode() == HttpStatus.OK) {
+//            responseBody = response.getBody().toString();
+//            ObjectMapper objectMapper = new ObjectMapper();
+////            JsonNode root = objectMapper.readTree(responseBody);
+////            JsonNode comicsNode = root.get("comics");
+//            JsonObject jsonObject = new Gson().fromJson(responseBody, JsonObject.class);
+//            JsonArray jsonArray = jsonObject.getAsJsonArray("items");
+//            for (JsonElement element : jsonArray) {
+//                var jsonObj = element.getAsJsonObject();
+//                String comicTagId = jsonObj.get("_id").getAsString();
+//                String title = jsonObj.get("name").getAsString();
+//                String image = jsonObj.get("image").getAsString();
+//
+//        }
+//        return ResponseEntity.ok().body(responseBody);
+//
+//    }
+
 }

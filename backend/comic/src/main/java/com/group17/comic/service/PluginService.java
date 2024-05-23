@@ -75,7 +75,7 @@ public class PluginService implements IPluginService {
         for (var crawler : crawlers) {
             String pluginName = crawler.getPluginName();
             UUID id = crawler.getID();
-            pluginList.add(new CrawlerPlugin(id, pluginName));
+            pluginList.add(new CrawlerPlugin(index, pluginName));
             index++;
         }
         return pluginList;
