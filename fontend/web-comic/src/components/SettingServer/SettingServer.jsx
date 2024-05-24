@@ -10,7 +10,7 @@ function SettingServer() {
     const [searchParams, setSearchParams] = useSearchParams();
 
     const handleChangeServer = (e) => {
-        const newHighestPriority = Number(e.target.id[e.target.id.length - 1]);
+        const newHighestPriority = servers.find((server) => server.id === e.target.id);
         setSearchParams((prev) => {
             prev.delete('page');
             prev.delete('genre');
@@ -18,7 +18,7 @@ function SettingServer() {
         });
         serversDispatch({
             type: UPDATE_PRIORITY,
-            payload: servers[newHighestPriority],
+            payload: newHighestPriority,
         });
     };
 
@@ -29,12 +29,12 @@ function SettingServer() {
                 <SettingsIcon />
             </div>
             <div className="flex flex-wrap justify-center gap-8 mt-4">
-                {servers.map((item, index) => {
-                    if (item.priority === 1) {
+                {servers.map((server) => {
+                    if (server.priority === 1) {
                         return (
                             <Button
-                                id={`server-${index}`}
-                                key={index}
+                                id={server.id}
+                                key={server.id}
                                 className="w-1/4"
                                 sx={{
                                     borderRadius: 2,
@@ -43,7 +43,7 @@ function SettingServer() {
                                 color="secondary"
                                 variant="contained"
                             >
-                                {item.name}
+                                {server.name}
                             </Button>
                         );
                     }
@@ -51,8 +51,8 @@ function SettingServer() {
                     return (
                         <Button
                             onClick={handleChangeServer}
-                            id={`server-${index}`}
-                            key={index}
+                            id={server.id}
+                            key={server.id}
                             className="w-1/4"
                             variant="contained"
                             sx={{
@@ -64,7 +64,7 @@ function SettingServer() {
                                 },
                             }}
                         >
-                            {item.name}
+                            {server.name}
                         </Button>
                     );
                 })}

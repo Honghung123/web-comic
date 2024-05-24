@@ -17,25 +17,10 @@ function Provider({ children }) {
         axios.get('http://localhost:8080/api/v1/comic/crawler-plugins').then(response => {
             const responseData = response.data;
             if (responseData.statusCode === 200) {
-                if (servers.length === 0) {
-                    serversDispatch({
-                        type: UPDATE_LIST,
-                        payload: responseData.data
-                    })
-                }
-                else {
-                    //them server moi duoc plugin vao
-                    if (responseData.data.length != servers.length) {
-                        // tam thoi xu ly nhu vay
-                        // chua luu tru duoc thu tu uu tien
-                        // can phai sua lai ....
-                        // cho sua backend r sua cai nay sau
-                        serversDispatch({
-                            type: UPDATE_LIST,
-                            payload: responseData.data
-                        })
-                    }
-                }
+                serversDispatch({
+                    type: UPDATE_LIST,
+                    payload: responseData.data
+                })
                 setLoading(false);
             }
             else {

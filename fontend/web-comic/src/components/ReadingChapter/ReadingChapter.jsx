@@ -38,7 +38,7 @@ function ReadingChapter() {
     const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 });
 
     // state for custom
-    const [bgColor, setBgColor] = useState(localStorage.getItem('bgColor') || 'bg-green-100');
+    const [bgColor, setBgColor] = useState(localStorage.getItem('bgColor') || 'bg-gray-100');
     const [fontFamily, setFontFamily] = useState(localStorage.getItem('fontFamily') || fontFamilies[0].value);
     const [lineHeight, setLineHeight] = useState(localStorage.getItem('lineHeight') || '150%');
     const [fontSize, setFontSize] = useState(Number(localStorage.getItem('fontSize') || '20'));
@@ -68,7 +68,7 @@ function ReadingChapter() {
                         server_id,
                     },
                     headers: {
-                        'crawler-size': servers.length,
+                        'list-crawlers': JSON.stringify(servers.map((server) => server.id)),
                     },
                 })
                 .then((response) => {
@@ -133,7 +133,7 @@ function ReadingChapter() {
                                 server_id,
                             },
                             headers: {
-                                'crawler-size': servers.length,
+                                'list-crawlers': JSON.stringify(servers.map((server) => server.id)),
                             },
                         },
                     );

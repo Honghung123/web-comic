@@ -32,7 +32,7 @@ function ComicDetail({ tagId }) {
                 .get(`http://localhost:8080/api/v1/comic/reading/${tagId}`, {
                     params: { server_id },
                     headers: {
-                        'crawler-size': servers.length,
+                        'list-crawlers': JSON.stringify(servers.map((server) => server.id)),
                     },
                 })
                 .then((response) => {
@@ -67,7 +67,7 @@ function ComicDetail({ tagId }) {
                         page: 1,
                     },
                     headers: {
-                        'crawler-size': servers.length,
+                        'list-crawlers': JSON.stringify(servers.map((server) => server.id)),
                     },
                 })
                 .then((response) => {
@@ -82,7 +82,7 @@ function ComicDetail({ tagId }) {
                                     page: responseData.pagination?.totalPages,
                                 },
                                 headers: {
-                                    'crawler-size': servers.length,
+                                    'list-crawlers': JSON.stringify(servers.map((server) => server.id)),
                                 },
                             })
                             .then((response) => {
@@ -94,6 +94,9 @@ function ComicDetail({ tagId }) {
                                         };
                                     });
                                 }
+                            })
+                            .catch((err) => {
+                                // nothing to do
                             });
                     } else {
                         // khong can thong bao loi
@@ -133,7 +136,7 @@ function ComicDetail({ tagId }) {
                                 server_id,
                             },
                             headers: {
-                                'crawler-size': servers.length,
+                                'list-crawlers': JSON.stringify(servers.map((server) => server.id)),
                             },
                         },
                     );
@@ -240,9 +243,22 @@ function ComicDetail({ tagId }) {
                     <div className="w-full h-32 mt-4">
                         <div className="text-xl font-semibold">
                             Thể loại:{' '}
-                            {comicData.genres.length > 0 && comicData.genres.map((genre) => genre.label).join(', ')}
+                            {comicData.genres.length > 0 &&
+                                comicData.genres.map((genre, index) => (
+                                    <>
+                                        <Link key={index} to={`/genre/${genre.tag}`}>
+                                            <span className="hover:text-purple-500">{genre.label}</span>
+                                        </Link>
+                                        {index < comicData.genres.length - 1 && <>, </>}
+                                    </>
+                                ))}
                         </div>
-                        <div className="text-xl font-semibold mt-2">Tác giả: {comicData.author?.name}</div>
+                        <div className="text-xl font-semibold mt-2">
+                            Tác giả:{' '}
+                            <Link to={`/author/${comicData.author?.authorId}`} className="hover:text-purple-500">
+                                {' ' + comicData.author?.name}
+                            </Link>
+                        </div>
                     </div>
                 </div>
             )}

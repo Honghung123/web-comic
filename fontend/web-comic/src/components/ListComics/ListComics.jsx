@@ -22,10 +22,11 @@ function ListComics() {
 
     useEffect(() => {
         window.scrollTo(0, 0);
-        setComicsData({});
+        setComicsData({ ...comicsData, comics: undefined });
         if (servers && servers.length > 0) {
             setLoading(true);
             const server_id = servers.find((server) => server.priority === 1).id;
+            console.log(JSON.stringify(servers.map((server) => server.id)));
             axios
                 .get(`http://localhost:8080/api/v1/comic/search`, {
                     params: {
@@ -35,7 +36,7 @@ function ListComics() {
                         keyword,
                     },
                     headers: {
-                        'crawler-size': servers.length,
+                        'list-crawlers': JSON.stringify(servers.map((server) => server.id)),
                     },
                 })
                 .then((response) => {
@@ -116,7 +117,7 @@ function ListComics() {
                     variant="outlined"
                     color="secondary"
                     page={page}
-                    count={(comicsData.pagination && comicsData.pagination.totalPages) || 10}
+                    count={(comicsData.pagination && comicsData.pagination.totalPages) || 1}
                     renderItem={(item) => {
                         return (
                             <PaginationItem component={Link} to={getSearchStr(keyword, genre, item.page)} {...item} />

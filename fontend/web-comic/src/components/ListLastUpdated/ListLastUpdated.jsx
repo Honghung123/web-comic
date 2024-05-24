@@ -21,7 +21,7 @@ function ListLastUpdate() {
                         page,
                     },
                     headers: {
-                        'crawler-size': servers.length,
+                        'list-crawlers': JSON.stringify(servers.map((server) => server.id)),
                     },
                 })
                 .then((response) => {
@@ -85,7 +85,14 @@ function ListLastUpdate() {
                                     </td>
                                     {comic.genres.length > 0 && (
                                         <td className="p-2 w-1/3">
-                                            {comic.genres.map((genre) => genre.label).join(', ')}
+                                            {comic.genres.map((genre, index) => (
+                                                <>
+                                                    <Link key={index} to={`/genre/${genre.tag}`}>
+                                                        <span className="hover:text-purple-500">{genre.label}</span>
+                                                    </Link>
+                                                    {index < comic.genres.length - 1 && <>, </>}
+                                                </>
+                                            ))}
                                         </td>
                                     )}
                                     {comic.newestChapter && (

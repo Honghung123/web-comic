@@ -72,7 +72,7 @@ function SearchBox() {
                         server_id,
                     },
                     headers: {
-                        'crawler-size': servers.length,
+                        'list-crawlers': JSON.stringify(servers.map((server) => server.id)),
                     },
                 })
                 .then((response) => {

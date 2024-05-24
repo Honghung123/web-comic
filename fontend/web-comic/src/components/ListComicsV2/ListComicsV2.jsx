@@ -2,9 +2,11 @@ import { useContext, useEffect, useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { Pagination, PaginationItem, Stack } from '@mui/material';
+import { Pagination, Stack } from '@mui/material';
 
 import { Context } from '../../GlobalContext';
+import Loading from '../Loading';
+
 function ListComicsV2() {
     const location = useLocation();
     const { pathname } = location;
@@ -14,6 +16,7 @@ function ListComicsV2() {
     const { servers } = useContext(Context);
     const [comicsData, setComicsData] = useState({});
     const [page, setPage] = useState(1);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         setPage(1);
@@ -24,7 +27,7 @@ function ListComicsV2() {
         setComicsData({ ...comicsData, comics: undefined });
         if (servers && servers.length > 0) {
             const server_id = servers.find((server) => server.priority === 1).id;
-
+            setLoading(true);
             let requestUrl = isAuthorPage
                 ? `http://localhost:8080/api/v1/comic/author/${authorId}`
                 : 'http://localhost:8080/api/v1/comic/search';
@@ -37,7 +40,7 @@ function ListComicsV2() {
                         genre,
                     },
                     headers: {
-                        'crawler-size': servers.length,
+                        'list-crawlers': JSON.stringify(servers.map((server) => server.id)),
                     },
                 })
                 .then((response) => {
@@ -53,6 +56,7 @@ function ListComicsV2() {
                         console.log(responseData.message);
                         toast.error(responseData.message);
                     }
+                    setLoading(false);
                 })
                 .catch((err) => {
                     //thong bao loi
@@ -66,17 +70,21 @@ function ListComicsV2() {
                     } else {
                         toast.error('Internal server error');
                     }
+                    setLoading(false);
                 });
         }
     }, [page, pathname]);
 
     return (
-        <div className="min-h-96 p-2 mx-auto relative" style={{ maxWidth: 1000 }}>
+        <div className="p-2 mx-auto relative" style={{ maxWidth: 1000, minHeight: 480 }}>
+            <Loading loading={loading} />
             {comicsData.comics && (
                 <>
                     <h2 className="text-3xl font-semibold underline underline-offset-8">
                         {comicsData.comics.length > 0 &&
-                            (isAuthorPage ? `Tác giả ${comicsData.comics[0].author.name}` : `Thể loại ${genre}`)}
+                            (isAuthorPage
+                                ? `Tác giả ${comicsData.comics[0].author.name || authorId}`
+                                : `Thể loại ${genre}`)}
                     </h2>
                     <div className="divide-y">
                         {comicsData.comics.map((comic) => {
@@ -93,12 +101,9 @@ function ListComicsV2() {
                                                 alt={comic.tagId}
                                             />
                                         </div>
-                                        <div className="px-4">
+                                        <div className="px-4" style={{ maxWidth: 580 }}>
                                             <Link to={`/info/${comic.tagId}`}>
-                                                <h3
-                                                    className="text-xl font-semibold hover:text-purple-500"
-                                                    style={{ maxWidth: 580 }}
-                                                >
+                                                <h3 className="text-xl font-semibold hover:text-purple-500">
                                                     {comic.title}
                                                 </h3>
                                             </Link>
@@ -109,11 +114,16 @@ function ListComicsV2() {
                                             </Link>
                                             {comic.genres.length > 0 && (
                                                 <div>
-                                                    The loai:{' '}
-                                                    {comic.genres.map((genre) => (
-                                                        <Link to={`/genre/${genre.tag}`}>
-                                                            <span className="hover:text-purple-500">{genre.label}</span>
-                                                        </Link>
+                                                    Thể loại:{' '}
+                                                    {comic.genres.map((genre, index) => (
+                                                        <>
+                                                            <Link key={index} to={`/genre/${genre.tag}`}>
+                                                                <span className="hover:text-purple-500">
+                                                                    {genre.label}
+                                                                </span>
+                                                            </Link>
+                                                            {index < comic.genres.length - 1 && <>, </>}
+                                                        </>
                                                     ))}
                                                 </div>
                                             )}

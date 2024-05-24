@@ -34,7 +34,7 @@ function ListChapters({ tagId, headerSize = 'text-3xl' }) {
                         page,
                     },
                     headers: {
-                        'crawler-size': servers.length,
+                        'list-crawlers': JSON.stringify(servers.map((server) => server.id)),
                     },
                 })
                 .then((response) => {
@@ -68,7 +68,7 @@ function ListChapters({ tagId, headerSize = 'text-3xl' }) {
     }, [page, tagId]);
 
     return (
-        <div className="min-h-32 mx-auto relative" style={{ maxWidth: 1200 }}>
+        <div className="min-h-64 mx-auto relative" style={{ maxWidth: 1200 }}>
             <Loading loading={loading} />
             <div className={`${headerSize} font-semibold`}>Danh sách chương: </div>
             <Divider orientation="horizontal" className={`${headerSize === 'text-xl' ? 'h-2' : 'h-4'}`} />
