@@ -31,15 +31,10 @@ import lombok.SneakyThrows;
 public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     private final String TRUYEN_API = "https://api.truyenfull.vn/";
     private final String TRUYEN_URL = "https://truyenfull.vn/";
-    private final UUID id = UUID.randomUUID();
+    private final UUID id = UUID.fromString("123e4567-e89b-12d3-a456-426614173002");
     @Override
     public UUID getID() {
         return id;
-    }
-
-    @Override
-    public Integer getServerID() {
-        return 2;
     }
 
     @Override

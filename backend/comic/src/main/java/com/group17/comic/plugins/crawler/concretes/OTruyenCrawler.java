@@ -23,10 +23,7 @@ public class OTruyenCrawler extends WebCrawler implements IDataCrawler {
         return id;
     }
 
-    @Override
-    public Integer getServerID() {
-        return 3;
-    }
+
 
     @Override
     public String getPluginName() {

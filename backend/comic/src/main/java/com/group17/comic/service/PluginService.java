@@ -1,5 +1,8 @@
 package com.group17.comic.service;
 
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -18,10 +21,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service("pluginServiceV1")
+
 public class PluginService implements IPluginService {
+    private static final Logger log = LoggerFactory.getLogger(PluginService.class);
     String baseDir = System.getProperty("user.dir");
     @Value("${comic.base_dir}")
     String projectDirectory;
@@ -37,15 +43,22 @@ public class PluginService implements IPluginService {
     private List<IFileConverter> exporters = new ArrayList<>();
 
     @Override
-    public Object getPlugin(Plugin plugin, int pluginId) {
+    public Object getPlugin(Plugin plugin, UUID pluginId) {
         switch (plugin) {
-            case CRAWLER -> { 
-//                return crawlers.get(pluginId);
-                return crawlers.stream().filter(crawler -> crawler.getServerID() == pluginId).findFirst()
-                        .orElseThrow(() -> new InvalidPluginListException("Plugin not found"));
+            case CRAWLER -> {
+                for (IDataCrawler crawler : crawlers) {
+                    log.info(crawler.getID() + " |||| " + pluginId);
+                }
+                return crawlers.stream()
+                        .filter(crawler -> crawler.getID().equals(pluginId))
+                        .findFirst()
+                        .orElseThrow(() -> new InvalidPluginListException("Plugin  found"));
             }
             case EXPORTER -> { 
-                return exporters.get(pluginId);
+                return exporters.stream()
+                        .filter(exporter -> exporter.getId().equals(pluginId))
+                        .findFirst()
+                        .orElseThrow(() -> new InvalidPluginListException("Plugin not found"));
             }
             default ->
                 throw new InvalidPluginListException("Plugin not found");
@@ -71,12 +84,10 @@ public class PluginService implements IPluginService {
     public List<CrawlerPlugin> getAllCrawlerPlugins() {
         this.checkCrawlerPlugins();
         List<CrawlerPlugin> pluginList = new ArrayList<>();
-        int index = 0;
         for (var crawler : crawlers) {
             String pluginName = crawler.getPluginName();
             UUID id = crawler.getID();
-            pluginList.add(new CrawlerPlugin(index, pluginName));
-            index++;
+            pluginList.add(new CrawlerPlugin(id, pluginName));
         }
         return pluginList;
     }
@@ -99,21 +110,44 @@ public class PluginService implements IPluginService {
     public List<ConverterPlugin> getAllConverterPlugins() {
         this.checkConverterPlugins();
         List<ConverterPlugin> pluginList = new ArrayList<>();
-        int index = 0;
         for (var converter : exporters) {
             String pluginName = converter.getPluginName();
             String blobType = converter.getBlobType();
             UUID id = converter.getId();
-            pluginList.add(new ConverterPlugin(index, pluginName, blobType));
-            index++;
+            pluginList.add(new ConverterPlugin(id, pluginName, blobType));
         }
         return pluginList;
     }
 
     @SneakyThrows
     @Override
-    public ChapterFile exportFile(ChapterDTO chapterDto, int converterId) {
-        return exporters.get(converterId).getConvertedFile(chapterDto);
+    public ChapterFile exportFile(ChapterDTO chapterDto, UUID converterId) {
+        return exporters.stream()
+                .filter(exporter -> exporter.getId().equals(converterId))
+                .findFirst()
+                .orElseThrow(() -> new InvalidPluginListException("Plugin not found "))
+                .getConvertedFile(chapterDto);
+    }
+
+    @Override
+    public UUID getPluginIdByName(String name) {
+        Optional<IDataCrawler> matchedCrawler = crawlers.stream()
+                .filter(crawler -> crawler.getPluginName().equals(name))
+                .findFirst();
+
+        if (matchedCrawler.isEmpty()) {
+            Optional<IFileConverter> matchedConverter = exporters.stream()
+                    .filter(exporter -> exporter.getPluginName().equals(name))
+                    .findFirst();
+
+            if (matchedConverter.isPresent()) {
+                return matchedConverter.get().getId();
+            }
+        } else {
+            return matchedCrawler.get().getID();
+        }
+
+        throw new InvalidPluginListException("Plugin not found");
     }
 
     @SneakyThrows

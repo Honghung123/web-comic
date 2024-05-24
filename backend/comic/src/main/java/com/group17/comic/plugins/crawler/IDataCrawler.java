@@ -8,7 +8,6 @@ import com.group17.comic.model.*;
 
 public interface IDataCrawler {
     UUID getID();
-    Integer getServerID();
     String getPluginName();
     List<Genre> getGenres();
     DataModel<Integer, List<Chapter>> getChapters(String comicTagId, int currentPage);
