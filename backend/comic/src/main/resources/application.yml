@@ -12,6 +12,10 @@ spring:
     ansi:
       enabled: DETECT
 
+api:
+  prefix:
+    v1: /api/v1
+
 logging:
   level:
     root: ERROR
@@ -40,9 +44,11 @@ comic:
     crawler:
       crawler_package_name: com.group17.comic.plugins.crawler.concretes
       crawler_directory: /plugins/crawler/concretes
+      default_crawler_name: Tang Thu Vien 
     converter:
       converter_package_name: com.group17.comic.plugins.exporter.concretes
       converter_directory: /plugins/exporter/concretes
+      default_converter_name: PDF
 
 # Cấu hình profile: 
 

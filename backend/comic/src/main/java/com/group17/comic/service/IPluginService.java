@@ -13,8 +13,8 @@ public interface IPluginService {
        Object getPlugin(Plugin plugin, UUID pluginId);
        void checkCrawlerPlugins();
        List<ConverterPlugin> getAllConverterPlugins();
-       void checkConverterPluginSize(int convertersSize);
-       void checkCrawlerServerSize(int crawlersSize);
+       void checkConverterList(List<String> convertersList);
+       void checkCrawlerList(List<String> crawlerList);
        List<CrawlerPlugin> getAllCrawlerPlugins();
        ChapterFile exportFile(ChapterDTO chapterDto, UUID converterId);
        UUID getPluginIdByName(String name);

@@ -1,8 +1,6 @@
 package com.group17.comic.service;
 
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j; 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +11,7 @@ import com.group17.comic.exception.customs.InvalidPluginListException;
 import com.group17.comic.model.*;
 import com.group17.comic.plugins.crawler.IDataCrawler;
 import com.group17.comic.plugins.exporter.IFileConverter;
+import com.group17.comic.utils.ListUtility;
 import com.group17.comic.utils.PluginUtility;
 
 import lombok.SneakyThrows;
@@ -25,8 +24,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service("pluginServiceV1")
-public class PluginService implements IPluginService {
-    private static final Logger log = LoggerFactory.getLogger(PluginService.class);
+@Slf4j
+public class PluginService implements IPluginService { 
     String baseDir = System.getProperty("user.dir");
     @Value("${comic.base_dir}")
     String projectDirectory;
@@ -133,35 +132,31 @@ public class PluginService implements IPluginService {
         Optional<IDataCrawler> matchedCrawler = crawlers.stream()
                 .filter(crawler -> crawler.getPluginName().equals(name))
                 .findFirst();
-
-        if (matchedCrawler.isEmpty()) {
-            Optional<IFileConverter> matchedConverter = exporters.stream()
-                    .filter(exporter -> exporter.getPluginName().equals(name))
-                    .findFirst();
-
-            if (matchedConverter.isPresent()) {
-                return matchedConverter.get().getId();
-            }
-        } else {
+        if (matchedCrawler.isPresent()) {
             return matchedCrawler.get().getID();
         }
-
+        Optional<IFileConverter> matchedConverter = exporters.stream()
+                .filter(exporter -> exporter.getPluginName().equals(name))
+                .findFirst();
+        if (matchedConverter.isPresent()) {
+            return matchedConverter.get().getId();
+        }
         throw new InvalidPluginListException("Plugin not found");
     }
 
     @SneakyThrows
-    public void checkCrawlerServerSize(int crawlersSize) {
+    public void checkCrawlerList(List<String> crawlersList) {
         this.checkCrawlerPlugins();
-        if (crawlersSize != crawlers.size()) {
+        if (!crawlersList.isEmpty() && !ListUtility.areListsEqual(crawlersList, crawlers)) {
             throw new InvalidPluginListException("Server has changed. Please refresh your page");
         }
     }
 
     @SneakyThrows
     @Override
-    public void checkConverterPluginSize(int convertersSize) {
+    public void checkConverterList(List<String> convertersList) {
         this.checkConverterPlugins();
-        if (convertersSize != exporters.size()) {
+        if (!convertersList.isEmpty() && !ListUtility.areListsEqual(convertersList, exporters)) {
             throw new InvalidPluginListException("Converter has changed. Please refresh your page");
         }
     }

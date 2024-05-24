@@ -1,7 +1,11 @@
 package com.group17.comic.utils;
 
 import java.text.Normalizer;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class StringUtility {
     // Chuyển tiếng Việt có dấu thành không dấu:  Thành công -> Thanh cong
@@ -50,5 +54,16 @@ public class StringUtility {
 	    }else{
             throw new Exception("Can't get chapter number");
         }
+    }
+
+    public static List<String> getArrayFromJSON(String json){
+        var objMapper = new ObjectMapper();
+        List<String> strList = null; 
+        try {
+            strList = Arrays.asList(objMapper.readValue(json, String[].class));
+        }catch(Exception e) {
+            strList = List.of();
+        }
+        return strList;
     }
 }
