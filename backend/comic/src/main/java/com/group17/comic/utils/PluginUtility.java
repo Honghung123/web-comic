@@ -99,11 +99,6 @@ public class PluginUtility {
     }
 
     public static String resolveAbsolutePath(String absolutePath) {
-//        String baseProject = "\\backend\\comic";
-//        if (!absolutePath.endsWith(baseProject)) {
-//            absolutePath = absolutePath + baseProject;
-//        }
-//        return absolutePath;
         String baseProject = "/backend/comic"; // Use forward slashes for directory separation
         Path basePath = Paths.get(absolutePath);
         Path baseProjectPath = Paths.get(baseProject);
@@ -111,6 +106,5 @@ public class PluginUtility {
             basePath = Paths.get(absolutePath, baseProject);
         }
         return basePath.toString();
-
     }
 }

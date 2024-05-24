@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service("pluginServiceV1")
 @Slf4j
@@ -147,7 +148,8 @@ public class PluginService implements IPluginService {
     @SneakyThrows
     public void checkCrawlerList(List<String> crawlersList) {
         this.checkCrawlerPlugins();
-        if (!crawlersList.isEmpty() && !ListUtility.areListsEqual(crawlersList, crawlers)) {
+        List<String> crawlerIdList = crawlers.stream().map(crawler -> crawler.getID().toString()).collect(Collectors.toList());
+        if (!crawlersList.isEmpty() && !ListUtility.areListsEqual(crawlersList, crawlerIdList)) {
             throw new InvalidPluginListException("Server has changed. Please refresh your page");
         }
     }
@@ -156,7 +158,8 @@ public class PluginService implements IPluginService {
     @Override
     public void checkConverterList(List<String> convertersList) {
         this.checkConverterPlugins();
-        if (!convertersList.isEmpty() && !ListUtility.areListsEqual(convertersList, exporters)) {
+        List<String> exporterIdList = exporters.stream().map(exporter -> exporter.getId().toString()).collect(Collectors.toList());
+        if (!convertersList.isEmpty() && !ListUtility.areListsEqual(convertersList, exporterIdList)) {
             throw new InvalidPluginListException("Converter has changed. Please refresh your page");
         }
     }
