@@ -25,7 +25,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service("pluginServiceV1")
-
 public class PluginService implements IPluginService {
     private static final Logger log = LoggerFactory.getLogger(PluginService.class);
     String baseDir = System.getProperty("user.dir");

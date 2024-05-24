@@ -4,18 +4,12 @@ import com.group17.comic.dto.request.AlternatedChapterDTO;
 import com.group17.comic.model.*;
 import com.group17.comic.plugins.crawler.IDataCrawler;
 import com.group17.comic.plugins.crawler.WebCrawler;
-import com.group17.comic.utils.StringUtility;
 import lombok.SneakyThrows;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestTemplate;
 
-import java.net.http.HttpClient;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class OTruyenCrawler extends WebCrawler implements IDataCrawler {
+public class DTruyenCrawler extends WebCrawler implements IDataCrawler {
     private final String BASE_API_URL = "https://otruyenapi.com/v1/api";
     private final UUID id = UUID.randomUUID();
     @Override
@@ -27,7 +21,7 @@ public class OTruyenCrawler extends WebCrawler implements IDataCrawler {
 
     @Override
     public String getPluginName() {
-        return "O Truyen";
+        return "D Truyen";
     }
 
     @Override
