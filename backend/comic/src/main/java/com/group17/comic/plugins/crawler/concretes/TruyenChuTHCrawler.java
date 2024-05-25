@@ -21,13 +21,10 @@ import lombok.SneakyThrows;
 public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
     private final String TRUYEN_URL = "https://truyenchuth.com/";
     private final UUID id = UUID.fromString("123e4567-e89b-12d3-a456-426614173001");
-
     @Override
     public UUID getID() {
         return id;
     }
-
-
 
     @Override
     public String getPluginName() {

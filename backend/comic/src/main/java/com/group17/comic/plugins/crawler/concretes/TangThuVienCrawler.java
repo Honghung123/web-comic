@@ -227,7 +227,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
             var authorTag = element.select(".book-mid-info .author a:nth-of-type(1)");
             String authorName = authorTag.text();
             String authorUrl = authorTag.attr("href");
-            String authorId = authorUrl.substring(authorUrl.lastIndexOf("/") + 1);
+            String authorId = authorUrl.substring(authorUrl.lastIndexOf("=") + 1);
             Author author = new Author(authorId, authorName);
             List<Genre> genres = new ArrayList<>();
             var genreTag = element.select(".book-mid-info .author a:nth-of-type(2)");
