@@ -43,7 +43,7 @@ public class Azw3Converter implements IFileConverter {
 
     @Override
     public String getBlobType() {
-        return "application/vnd.amazon.ebook";
+        return "application/vnd.amazon.mobi8-ebook";
     }
     @SneakyThrows
     @Override
@@ -66,7 +66,7 @@ public class Azw3Converter implements IFileConverter {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
         headers.setContentLength(Files.size(Paths.get(uploadDir + fileName)));
-        headers.setContentType(org.springframework.http.MediaType.parseMediaType("application/vnd.amazon.ebook"));
+        headers.setContentType(org.springframework.http.MediaType.parseMediaType("application/vnd.amazon.mobi8-ebook"));
         return new ChapterFile(headers, resource);
 
     }

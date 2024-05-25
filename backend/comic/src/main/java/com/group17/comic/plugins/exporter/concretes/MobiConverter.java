@@ -69,8 +69,11 @@ public class MobiConverter implements IFileConverter {
         // Get the pdf file from folder to return to client
         InputStreamResource resource = new InputStreamResource(new FileInputStream(uploadDir + fileName));
         HttpHeaders headers = new HttpHeaders();
-//        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName+ ".mobi");
-        headers.setContentDisposition(ContentDisposition.builder("attachment").filename("temp.mobi").build());
+        headers.setContentDisposition(ContentDisposition
+                .builder("attachment")
+                .filename(fileName + ".mobi")
+                .build()
+        );
         headers.setContentLength(Files.size(Paths.get(uploadDir + fileName)));
         headers.setContentType(org.springframework.http.MediaType.parseMediaType("application/x-mobipocket-ebook"));
         return new ChapterFile(headers, resource);
