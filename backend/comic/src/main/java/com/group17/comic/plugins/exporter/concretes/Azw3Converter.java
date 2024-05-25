@@ -1,5 +1,6 @@
 package com.group17.comic.plugins.exporter.concretes;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -24,6 +25,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 @Slf4j
 public class Azw3Converter implements IFileConverter {
@@ -70,8 +73,9 @@ public class Azw3Converter implements IFileConverter {
         return new ChapterFile(headers, resource);
 
     }
-    public byte[] saveAsAZW3FromText(String content, String fileInputName) throws IOException {
-        api_key = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiZWMyOGFlMmExZjlhMDhjMWZhNTYzN2NlOGMwMjUyMmEwYTA5YTIyNzI0Mjg0M2JjODdkMzM0ZWRmYTc0MTk1ZDQzMmJmY2FmNTMxNTcwYzQiLCJpYXQiOjE3MTY2MDMwNjcuNzQ0MDExLCJuYmYiOjE3MTY2MDMwNjcuNzQ0MDE0LCJleHAiOjQ4NzIyNzY2NjcuNzIzMzc1LCJzdWIiOiI2ODQ4NTY3NiIsInNjb3BlcyI6WyJ1c2VyLnJlYWQiLCJ1c2VyLndyaXRlIiwidGFzay5yZWFkIiwidGFzay53cml0ZSIsIndlYmhvb2sucmVhZCIsIndlYmhvb2sud3JpdGUiLCJwcmVzZXQucmVhZCIsInByZXNldC53cml0ZSJdfQ.ORRDLBHXHbA3bMc8Q5aBGWogBfnvTsvguO-QcA7X2zla8EzhG7mtURD8gtop2Np3KMjszay_bASs1B2iuEx1m3mYF5nt_yDkidSru94jt5NqL-UdbiEgrkYhf9iNGtJdH2bS4gGGvJKdSGnluH5waZ-jKwws8Vz87T8zZwlk9GVp1-Tlom_XLiMIgwV6WLFv4uuDRN4EnirgC4PjNh_zh6So0FDN7cw7QnYEtkpTW8S1VSZSzLkSjqdBPTf6PpuUj63YZdWVod1OveOavupEvJnYIH4k-w3KLaooGP31TOKT5nwZipV0lqLV5nAvnt58PDcdaz3o6oLh6lyHZ29n5XIEb5EuWouaSByvnULsrH4dplhCQmIdpc_r40UGDZ-DXxBcR60g_0SEEkUGlcziHkV7JLWRSRCChF4PJFOBpsPvrO2vomOBtLDw0KJPWYYCb1kaFAqzrttvbYV06R7g9e5UnQlQ5UuCwz-sgwNPIHa77oe-3lia7tJT4U4wS_ksurIiVHPjeSme7QsWSksY6abD5j47Ijj07AtsaDZ_8dallmVfFfU0DVHMeEK1VMmkBJsa7URDakxXdedfhWpdRhUcgxs85HvkYdYb7yINu4WH1BvNPes-4z4awVq9wGOuxhVN-OzGgTS1Do9R_BFg6VxnHmrlbrhIaPIa4uryo8s";
+    public byte[] saveAsAZW3FromText(String content, String fileInputName) throws Exception {
+        // api_key = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiZWMyOGFlMmExZjlhMDhjMWZhNTYzN2NlOGMwMjUyMmEwYTA5YTIyNzI0Mjg0M2JjODdkMzM0ZWRmYTc0MTk1ZDQzMmJmY2FmNTMxNTcwYzQiLCJpYXQiOjE3MTY2MDMwNjcuNzQ0MDExLCJuYmYiOjE3MTY2MDMwNjcuNzQ0MDE0LCJleHAiOjQ4NzIyNzY2NjcuNzIzMzc1LCJzdWIiOiI2ODQ4NTY3NiIsInNjb3BlcyI6WyJ1c2VyLnJlYWQiLCJ1c2VyLndyaXRlIiwidGFzay5yZWFkIiwidGFzay53cml0ZSIsIndlYmhvb2sucmVhZCIsIndlYmhvb2sud3JpdGUiLCJwcmVzZXQucmVhZCIsInByZXNldC53cml0ZSJdfQ.ORRDLBHXHbA3bMc8Q5aBGWogBfnvTsvguO-QcA7X2zla8EzhG7mtURD8gtop2Np3KMjszay_bASs1B2iuEx1m3mYF5nt_yDkidSru94jt5NqL-UdbiEgrkYhf9iNGtJdH2bS4gGGvJKdSGnluH5waZ-jKwws8Vz87T8zZwlk9GVp1-Tlom_XLiMIgwV6WLFv4uuDRN4EnirgC4PjNh_zh6So0FDN7cw7QnYEtkpTW8S1VSZSzLkSjqdBPTf6PpuUj63YZdWVod1OveOavupEvJnYIH4k-w3KLaooGP31TOKT5nwZipV0lqLV5nAvnt58PDcdaz3o6oLh6lyHZ29n5XIEb5EuWouaSByvnULsrH4dplhCQmIdpc_r40UGDZ-DXxBcR60g_0SEEkUGlcziHkV7JLWRSRCChF4PJFOBpsPvrO2vomOBtLDw0KJPWYYCb1kaFAqzrttvbYV06R7g9e5UnQlQ5UuCwz-sgwNPIHa77oe-3lia7tJT4U4wS_ksurIiVHPjeSme7QsWSksY6abD5j47Ijj07AtsaDZ_8dallmVfFfU0DVHMeEK1VMmkBJsa7URDakxXdedfhWpdRhUcgxs85HvkYdYb7yINu4WH1BvNPes-4z4awVq9wGOuxhVN-OzGgTS1Do9R_BFg6VxnHmrlbrhIaPIa4uryo8s";
+        api_key = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiYzE2M2VjZjk0OWI5YTdkZjBlNzE2ZTc4NGQ0YzYzMWYxNzE4NGRkMDgwNjM3MGVkNzViY2U0MDhkYzRlOWNjMTJiYzk3YTRlMTcyY2YzYzciLCJpYXQiOjE3MTY2Mjk3OTguMjkxMDM3LCJuYmYiOjE3MTY2Mjk3OTguMjkxMDM4LCJleHAiOjQ4NzIzMDMzOTguMjg3OTkyLCJzdWIiOiI2ODQ4Nzg2OSIsInNjb3BlcyI6WyJ1c2VyLnJlYWQiLCJ1c2VyLndyaXRlIiwidGFzay5yZWFkIiwidGFzay53cml0ZSJdfQ.Z3-C_e8VhVcu-S9s2Hndm7vAo6EF448MjJ86nD-8uzZf6IjsIPUp8_DoQL6S-rhwIa9jlnxhmJwfNIlSls1NmlWgEO-A5_m6yGYWybxFySXMFTtz_VFGZzj1YE8ks8TMQTcyuwew--HcdKuJmbvx7ZSsC0MvTOov4eB2GnwlVsQYHSaiXE8D2qwMk0W7Z538Ropki6gl5eyN-K-mdfK3VeKxsnoXCRtMLDoTIdD4NdUH7_lEm9mC_Y0K_39P1-8fu8UWQxSR2wXwWIT0y2DTi8dAKxgpPwNZRLGd1G0gsmeggh5yY6BF6mSCmd_S0uEzP8QRcO1n2QWZytMvdZ1DBXfkMlHQqWF-SeyUIwoF3_AN3ph5SrPB-3zwt0OE5Woz1dx-GT7-T_eyegLIEbKcvq-UkGpUNFFCON7GjtH7H7LRISfvAGA7AAMUEDMnvB-EFw_g9C6Nm6YIWX9qEoix9B5_NVmVKiItyrK0HgB_O0rU9-L6zTfX9DbzzrwxFvvaXJINr8tMkktLOt6jVXFmt0twI1_D5Dvls68uCa2Wwi5Lqrgrz1T-svYJVq3fOjYEfChUIoY-OFW1DbGCdDqZKWhHpPN8Rh1Zz0OYYbJ9PphQ43mEsB99lBRRBN0g0xU-xujKBJKyOht0aTZ_LsH_MWxJ18iSnkJMyoYRcJSiym0";
         final String BASE_URL = "https://api.cloudconvert.com/v2";
         String url = BASE_URL + "/jobs";
         byte[] fileBytes = null;
@@ -79,8 +83,8 @@ public class Azw3Converter implements IFileConverter {
         JsonObject tasks = new JsonObject();
         JsonObject importFile = new JsonObject();
         importFile.addProperty("operation", "import/raw");
-
-        importFile.addProperty("file", content);
+        String contentTxt = StringUtility.removeHtmlTags(content);
+        importFile.addProperty("file", contentTxt);
         importFile.addProperty("filename", fileInputName);
         tasks.add("import-file", importFile);
 

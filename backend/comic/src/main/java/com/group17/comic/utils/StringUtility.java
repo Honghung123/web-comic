@@ -66,4 +66,19 @@ public class StringUtility {
         }
         return strList;
     }
+
+    public static String removeHtmlTags(String content) {
+        var defaultHtmlTags = List.of("h1", "h2", "h3", "h4", "h5", "h6", "div", "p", "br", "span", "hr", "ul", "li", "ol");
+        return removeWithSpecificHtmlTags(content, defaultHtmlTags);
+    }
+
+    public static String removeWithSpecificHtmlTags(String html, List<String> tags){
+        for (String tag : tags) { 
+            String regexOpen = "<" + tag + "(\\s+[^>]*)?>";
+            String regexClose = "</" + tag + ">"; 
+            html = html.replaceAll(regexOpen, "");
+            html = html.replaceAll(regexClose, "");
+        }
+        return html;
+    }
 }

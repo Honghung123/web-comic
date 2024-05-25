@@ -76,7 +76,7 @@ public class PdfConverter implements IFileConverter {
         JsonObject jsonBody = new JsonObject();
         jsonBody.add("html", new JsonPrimitive(myText));
         jsonBody.add("name", new JsonPrimitive(fileOutputName));
-        jsonBody.add("margins", new JsonPrimitive("15px 25px 15px 25px"));
+        jsonBody.add("margins", new JsonPrimitive("25px 50px 25px 50px"));
         jsonBody.add("paperSize", new JsonPrimitive("Letter"));
         jsonBody.add("orientation", new JsonPrimitive("Portrait"));
         jsonBody.add("printBackground", new JsonPrimitive(true));

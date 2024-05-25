@@ -29,19 +29,20 @@ function DownloadModal({ position, open, setOpen, chapter }) {
                 },
                 responseType: 'blob',
             });
-            console.log('----------');
-            console.log(response);
+            const converter = converters.find((converter) => {
+                console.log(converter.id, currentConverterId);
+                return converter.id == currentConverterId;
+            });
             const blob = new Blob([response.data], {
-                type: converters.find((converter) => {
-                    console.log(converter.id, currentConverterId);
-                    return converter.id == currentConverterId;
-                }).blobType,
+                type: converter.blobType,
             });
             const windowUrl = window.URL || window.webkitURL;
             const downloadUrl = windowUrl.createObjectURL(blob);
             const anchor = document.createElement('a');
             anchor.href = downloadUrl;
-            anchor.download = chapter.chapterTitle || 'untitled';
+            anchor.download =
+                (`Chương ${chapter.chapterNumber}: ${chapter.chapterTitle}` || 'Untitled') +
+                `.${converter.name.toLowerCase()}`;
             document.body.appendChild(anchor);
             anchor.click();
             // Xóa URL sau khi đã tải xuống
