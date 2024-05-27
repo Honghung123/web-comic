@@ -94,13 +94,13 @@ function ListComics() {
         <div className="min-h-96 p-2 mt-8 mx-auto relative" style={{ maxWidth: 1200 }}>
             <Loading loading={loading} />
             <h2 className="text-3xl pt-2 font-semibold underline underline-offset-8">{headerText}</h2>
-            {keyword != '' && genre == '' && (
+            {/* {keyword != '' && genre == '' && (
                 <div>
                     <h3 className="text-xl font-semibold underline underline-offset-4">Danh sách tác giả:</h3>
                     <p>Danh sách ....</p>
                     <h3 className="text-xl font-semibold underline underline-offset-4">Danh sách truyện:</h3>
                 </div>
-            )}
+            )} */}
             <div className="flex flex-wrap min-h-full" style={{ marginLeft: '-1rem', marginRight: '-1rem' }}>
                 {comicsData.comics &&
                     comicsData.comics.map((comic) => (

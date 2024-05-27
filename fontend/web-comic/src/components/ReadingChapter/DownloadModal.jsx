@@ -14,6 +14,7 @@ function DownloadModal({ position, open, setOpen, chapter }) {
     const [converters, setConverters] = useState([]);
     const [currentConverterId, setCurrentConverterId] = useState();
     const [loading, setLoading] = useState(false);
+    console.log(converters);
 
     const handleDownload = async (e) => {
         setLoading(true);
@@ -26,6 +27,9 @@ function DownloadModal({ position, open, setOpen, chapter }) {
             const response = await axios.post(url, payload, {
                 params: {
                     converter_id: currentConverterId,
+                },
+                header: {
+                    'list-converters': converters.map((converter) => converter.id),
                 },
                 responseType: 'blob',
             });
@@ -71,23 +75,25 @@ function DownloadModal({ position, open, setOpen, chapter }) {
     console.log('current: ', currentConverterId);
 
     useEffect(() => {
-        axios
-            .get(`http://localhost:8080/api/v1/comic/converter-plugins`)
-            .then((response) => {
-                const responseData = response.data;
-                if (responseData.statusCode === 200) {
-                    setConverters(responseData.data);
-                    setCurrentConverterId(responseData.data[0]?.id);
-                } else {
+        if (open) {
+            axios
+                .get(`http://localhost:8080/api/v1/comic/converter-plugins`)
+                .then((response) => {
+                    const responseData = response.data;
+                    if (responseData.statusCode === 200) {
+                        setConverters(responseData.data);
+                        setCurrentConverterId(responseData.data[0]?.id);
+                    } else {
+                        // Thong bao loi
+                        console.log(responseData.message);
+                    }
+                })
+                .catch((err) => {
                     // Thong bao loi
-                    console.log(responseData.message);
-                }
-            })
-            .catch((err) => {
-                // Thong bao loi
-                console.log(err);
-            });
-    }, []);
+                    console.log(err);
+                });
+        }
+    }, [open]);
 
     return (
         <Modal
