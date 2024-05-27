@@ -72,7 +72,7 @@ public class PdfConverter implements IFileConverter {
     @SuppressWarnings("deprecation")
     public byte[] savePdfFromText(String myText, String fileOutputName) throws IOException {
         String url = "https://api.pdf.co/v1/pdf/convert/from/html";
-        String apiKey = "damrosehung123@gmail.com_QkG8Xf1Md9B2N4HSeK8vnArZ8GnI98keh80LbC9w063U00eXf88sdc3T9g6Z1sNW;";
+        String apiKey = "laptrinhgalam123@gmail.com_9GFijyG3qTs3xsgOoYK08rflhCvca5kb408841Eb7YJkL4El08A2Sx8Y921NiHjS";
         JsonObject jsonBody = new JsonObject();
         jsonBody.add("html", new JsonPrimitive(myText));
         jsonBody.add("name", new JsonPrimitive(fileOutputName));

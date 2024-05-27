@@ -68,7 +68,8 @@ public class Mp3Converter implements IFileConverter {
         Gson gson = new Gson();
         // Tạo JSON body dùng JsonObject và Gson
         JsonObject jsonBody = new JsonObject();
-        jsonBody.addProperty("text", content);
+        var removeHtmlTagContent = StringUtility.removeHtmlTags(content);
+        jsonBody.addProperty("text", removeHtmlTagContent);
         jsonBody.addProperty("voice", voice);
         jsonBody.addProperty("id", "2");
         jsonBody.addProperty("without_filter", false);
