@@ -8,6 +8,7 @@ import org.jsoup.select.Elements;
 import org.springframework.util.StringUtils;
 
 import com.group17.comic.dto.request.AlternatedChapterDTO;
+import com.group17.comic.dto.response.AuthorResponseDTO;
 import com.group17.comic.exception.customs.InvalidTypeException;
 import com.group17.comic.exception.customs.ResourceNotFound;
 import com.group17.comic.model.*;
@@ -52,7 +53,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
 
     @SneakyThrows
     @Override
-    public DataSearchModel<Integer, List<ComicModel>, List<Author>> search(String keyword,
+    public DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> search(String keyword,
             String byGenre, int currentPage) {
         keyword = StringUtility.removeDiacriticalMarks(keyword);
         if (StringUtils.hasLength(keyword) && StringUtils.hasLength(byGenre)) {
@@ -67,7 +68,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
     }
 
     @SneakyThrows
-    private DataSearchModel<Integer, List<ComicModel>, List<Author>> searchByKeywordAndGenre(String keyword,
+    private DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> searchByKeywordAndGenre(String keyword,
             String byGenre, int currentPage) {
         List<ComicModel> listMatchedComic = new ArrayList<>();
         String term = StringUtility.removeDiacriticalMarks(keyword).trim().toLowerCase();
@@ -85,13 +86,13 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
             }
         }
         var pagination = new Pagination<Integer>(currentPage, listMatchedComic.size(), 1, -1);
-        DataSearchModel<Integer, List<ComicModel>, List<Author>> result = new DataSearchModel<>(pagination,
+        DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> result = new DataSearchModel<>(pagination,
                 listMatchedComic, null);
         return result;
     }
 
     @SneakyThrows
-    private DataSearchModel<Integer, List<ComicModel>, List<Author>> searchOnlyByGenre(String byGenre,
+    private DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> searchOnlyByGenre(String byGenre,
             int currentPage) {
         List<ComicModel> listMatchedComic = new ArrayList<>();
         Integer categoryId = this.getCategoryId(byGenre);
@@ -145,13 +146,13 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         }
         var pagination = new Pagination<Integer>(currentPage, perPage, totalPages, totalItems);
         PaginationUtility.updatePagination(pagination);
-        DataSearchModel<Integer, List<ComicModel>, List<Author>> result = new DataSearchModel<>(pagination,
+        DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> result = new DataSearchModel<>(pagination,
                 listMatchedComic, null);
         return result;
     }
 
     @SneakyThrows
-    private DataSearchModel<Integer, List<ComicModel>, List<Author>> searchOnlyByKeyword(String keyword,
+    private DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> searchOnlyByKeyword(String keyword,
             int currentPage) {
         List<ComicModel> listMatchedComic = new ArrayList<>();
         String term = keyword.trim().replace(" ", "%20");
@@ -203,16 +204,16 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
             totalPages = Integer.parseInt(lastAnchorTag.text());
             totalItems = totalPages * perPage;
         }
-        List<Author> authorList = new ArrayList<>();
+        List<AuthorResponseDTO> authorList = new ArrayList<>();
         var pagination = new Pagination<Integer>(currentPage, perPage, totalPages, totalItems);
         PaginationUtility.updatePagination(pagination);
-        DataSearchModel<Integer, List<ComicModel>, List<Author>> result = new DataSearchModel<>(pagination,
+        DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> result = new DataSearchModel<>(pagination,
                 listMatchedComic, authorList);
         return result;
     }
 
     @SneakyThrows
-    private DataSearchModel<Integer, List<ComicModel>, List<Author>> getHotOrPromoteComics(int currentPage) {
+    private DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> getHotOrPromoteComics(int currentPage) {
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "tong-hop?rank=nm&time=m&page=" + currentPage);
         List<ComicModel> lastedComics = new ArrayList<>();
         Elements elements = doc.select("div#rank-view-list ul li");
@@ -261,7 +262,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
         }
         var pagination = new Pagination<Integer>(currentPage, perPage, totalPages, totalItems);
         PaginationUtility.updatePagination(pagination);
-        DataSearchModel<Integer, List<ComicModel>, List<Author>> result = new DataSearchModel<>(pagination,
+        DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> result = new DataSearchModel<>(pagination,
                 lastedComics, null);
         return result;
     }

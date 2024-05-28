@@ -17,7 +17,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.group17.comic.dto.request.AlternatedChapterDTO; 
+import com.group17.comic.dto.request.AlternatedChapterDTO;
+import com.group17.comic.dto.response.AuthorResponseDTO;
 import com.group17.comic.exception.customs.InvalidTypeException;
 import com.group17.comic.exception.customs.ResourceNotFound; 
 import com.group17.comic.model.*; 
@@ -63,7 +64,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
 
     @SneakyThrows
     @Override
-    public DataSearchModel<Integer, List<ComicModel>, List<Author>> search(String keyword,
+    public DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> search(String keyword,
             String byGenre, int currentPage) {
         keyword = StringUtility.removeDiacriticalMarks(keyword);
         if(StringUtils.hasLength(keyword) && StringUtils.hasLength(byGenre)) {
@@ -78,7 +79,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     }
 
     @SneakyThrows
-    private DataSearchModel<Integer, List<ComicModel>, List<Author>> searchByKeywordAndGenre(String keyword, String byGenre, int currentPage) {
+    private DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> searchByKeywordAndGenre(String keyword, String byGenre, int currentPage) {
         List<ComicModel> listMatchedComic = new ArrayList<>();
         String term = keyword.trim().replace(" ", "%20");
         Integer categoryId = this.getCategoryId(byGenre); 
@@ -138,13 +139,13 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         } catch (Exception e) {
             throw new HttpStatusException("Cannot make request to get data from TruyenFull", 404, apiUrl);
         }
-        DataSearchModel<Integer, List<ComicModel>, List<Author>> result = new DataSearchModel<>(pagination,
+        DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> result = new DataSearchModel<>(pagination,
                 listMatchedComic, null);
         return result;
     }
 
     @SneakyThrows
-    private DataSearchModel<Integer, List<ComicModel>, List<Author>> searchOnlyByGenre(String byGenre, int currentPage) {
+    private DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> searchOnlyByGenre(String byGenre, int currentPage) {
         List<ComicModel> listMatchedComic = new ArrayList<>(); 
         String apiUrl = TRUYEN_API + "/v1/story/cate?cate="+ byGenre +"&type=story_new&page=" + currentPage;
         HttpClient client = HttpClient.newHttpClient();
@@ -202,20 +203,20 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         } catch (Exception e) {
             throw new HttpStatusException("Cannot make request to get data from TruyenFull", 404, apiUrl);
         }
-        DataSearchModel<Integer, List<ComicModel>, List<Author>> result = new DataSearchModel<>(pagination,
+        DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> result = new DataSearchModel<>(pagination,
                 listMatchedComic, null);
         return result;
     }
 
     @SneakyThrows
-    private DataSearchModel<Integer, List<ComicModel>, List<Author>> searchOnlyByKeyword(String keyword, int currentPage) {
+    private DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> searchOnlyByKeyword(String keyword, int currentPage) {
         List<ComicModel> listMatchedComic = new ArrayList<>();
         String term = keyword.trim().replace(" ", "%20");
         String apiUrl = TRUYEN_API + "/v1/tim-kiem?title=" + term + "&page=" + currentPage;
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
         Pagination<Integer> pagination = null;
-        List<Author> authorList = new ArrayList<Author>();
+        List<AuthorResponseDTO> authorList = new ArrayList<>();
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 200) {
@@ -263,7 +264,8 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                         String authorId = StringUtility.removeDiacriticalMarks(authorName).toLowerCase().replace(" ",
                                 "-");
                         if (!authorList.stream().anyMatch(author -> author.getAuthorId().equals(authorId))) {
-                            authorList.add(new Author(authorId, authorName));
+                            String comicTagId = jsonObj.get("id").getAsString();
+                            authorList.add(new AuthorResponseDTO(authorId, authorName, comicTagId));
                         }
                     }
                 }
@@ -279,7 +281,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         } catch (Exception e) {
             throw new HttpStatusException("Cannot make request to get data from TruyenFull", 404, apiUrl);
         }
-        DataSearchModel<Integer, List<ComicModel>, List<Author>> result = new DataSearchModel<>(pagination,
+        DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> result = new DataSearchModel<>(pagination,
                 listMatchedComic, authorList);
         return result;
     }
@@ -411,7 +413,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     }
 
     @SneakyThrows
-    private DataSearchModel<Integer, List<ComicModel>, List<Author>> getHotOrPromoteComics(int currentPage) {
+    private DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> getHotOrPromoteComics(int currentPage) {
         List<ComicModel> listMatchedComic = new ArrayList<>(); 
         String apiUrl = TRUYEN_API + "/v1/story/all?type=story_full_rate&page=" + currentPage;
         HttpClient client = HttpClient.newHttpClient();
@@ -469,7 +471,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         } catch (Exception e) {
             throw new HttpStatusException("Cannot make request to get data from TruyenFull", 404, apiUrl);
         }
-        DataSearchModel<Integer, List<ComicModel>, List<Author>> result = new DataSearchModel<>(pagination,
+        DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> result = new DataSearchModel<>(pagination,
                 listMatchedComic, null);
         return result;
     }

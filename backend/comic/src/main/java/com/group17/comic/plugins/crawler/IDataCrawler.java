@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.group17.comic.dto.request.AlternatedChapterDTO;
+import com.group17.comic.dto.response.AuthorResponseDTO;
 import com.group17.comic.model.*; 
 
 public interface IDataCrawler {
@@ -11,7 +12,7 @@ public interface IDataCrawler {
     String getPluginName();
     List<Genre> getGenres();
     DataModel<Integer, List<Chapter>> getChapters(String comicTagId, int currentPage);
-    DataSearchModel<Integer, List<ComicModel>, List<Author>> search(String keyword, String byGenres, int currentPage);
+    DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> search(String keyword, String byGenres, int currentPage);
     DataModel<Integer, List<ComicModel>> getLastedComics(int currentPage);
     Comic getComicInfo(String comicTagId);
     Comic getComicInfoOnOtherServer(AlternatedChapterDTO altChapterDto);

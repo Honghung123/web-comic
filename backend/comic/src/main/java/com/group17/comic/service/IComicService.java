@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.group17.comic.dto.request.AlternatedChapterDTO;
+import com.group17.comic.dto.response.AuthorResponseDTO;
 import com.group17.comic.model.Author;
 import com.group17.comic.model.Chapter;
 import com.group17.comic.model.Comic;
@@ -17,7 +18,7 @@ public interface IComicService {
        List<Genre> getAllGenres(UUID pluginId);
        DataModel<Integer, List<ComicModel>> getNewestCommic(UUID pluginId, int page);
        DataModel<Integer, List<ComicModel>> getComicsOfAnAuthor(UUID serverId, String authorId, String tagId, int page);
-       DataSearchModel<Integer, List<ComicModel>, List<Author>> searchComic(UUID serverId,
+       DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> searchComic(UUID serverId,
                                                       String keyword, String byGenres, int currentPage);
        Comic getComicInfo(UUID pluginId, String tagUrl);
        DataModel<Integer, List<Chapter>> getChapters(UUID serverId, String tagId, int currentPage);

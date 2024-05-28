@@ -3,6 +3,7 @@ package com.group17.comic.service;
 import org.springframework.stereotype.Service;
 
 import com.group17.comic.dto.request.AlternatedChapterDTO;
+import com.group17.comic.dto.response.AuthorResponseDTO;
 import com.group17.comic.enums.Plugin; 
 import com.group17.comic.model.*;
 import com.group17.comic.plugins.crawler.IDataCrawler; 
@@ -46,7 +47,7 @@ public class ComicService implements IComicService{
 
     @SneakyThrows
     @Override
-    public DataSearchModel<Integer, List<ComicModel>, List<Author>> searchComic(UUID pluginId,
+    public DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> searchComic(UUID pluginId,
             String keyword, String byGenres, int currentPage) { 
         var result = this.getCrawlerPlugin(pluginId).search(keyword, byGenres, currentPage);
         return result;
