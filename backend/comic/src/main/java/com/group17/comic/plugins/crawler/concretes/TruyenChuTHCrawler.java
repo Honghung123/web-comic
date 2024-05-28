@@ -461,7 +461,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
 
     @Override
     @SneakyThrows
-    public DataModel<Integer, List<ComicModel>> getComicsByAuthor(String authorId, int currentPage) {
+    public DataModel<Integer, List<ComicModel>> getComicsByAuthor(String authorId, String tagId, int currentPage) {
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "tac-gia/" + authorId);
         List<ComicModel> lastedComics = new ArrayList<>();
         Elements elements = doc.select(".list-row-img");
@@ -472,7 +472,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
             var anchorTag = element.selectFirst(".row-info a");
             String title = anchorTag.text();
             String comicUrl = anchorTag.attr("href");
-            String tagId = comicUrl.substring(comicUrl.lastIndexOf("/") + 1);
+            String comicTagId = comicUrl.substring(comicUrl.lastIndexOf("/") + 1);
             String image = element.selectFirst(".row-image a img").attr("src");
             var authorTag = element.selectFirst(".row-author");
             String authorName = authorTag.text();
@@ -480,7 +480,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
             List<Genre> genres = new ArrayList<>();
             boolean isFull = false;
             var comicModel = ComicModel.builder()
-                    .tagId(tagId)
+                    .tagId(comicTagId)
                     .title(title)
                     .image(image)
                     .alternateImage(this.alternateImage)

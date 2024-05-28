@@ -109,7 +109,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
             var authorTag = element.select(".book-mid-info .author a:nth-of-type(1)");
             String authorName = authorTag.text();
             String authorUrl = authorTag.attr("href");
-            String authorId = authorUrl.substring(authorUrl.lastIndexOf("/") + 1);
+            String authorId = authorUrl.substring(authorUrl.lastIndexOf("=") + 1);
             Author author = new Author(authorId, authorName);
             List<Genre> genres = new ArrayList<>();
             var genreTag = element.select(".book-mid-info .author a:nth-of-type(2)");
@@ -558,7 +558,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
 
     @Override
     @SneakyThrows
-    public DataModel<Integer, List<ComicModel>> getComicsByAuthor(String authorId, int currentPage) {
+    public DataModel<Integer, List<ComicModel>> getComicsByAuthor(String authorId, String tagId, int currentPage) {
         Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "tac-gia?author=" + authorId);
         List<ComicModel> lastedComics = new ArrayList<>();
         Elements elements = doc.select("div#rank-view-list ul li");

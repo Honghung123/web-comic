@@ -81,8 +81,8 @@ public class ComicService implements IComicService{
     }
 
     @Override
-    public DataModel<Integer, List<ComicModel>> getComicsOfAnAuthor(UUID pluginId, String authorId, int page) {
-        var result = this.getCrawlerPlugin(pluginId).getComicsByAuthor(authorId, page);
+    public DataModel<Integer, List<ComicModel>> getComicsOfAnAuthor(UUID pluginId, String authorId, String tagId, int page) {
+        var result = this.getCrawlerPlugin(pluginId).getComicsByAuthor(authorId, tagId, page);
         return result;
     }
 

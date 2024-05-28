@@ -671,37 +671,49 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
 
     @Override
     @SneakyThrows
-    public DataModel<Integer, List<ComicModel>> getComicsByAuthor(String authorId, int currentPage) {
-        List<ComicModel> lastedComics = new ArrayList<>();
-        Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "tac-gia/" + authorId);
-        Elements elements = doc.select(".col-truyen-main .list-truyen .row");
-        if (elements == null) {
-            throw new ResourceNotFound("Failed to get lasted chapters from Truyen Chu TH");
-        }
-        for (Element element : elements) {
-            String image = element.selectFirst(".col-xs-3 div[data-image]").attr("data-image");
-            var comicAnchor = element.selectFirst(".col-xs-7 .truyen-title a");
-            String title = comicAnchor.text();
-            String comicUrl = comicAnchor.attr("href");
-            String tagId = comicUrl.substring(comicUrl.lastIndexOf("vn/") + 3, comicUrl.lastIndexOf("/")); 
-            String authorName = element.selectFirst(".col-xs-7 .author span").text();
-            var author = new Author(authorId, authorName);
-            List<Genre> genres = new ArrayList<>();
-            boolean isFull = false;
-            var comicModel = ComicModel.builder()
-                    .tagId(tagId)
-                    .title(title)
-                    .image(image)
-                    .alternateImage(this.alternateImage)
-                    .genres(genres)
-                    .author(author)
-                    .isFull(isFull)
-                    .build();
-            lastedComics.add(comicModel);
-        }
-        int perPage = elements.size();
-        Pagination<Integer> pagination = new Pagination<>(currentPage, perPage, 1, -1);
-        DataModel<Integer, List<ComicModel>> result = new DataModel<>(pagination, lastedComics);
-        return result;
+    public DataModel<Integer, List<ComicModel>> getComicsByAuthor(String authorId, String tagId, int currentPage) {
+        List<ComicModel> authorComics = new ArrayList<>();
+        String apiUrl = TRUYEN_API + "/v1/story/detail/" + tagId + "/story_author";
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                String responseBody = response.body(); 
+                JsonObject jsonObject = new Gson().fromJson(responseBody, JsonObject.class);
+                JsonArray jsonArray = jsonObject.getAsJsonArray("data");
+                for (JsonElement element : jsonArray) {
+                    var jsonObj = element.getAsJsonObject();
+                    String comicTagId = jsonObj.get("id").getAsString();
+                    String title = jsonObj.get("title").getAsString();
+                    String image = jsonObj.get("image").getAsString(); 
+                    String authorName = jsonObj.get("author").getAsString();
+                    var author = new Author(authorId, authorName);
+                    List<Genre> genres = new ArrayList<>();
+                    boolean isFull = false;
+                    var comicModel = ComicModel.builder()
+                            .tagId(comicTagId)
+                            .title(title)
+                            .image(image)
+                            .alternateImage(this.alternateImage)
+                            .genres(genres)
+                            .author(author)
+                            .isFull(isFull)
+                            .build();
+                            authorComics.add(comicModel);    
+                
+                } 
+                var jsonPagination = jsonObject.get("meta").getAsJsonObject().get("pagination").getAsJsonObject();
+                int perPage = jsonPagination.get("per_page").getAsInt();
+                int totalPages = jsonPagination.get("total_pages").getAsInt();
+                Pagination<Integer> pagination = new Pagination<>(currentPage, perPage, totalPages, -1);
+                DataModel<Integer, List<ComicModel>> result = new DataModel<>(pagination, authorComics);
+                return result;
+            } else {
+                throw new ResourceNotFound("Failed to request comic information from TruyenFull");
+            }
+        } catch (Exception e) {
+            throw new HttpStatusException("Cannot make request to get comic information from TruyenFull", 404, apiUrl);
+        } 
     }
 }

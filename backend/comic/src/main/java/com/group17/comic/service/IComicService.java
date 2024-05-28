@@ -16,7 +16,7 @@ import com.group17.comic.model.Genre;
 public interface IComicService { 
        List<Genre> getAllGenres(UUID pluginId);
        DataModel<Integer, List<ComicModel>> getNewestCommic(UUID pluginId, int page);
-       DataModel<Integer, List<ComicModel>> getComicsOfAnAuthor(UUID serverId, String authorId, int page);
+       DataModel<Integer, List<ComicModel>> getComicsOfAnAuthor(UUID serverId, String authorId, String tagId, int page);
        DataSearchModel<Integer, List<ComicModel>, List<Author>> searchComic(UUID serverId,
                                                       String keyword, String byGenres, int currentPage);
        Comic getComicInfo(UUID pluginId, String tagUrl);

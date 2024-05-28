@@ -107,7 +107,7 @@ class TruyenFullCrawlerTest {
     @Test
     void canComicsByAuthor() {
         String authorName = "Thục Kỷ";
-        DataModel<Integer, List<ComicModel>> comicsOfTheAuthorModel =  truyenFullCrawler.getComicsByAuthor(authorName, 1);
+        DataModel<Integer, List<ComicModel>> comicsOfTheAuthorModel =  truyenFullCrawler.getComicsByAuthor(authorName, "", 1);
 
     }
 }

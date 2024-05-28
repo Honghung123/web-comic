@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files; 
 import java.nio.file.Paths;
@@ -17,8 +16,7 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 
 import com.group17.comic.dto.request.ChapterDTO;
-import com.group17.comic.dto.response.ChapterFile;
-import com.group17.comic.log.Logger;
+import com.group17.comic.dto.response.ChapterFile; 
 import com.group17.comic.plugins.exporter.IFileConverter;
 import com.group17.comic.utils.FileUtility;
 import com.group17.comic.utils.StringUtility;

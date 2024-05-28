@@ -17,5 +17,5 @@ public interface IDataCrawler {
     Comic getComicInfoOnOtherServer(AlternatedChapterDTO altChapterDto);
     DataModel<?, ComicChapterContent> getComicChapterContent(String comicTagId, String currentChapter);
     DataModel<?, ComicChapterContent> getComicChapterContentOnOtherServer(AlternatedChapterDTO altChapterDto);
-    DataModel<Integer, List<ComicModel>> getComicsByAuthor(String authorId, int currentPage);
+    DataModel<Integer, List<ComicModel>> getComicsByAuthor(String authorId, String tagId, int currentPage);
 }
