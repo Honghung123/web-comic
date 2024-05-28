@@ -84,7 +84,11 @@ function ListComicsV2() {
                         {comicsData.comics.length > 0 &&
                             (isAuthorPage
                                 ? `Tác giả ${comicsData.comics[0].author.name || authorId}`
-                                : `Thể loại ${genre}`)}
+                                : `Thể loại ${
+                                      JSON.parse(localStorage.getItem('genres'))?.find(
+                                          (genreItem) => genreItem.tag === genre,
+                                      ).label
+                                  }`)}
                     </h2>
                     <div className="divide-y">
                         {comicsData.comics.map((comic) => {

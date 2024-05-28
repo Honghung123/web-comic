@@ -22,7 +22,7 @@ function ListComics() {
 
     useEffect(() => {
         window.scrollTo(0, 0);
-        setComicsData({ ...comicsData, comics: undefined });
+        setComicsData({ ...comicsData, comics: undefined, others: undefined });
         if (servers && servers.length > 0) {
             setLoading(true);
             const server_id = servers.find((server) => server.priority === 1).id;
@@ -41,10 +41,12 @@ function ListComics() {
                 })
                 .then((response) => {
                     const responseData = response.data;
+                    console.log('list-comic: ', responseData);
                     if (responseData.statusCode === 200) {
                         setComicsData({
                             comics: responseData.data,
                             pagination: responseData.pagination,
+                            others: responseData.others || [],
                         });
                     } else {
                         // thong bao loi
@@ -70,7 +72,7 @@ function ListComics() {
         }
     }, [servers, genre, keyword, page]);
 
-    console.log('commic data: ', comicsData);
+    // console.log('commic data: ', comicsData);
     const getSearchStr = (keyword, genre, page) => {
         let searchStr =
             `?${keyword === '' ? '' : `keyword=${keyword}`}` +
@@ -83,24 +85,38 @@ function ListComics() {
     };
 
     let headerText = 'Danh sách truyện đề cử:';
-    if (keyword != '' && genre != '') {
-        headerText = `Tìm kiếm cho: "${keyword}". Thể loại: ${genre.replace(/-/g, ' ')}.`;
-    } else if (keyword != '' && genre == '') {
+    if (keyword !== '' && genre === '') {
         headerText = `Tìm kiếm cho: "${keyword}"`;
-    } else if (keyword == '' && genre != '') {
-        headerText = `Tìm kiếm theo thể loại: "${genre.replace(/-/g, ' ')}"`;
+    } else if (genre !== '') {
+        const listGenres = JSON.parse(localStorage.getItem('genres'));
+        const genreLabel = listGenres?.find((genreItem) => genreItem.tag === genre).label;
+        if (keyword === '') {
+            headerText = `Tìm kiếm theo thể loại: "${genreLabel}"`;
+        } else {
+            headerText = `Tìm kiếm cho: "${keyword}". Thể loại: ${genreLabel}.`;
+        }
     }
+
     return (
         <div className="min-h-96 p-2 mt-8 mx-auto relative" style={{ maxWidth: 1200 }}>
             <Loading loading={loading} />
             <h2 className="text-3xl pt-2 font-semibold underline underline-offset-8">{headerText}</h2>
-            {/* {keyword != '' && genre == '' && (
+            {keyword !== '' && genre === '' && comicsData.others && comicsData.others.length > 0 && (
                 <div>
-                    <h3 className="text-xl font-semibold underline underline-offset-4">Danh sách tác giả:</h3>
-                    <p>Danh sách ....</p>
-                    <h3 className="text-xl font-semibold underline underline-offset-4">Danh sách truyện:</h3>
+                    <h3 className="text-xl font-semibold underline underline-offset-4 mt-2">Danh sách tác giả:</h3>
+                    <div className="my-2">
+                        {comicsData.others.map((author, index) => (
+                            <>
+                                <Link key={index} to={`/author/${author.authorId}`}>
+                                    <span className="hover:text-purple-500 pl-1 italic text-xl">{author.name}</span>
+                                </Link>
+                                {index < comicsData.others.length - 1 && <>, </>}
+                            </>
+                        ))}
+                    </div>
+                    <h3 className="text-xl font-semibold underline underline-offset-4 mt-4">Danh sách truyện:</h3>
                 </div>
-            )} */}
+            )}
             <div className="flex flex-wrap min-h-full" style={{ marginLeft: '-1rem', marginRight: '-1rem' }}>
                 {comicsData.comics &&
                     comicsData.comics.map((comic) => (

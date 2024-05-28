@@ -84,6 +84,7 @@ function SearchBox() {
                             label: 'Tất cả',
                         });
                         setListGenres(responseData.data);
+                        localStorage.setItem('genres', JSON.stringify(responseData.data));
                     } else {
                         // Thong bao loi
                         console.log(responseData.message);
@@ -111,6 +112,18 @@ function SearchBox() {
             setGenre('');
         }
     }, [currentPage]);
+
+    useEffect(() => {
+        if (!searchParams.get('keyword')) {
+            setKeyword('');
+        }
+    }, [searchParams.get('keyword')]);
+
+    useEffect(() => {
+        if (!searchParams.get('genre')) {
+            setGenre('');
+        }
+    }, [searchParams.get('genre')]);
 
     return (
         <div className="flex" style={{ margin: 20 }}>
