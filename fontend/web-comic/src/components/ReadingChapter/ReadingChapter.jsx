@@ -7,12 +7,13 @@ import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import NavigateNextRoundedIcon from '@mui/icons-material/NavigateNextRounded';
 import NavigateBeforeRoundedIcon from '@mui/icons-material/NavigateBeforeRounded';
 import Divider from '@mui/material/Divider';
-import Modal from '@mui/material/Modal';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import Tippy from '@tippyjs/react/headless';
+import 'tippy.js/dist/tippy.css';
 
 import { Context } from '../../GlobalContext';
 import ListChapters from '../ListChapters/ListChapters';
@@ -35,7 +36,6 @@ function ReadingChapter() {
     const [openSetting, setOpenSetting] = useState(false);
     const [openListChapters, setOpenListChapters] = useState(false);
     const [openDownload, setOpenDownload] = useState(false);
-    const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 });
 
     // state for custom
     const [bgColor, setBgColor] = useState(localStorage.getItem('bgColor') || 'bg-gray-100');
@@ -45,8 +45,6 @@ function ReadingChapter() {
 
     const [chapterData, setChapterData] = useState();
     const [loading, setLoading] = useState(false);
-
-    const contentRef = useRef();
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -207,7 +205,6 @@ function ReadingChapter() {
                     <div className="w-full mx-auto px-16 mt-8 relative">
                         <Loading loading={loading} />
                         <div
-                            ref={contentRef}
                             className={`w-full min-h-72 ${bgColor} sm:p-4 p-2`}
                             style={{ fontSize, lineHeight, fontFamily }}
                             dangerouslySetInnerHTML={{
@@ -215,49 +212,228 @@ function ReadingChapter() {
                             }}
                         ></div>
                         <div className={`${bgColor} absolute z-50 top-0 left-0 divide-black rounded`}>
-                            <div
-                                onClick={(e) => {
-                                    const rect = contentRef.current.getBoundingClientRect();
-                                    setOpenListChapters(true);
-                                    setModalPosition({ x: rect.left - 4, y: rect.top - 4 });
-                                }}
-                                className={`flex justify-center items-center cursor-pointer ${
-                                    openListChapters ? 'text-purple-500' : ''
-                                }`}
-                                style={{ width: 50, height: 50 }}
+                            {/* List Chapters */}
+                            <Tippy
+                                interactive
+                                visible={openListChapters}
+                                onClickOutside={() => setOpenListChapters(false)}
+                                placement="right-start"
+                                render={(attrs) => (
+                                    <div
+                                        className="h-64 overflow-auto bg-white rounded p-4"
+                                        tabIndex={-1}
+                                        {...attrs}
+                                        style={{ boxShadow: '0 0 10px rgba(0, 0, 0, 0.4)', width: 380 }}
+                                    >
+                                        <ListChapters headerSize="text-xl" tagId={tagId} />
+                                    </div>
+                                )}
                             >
-                                <MenuRoundedIcon />
-                            </div>
+                                <div
+                                    onClick={() => setOpenListChapters(true)}
+                                    className={`flex justify-center items-center cursor-pointer ${
+                                        openListChapters ? 'text-purple-500' : ''
+                                    }`}
+                                    style={{ width: 50, height: 50 }}
+                                >
+                                    <MenuRoundedIcon />
+                                </div>
+                            </Tippy>
                             <Divider orientation="horizontal" variant="middle" />
-                            <div
-                                onClick={(e) => {
-                                    let rect = contentRef.current.getBoundingClientRect();
-                                    setOpenSetting(true);
-                                    setModalPosition({ x: rect.left - 4, y: rect.top - 4 });
-                                }}
-                                className={`flex justify-center items-center cursor-pointer ${
-                                    openSetting ? 'text-purple-500' : ''
-                                }`}
-                                style={{ width: 50, height: 50 }}
+
+                            {/* Setting properties */}
+                            <Tippy
+                                interactive
+                                visible={openSetting}
+                                onClickOutside={() => setOpenSetting(false)}
+                                placement="right-start"
+                                offset={[-50, 10]}
+                                render={(attrs) => (
+                                    <div
+                                        tabIndex={-1}
+                                        {...attrs}
+                                        className="bg-white rounded p-4"
+                                        style={{ boxShadow: '0 0 10px rgba(0, 0, 0, 0.4)', width: 380 }}
+                                    >
+                                        <div className="text-xl font-semibold">Tùy chỉnh:</div>
+                                        <Divider orientation="horizontal" className="h-2" />
+                                        <div className="flex justify-between mt-4">
+                                            <div className="">Theme</div>
+                                            <div className="flex gap-4">
+                                                {bgColors.map((color) => {
+                                                    return (
+                                                        <div
+                                                            onClick={(e) => {
+                                                                const tagName = e.target.tagName.toUpperCase();
+                                                                let id;
+                                                                if (tagName === 'DIV') id = e.target.id;
+                                                                else if (tagName === 'SVG') id = e.target.parentNode.id;
+                                                                else id = e.target.parentNode.parentNode.id;
+                                                                if (id !== bgColor) {
+                                                                    localStorage.setItem('bgColor', id);
+                                                                    setBgColor(id);
+                                                                }
+                                                            }}
+                                                            key={color}
+                                                            id={color}
+                                                            className={`rounded-full border text-purple-500 ${color} ${
+                                                                bgColor === color ? 'border-purple-500' : ''
+                                                            }  h-8 w-8 cursor-pointer text-center`}
+                                                        >
+                                                            {bgColor === color && <CheckRoundedIcon />}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+
+                                        <div className="flex justify-between gap-8 mt-4 items-center">
+                                            <div style={{ width: 90 }}>Font chữ</div>
+                                            <Select
+                                                onChange={(e) => {
+                                                    localStorage.setItem('fontFamily', e.target.value);
+                                                    setFontFamily(e.target.value);
+                                                }}
+                                                sx={{
+                                                    flex: 1,
+                                                    height: 40,
+                                                    '&.MuiOutlinedInput-root': {
+                                                        '&:hover fieldset': {
+                                                            borderColor: 'rgba(25, 118, 210, 0.5)',
+                                                        },
+                                                        '&.Mui-focused fieldset': {
+                                                            border: '1px solid rgba(25, 118, 210, 0.5)',
+                                                        },
+                                                    },
+                                                }}
+                                                value={fontFamily}
+                                                className="bg-white"
+                                            >
+                                                {fontFamilies.map((font) => (
+                                                    <MenuItem value={font.value} key={font.value}>
+                                                        {font.title}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        </div>
+
+                                        <div className="flex justify-between gap-8 mt-4 items-center">
+                                            <div style={{ width: 90 }}>Cách dòng</div>
+                                            <Select
+                                                onChange={(e) => {
+                                                    localStorage.setItem('lineHeight', e.target.value);
+                                                    setLineHeight(e.target.value);
+                                                }}
+                                                sx={{
+                                                    flex: 1,
+                                                    height: 40,
+                                                    '&.MuiOutlinedInput-root': {
+                                                        '&:hover fieldset': {
+                                                            borderColor: 'rgba(25, 118, 210, 0.5)',
+                                                        },
+                                                        '&.Mui-focused fieldset': {
+                                                            border: '1px solid rgba(25, 118, 210, 0.5)',
+                                                        },
+                                                    },
+                                                }}
+                                                value={lineHeight}
+                                                className="bg-white"
+                                            >
+                                                {lineHeights.map((lh) => (
+                                                    <MenuItem value={lh} key={lh}>
+                                                        {lh}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        </div>
+
+                                        <div className="flex justify-between gap-8 mt-4 items-center">
+                                            <div style={{ width: 90 }}>Cỡ chữ</div>
+                                            <div className="flex grow">
+                                                <Button
+                                                    onClick={(e) => {
+                                                        setFontSize((prev) => {
+                                                            if (prev >= 14) {
+                                                                localStorage.setItem('fontSize', prev - 2);
+                                                                return prev - 2;
+                                                            }
+                                                            return prev;
+                                                        });
+                                                    }}
+                                                    variant="outlined"
+                                                    color="primary"
+                                                    sx={{ borderRadius: '20px 0 0 20px' }}
+                                                >
+                                                    -
+                                                </Button>
+                                                <div
+                                                    className="border flex grow justify-center items-center"
+                                                    style={{ borderColor: 'rgba(25, 118, 210, 0.5)' }}
+                                                >
+                                                    {fontSize}
+                                                </div>
+                                                <Button
+                                                    onClick={(e) => {
+                                                        setFontSize((prev) => {
+                                                            if (prev <= 42) {
+                                                                localStorage.setItem('fontSize', prev + 2);
+                                                                return prev + 2;
+                                                            }
+                                                            return prev;
+                                                        });
+                                                    }}
+                                                    variant="outlined"
+                                                    color="primary"
+                                                    sx={{ borderRadius: '0 20px 20px 0' }}
+                                                >
+                                                    +
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             >
-                                <SettingsRoundedIcon />
-                            </div>
+                                <div
+                                    onClick={() => setOpenSetting(true)}
+                                    className={`flex justify-center items-center cursor-pointer ${
+                                        openSetting ? 'text-purple-500' : ''
+                                    }`}
+                                    style={{ width: 50, height: 50 }}
+                                >
+                                    <SettingsRoundedIcon />
+                                </div>
+                            </Tippy>
                             <Divider orientation="horizontal" variant="middle" />
-                            <div
-                                onClick={(e) => {
-                                    let rect = contentRef.current.getBoundingClientRect();
-                                    setOpenDownload(true);
-                                    setModalPosition({ x: rect.left - 4, y: rect.top - 4 });
-                                }}
-                                className={`flex justify-center items-center cursor-pointer ${
-                                    openDownload ? 'text-purple-500' : ''
-                                }`}
-                                style={{ width: 50, height: 50 }}
+
+                            {/* Download file */}
+                            <Tippy
+                                interactive
+                                visible={openDownload}
+                                onClickOutside={() => setOpenDownload(false)}
+                                placement="right-start"
+                                offset={[-100, 10]}
+                                render={(attrs) => (
+                                    <DownloadModal
+                                        tabIndex={-1}
+                                        {...attrs}
+                                        open={openDownload}
+                                        setOpen={setOpenDownload}
+                                        chapter={chapterData?.data}
+                                    />
+                                )}
                             >
-                                <FileDownloadIcon />
-                            </div>
+                                <div
+                                    onClick={() => setOpenDownload(true)}
+                                    className={`flex justify-center items-center cursor-pointer ${
+                                        openDownload ? 'text-purple-500' : ''
+                                    }`}
+                                    style={{ width: 50, height: 50 }}
+                                >
+                                    <FileDownloadIcon />
+                                </div>
+                            </Tippy>
                         </div>
-                        <Modal
+                        {/* <Modal
                             open={openListChapters}
                             onClose={() => {
                                 setOpenListChapters(false);
@@ -272,9 +448,9 @@ function ReadingChapter() {
                             <div className="w-96 h-64 overflow-auto bg-white rounded p-4 shadow">
                                 <ListChapters headerSize="text-xl" tagId={tagId} />
                             </div>
-                        </Modal>
+                        </Modal> */}
 
-                        <Modal
+                        {/* <Modal
                             open={openSetting}
                             onClose={() => {
                                 setOpenSetting(false);
@@ -426,14 +602,7 @@ function ReadingChapter() {
                                     </div>
                                 </div>
                             </div>
-                        </Modal>
-
-                        <DownloadModal
-                            position={modalPosition}
-                            open={openDownload}
-                            setOpen={setOpenDownload}
-                            chapter={chapterData?.data}
-                        />
+                        </Modal> */}
                     </div>
                 </div>
             )}

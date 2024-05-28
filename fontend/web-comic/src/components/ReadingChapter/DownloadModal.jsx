@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import Divider from '@mui/material/Divider';
-import Modal from '@mui/material/Modal';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
@@ -10,7 +9,7 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 
 import { toast } from 'react-toastify';
 
-function DownloadModal({ position, open, setOpen, chapter }) {
+function DownloadModal({ open, setOpen, chapter }) {
     const [converters, setConverters] = useState([]);
     const [currentConverterId, setCurrentConverterId] = useState();
     const [loading, setLoading] = useState(false);
@@ -49,7 +48,7 @@ function DownloadModal({ position, open, setOpen, chapter }) {
                 `.${converter.name.toLowerCase()}`;
             document.body.appendChild(anchor);
             anchor.click();
-            // Xóa URL sau khi đã tải xuống
+            // Xoa URL di sau khi tai xuong
             window.URL.revokeObjectURL(downloadUrl);
         } catch (error) {
             console.log(error);
@@ -96,53 +95,42 @@ function DownloadModal({ position, open, setOpen, chapter }) {
     }, [open]);
 
     return (
-        <Modal
-            open={open}
-            onClose={() => {
-                setOpen(false);
-            }}
-            aria-labelledby="modal-modal-title"
-            aria-describedby="modal-modal-description"
-            BackdropProps={{
-                sx: { backgroundColor: 'transparent' },
-            }}
-            sx={{ top: position.y, left: position.x }}
-        >
-            <div className="w-64 bg-white rounded p-4 shadow">
-                <div className="text-xl font-semibold">Tải xuống:</div>
-                <Divider orientation="horizontal" className="h-2" />
-                <RadioGroup
-                    aria-labelledby="file-types-choices"
-                    value={currentConverterId}
-                    onChange={(e) => {
-                        setCurrentConverterId(e.target.value);
-                    }}
-                >
-                    {converters &&
-                        converters.map((converter) => {
-                            return (
-                                <FormControlLabel
-                                    key={converter.id}
-                                    value={converter.id}
-                                    control={<Radio color="secondary" />}
-                                    label={converter.name}
-                                />
-                            );
-                        })}
-                </RadioGroup>
+        <div className="bg-white rounded p-4" style={{ boxShadow: '0 0 10px rgba(0, 0, 0, 0.4)', width: 380 }}>
+            <div className="text-xl font-semibold">Tải xuống:</div>
+            <Divider orientation="horizontal" className="h-2" />
+            <RadioGroup
+                aria-labelledby="file-types-choices"
+                value={currentConverterId}
+                onChange={(e) => {
+                    setCurrentConverterId(e.target.value);
+                }}
+                style={{ display: 'flex', flexDirection: 'row' }}
+            >
+                {converters &&
+                    converters.map((converter) => {
+                        return (
+                            <FormControlLabel
+                                key={converter.id}
+                                value={converter.id}
+                                control={<Radio color="secondary" />}
+                                label={converter.name}
+                                style={{ width: 110 }}
+                            />
+                        );
+                    })}
+            </RadioGroup>
 
-                <div className="text-center">
-                    <Button
-                        variant="outlined"
-                        color="success"
-                        onClick={btnDownloadClick}
-                        sx={{ opacity: loading ? 0.5 : 1 }}
-                    >
-                        <FileDownloadIcon />
-                    </Button>
-                </div>
+            <div className="text-center">
+                <Button
+                    variant="outlined"
+                    color="success"
+                    onClick={btnDownloadClick}
+                    sx={{ opacity: loading ? 0.5 : 1 }}
+                >
+                    <FileDownloadIcon />
+                </Button>
             </div>
-        </Modal>
+        </div>
     );
 }
 
