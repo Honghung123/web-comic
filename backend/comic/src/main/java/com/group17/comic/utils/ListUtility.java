@@ -7,11 +7,20 @@ public class ListUtility {
         if (list1.size() != list2.size()) {
             return false;
         }
+        boolean result = true;
         for (int i = 0; i < list1.size(); i++) {
-            if (!list1.get(i).equals(list2.get(i))) {
-                return false;
+            boolean isEqual = false;
+            for (int j = 0; j < list2.size(); j++) {
+                if (list1.get(i).equals(list2.get(j))) {
+                    isEqual = isEqual || true;
+                    break;
+                }                
+            }
+            if (!isEqual) {
+                result = false;
+                break;
             }
         }
-        return true;
+        return result;
     }
 }
