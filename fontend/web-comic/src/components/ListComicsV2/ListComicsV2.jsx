@@ -11,6 +11,7 @@ function ListComicsV2() {
     const location = useLocation();
     const { pathname } = location;
     const isAuthorPage = pathname.startsWith('/author');
+    const serverId = pathname.substring(pathname.indexOf('/', 1) + 1, pathname.lastIndexOf('/'));
     const authorId = isAuthorPage ? pathname.substring(pathname.lastIndexOf('/') + 1) : '';
     const genre = isAuthorPage ? '' : pathname.substring(pathname.lastIndexOf('/') + 1);
     const { servers } = useContext(Context);
@@ -25,8 +26,7 @@ function ListComicsV2() {
     useEffect(() => {
         window.scrollTo(0, 0);
         setComicsData({ ...comicsData, comics: undefined });
-        if (servers && servers.length > 0) {
-            const server_id = servers.find((server) => server.priority === 1).id;
+        if (serverId) {
             setLoading(true);
             let requestUrl = isAuthorPage
                 ? `http://localhost:8080/api/v1/comic/author/${authorId}`
@@ -35,9 +35,10 @@ function ListComicsV2() {
             axios
                 .get(requestUrl, {
                     params: {
-                        server_id,
+                        server_id: serverId,
                         page,
                         genre,
+                        tagId: 'hihi',
                     },
                     headers: {
                         'list-crawlers': JSON.stringify(servers.map((server) => server.id)),
@@ -106,12 +107,12 @@ function ListComicsV2() {
                                             />
                                         </div>
                                         <div className="px-4" style={{ maxWidth: 580 }}>
-                                            <Link to={`/info/${comic.tagId}`}>
+                                            <Link to={`/info/${serverId}/${comic.tagId}`}>
                                                 <h3 className="text-xl font-semibold hover:text-purple-500">
                                                     {comic.title}
                                                 </h3>
                                             </Link>
-                                            <Link to={`/author/${comic.author.authorId}`}>
+                                            <Link to={`/author/${serverId}/${comic.author.authorId}`}>
                                                 <div className="italic py-2 hover:text-purple-500">
                                                     {comic.author.name}
                                                 </div>
@@ -121,7 +122,7 @@ function ListComicsV2() {
                                                     Thể loại:{' '}
                                                     {comic.genres.map((genre, index) => (
                                                         <>
-                                                            <Link key={index} to={`/genre/${genre.tag}`}>
+                                                            <Link key={index} to={`/genre/${serverId}/${genre.tag}`}>
                                                                 <span className="hover:text-purple-500">
                                                                     {genre.label}
                                                                 </span>

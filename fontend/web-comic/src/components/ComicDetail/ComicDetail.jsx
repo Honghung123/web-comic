@@ -1,18 +1,21 @@
 import { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import { Button } from '@mui/material';
-
-import { Context } from '../../GlobalContext';
-import * as Utils from '../../utils';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-function ComicDetail({ tagId }) {
+import { Context } from '../../GlobalContext';
+import * as Utils from '../../utils';
+import SettingServer from '../SettingServer';
+
+function ComicDetail({ tagId, serverId }) {
     const navigate = useNavigate();
     const { servers } = useContext(Context);
     const [comicData, setComicData] = useState();
     const [showFullDescription, setShowFullDescription] = useState(false);
     const [chapterBound, setChapterBound] = useState();
+    const [serverIdState, setServerIdState] = useState(serverId);
+
     const toggleDescription = () => {
         setShowFullDescription(!showFullDescription);
     };
@@ -20,17 +23,12 @@ function ComicDetail({ tagId }) {
         return text.length > length ? text.slice(0, length) : text;
     };
 
-    let server_id;
-    if (servers && servers.length > 0) {
-        server_id = servers.find((server) => server.priority === 1).id;
-    }
-
     useEffect(() => {
         window.scrollTo(0, 0);
-        if (server_id !== undefined) {
+        if (serverId !== undefined) {
             axios
                 .get(`http://localhost:8080/api/v1/comic/reading/${tagId}`, {
-                    params: { server_id },
+                    params: { server_id: serverIdState },
                     headers: {
                         'list-crawlers': JSON.stringify(servers.map((server) => server.id)),
                     },
@@ -63,7 +61,7 @@ function ComicDetail({ tagId }) {
             axios
                 .get(`http://localhost:8080/api/v1/comic/reading/${tagId}/chapters`, {
                     params: {
-                        server_id,
+                        server_id: serverId,
                         page: 1,
                     },
                     headers: {
@@ -78,7 +76,7 @@ function ComicDetail({ tagId }) {
                         axios
                             .get(`http://localhost:8080/api/v1/comic/reading/${tagId}/chapters`, {
                                 params: {
-                                    server_id,
+                                    server_id: serverId,
                                     page: responseData.pagination?.totalPages,
                                 },
                                 headers: {
@@ -110,9 +108,10 @@ function ComicDetail({ tagId }) {
         }
     }, [tagId]);
 
+    // change comic's source
     useEffect(() => {
         if (comicData && servers && servers.length > 0) {
-            const { id: server_id, name: server_name } = servers.find((server) => server.priority === 1);
+            const { id: server_id, name: server_name } = servers.find((server) => server.id === serverIdState);
 
             console.log('post body: ', {
                 title: comicData.title,
@@ -144,10 +143,11 @@ function ComicDetail({ tagId }) {
                     const responseData = response.data;
                     if (responseData.statusCode === 200) {
                         // toast.success('Data fetched successfully!');
-                        navigate(`/info/${responseData.data.tagId}`);
+                        navigate(`/info/${serverIdState}/${responseData.data.tagId}`);
                     } else {
                         // thong bao loi
                         console.log(responseData.message);
+                        setServerIdState(serverId);
                         throw new Error(responseData.message);
                         // alert(responseData.message);
                     }
@@ -155,22 +155,25 @@ function ComicDetail({ tagId }) {
                     // thong bao loi
                     // alert(err.message);
                     console.log(err);
+                    setServerIdState(serverId);
                     throw err;
                 }
             };
 
-            toast.promise(fecthData(), {
-                pending: `Chuyển sang server ${server_name}`,
-                success: 'Chuyển server thành công',
-                error: `Không tìm thấy truyện trên ${server_name}`,
-            });
+            if (serverId !== serverIdState) {
+                toast.promise(fecthData(), {
+                    pending: `Chuyển sang server ${server_name}`,
+                    success: 'Chuyển server thành công',
+                    error: `Không tìm thấy truyện trên ${server_name}`,
+                });
+            }
         }
-    }, [servers]);
+    }, [serverIdState]);
 
     console.log('comic data: ', comicData);
 
     return (
-        <div className="min-h-96 my-16 mx-auto relative" style={{ maxWidth: 1200 }}>
+        <div className="min-h-96 mb-16 mx-auto relative" style={{ maxWidth: 1200 }}>
             {comicData && (
                 <div className="flex flex-wrap">
                     <div className="md:w-1/4 sm:w-1/3 w-full overflow-hidden">
@@ -206,8 +209,8 @@ function ComicDetail({ tagId }) {
                                 component={Link}
                                 to={
                                     chapterBound && chapterBound.first
-                                        ? `/reading/${tagId}/${chapterBound.first.chapterNo}`
-                                        : `/info/${tagId}`
+                                        ? `/reading/${serverId}/${tagId}/${chapterBound.first.chapterNo}`
+                                        : `/info/${serverId}/${tagId}`
                                 }
                                 variant="contained"
                                 color="success"
@@ -216,9 +219,9 @@ function ComicDetail({ tagId }) {
                                 Đọc từ đầu
                             </Button>
                             <Button
-                                disabled={Utils.getLastReadingChapter(tagId, server_id) === undefined}
+                                disabled={Utils.getLastReadingChapter(tagId, serverId) === undefined}
                                 component={Link}
-                                to={`/reading/${tagId}/${Utils.getLastReadingChapter(tagId, server_id)}`}
+                                to={`/reading/${serverId}/${tagId}/${Utils.getLastReadingChapter(tagId, serverId)}`}
                                 variant="contained"
                                 color="success"
                                 sx={{ borderRadius: 40 }}
@@ -229,8 +232,8 @@ function ComicDetail({ tagId }) {
                                 component={Link}
                                 to={
                                     chapterBound && chapterBound.last
-                                        ? `/reading/${tagId}/${chapterBound.last.chapterNo}`
-                                        : `/info/${tagId}`
+                                        ? `/reading/${serverId}/${tagId}/${chapterBound.last.chapterNo}`
+                                        : `/info/${serverId}/${tagId}`
                                 }
                                 variant="contained"
                                 color="success"
@@ -240,25 +243,29 @@ function ComicDetail({ tagId }) {
                             </Button>
                         </div>
                     </div>
-                    <div className="w-full h-32 mt-4">
+                    <div className="w-full mt-4">
                         <div className="text-xl font-semibold">
                             Thể loại:{' '}
                             {comicData.genres.length > 0 &&
                                 comicData.genres.map((genre, index) => (
                                     <>
-                                        <Link key={index} to={`/genre/${genre.tag}`}>
+                                        <Link key={index} to={`/genre/${serverId}/${genre.tag}`}>
                                             <span className="hover:text-purple-500">{genre.label}</span>
                                         </Link>
                                         {index < comicData.genres.length - 1 && <>, </>}
                                     </>
                                 ))}
                         </div>
-                        <div className="text-xl font-semibold mt-2">
+                        <div className="text-xl font-semibold mt-4">
                             Tác giả:{' '}
-                            <Link to={`/author/${comicData.author?.authorId}`} className="hover:text-purple-500">
+                            <Link
+                                to={`/author/${serverId}/${comicData.author?.authorId}`}
+                                className="hover:text-purple-500"
+                            >
                                 {' ' + comicData.author?.name}
                             </Link>
                         </div>
+                        <SettingServer serverId={serverIdState} setServerId={setServerIdState} />
                     </div>
                 </div>
             )}

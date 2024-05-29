@@ -65,7 +65,7 @@ function SearchBox() {
     useEffect(() => {
         setGenre('');
         if (servers && servers.length > 0) {
-            const server_id = servers.find((server) => server.priority === 1).id;
+            const server_id = servers[0].id;
             axios
                 .get('http://localhost:8080/api/v1/comic/genres', {
                     params: {

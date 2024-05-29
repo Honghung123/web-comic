@@ -16,7 +16,8 @@ import Tippy from '@tippyjs/react/headless';
 import 'tippy.js/dist/tippy.css';
 
 import { Context } from '../../GlobalContext';
-import ListChapters from '../ListChapters/ListChapters';
+import ListChapters from '../ListChapters';
+import SettingServer from '../SettingServer';
 import Loading from '../Loading';
 import * as Utils from '../../utils';
 import DownloadModal from './DownloadModal';
@@ -25,12 +26,15 @@ import { fontFamilies, bgColors, lineHeights } from './constants';
 function ReadingChapter() {
     const location = useLocation();
     const { pathname } = location;
-    console.log(pathname);
     const navigate = useNavigate();
     const tempStr = pathname.substring(pathname.indexOf('/', 1) + 1);
-    const tagId = tempStr.substring(0, tempStr.indexOf('/'));
-    const chapter = tempStr.substring(tempStr.indexOf('/') + 1);
+    const serverId = tempStr.substring(0, tempStr.indexOf('/'));
+    const tagId = tempStr.substring(tempStr.indexOf('/') + 1, tempStr.lastIndexOf('/'));
+    const chapter = tempStr.substring(tempStr.lastIndexOf('/') + 1);
     const { servers } = useContext(Context);
+
+    // state for change comic's source
+    const [serverIdState, setServerIdState] = useState(serverId);
 
     // state for modal
     const [openSetting, setOpenSetting] = useState(false);
@@ -53,17 +57,17 @@ function ReadingChapter() {
     // fetch data
     useEffect(() => {
         setOpenListChapters(false);
-        if (servers && servers.length > 0) {
+        if (serverId) {
             setLoading(true);
             if (chapterData) {
-                setChapterData({ ...chapterData, data: {} });
+                setChapterData({ ...chapterData, data: { title: chapterData?.data?.title } });
+                // setChapterData(undefined);
             }
-            const server_id = servers.find((server) => server.priority === 1).id;
 
             axios
                 .get(`http://localhost:8080/api/v1/comic/reading/${tagId}/chapters/${chapter}`, {
                     params: {
-                        server_id,
+                        server_id: serverId,
                     },
                     headers: {
                         'list-crawlers': JSON.stringify(servers.map((server) => server.id)),
@@ -74,7 +78,7 @@ function ReadingChapter() {
                     const responseData = response.data;
                     if (responseData.statusCode === 200) {
                         // save chapter into history
-                        Utils.addChapter(chapter, tagId, server_id);
+                        Utils.addChapter(chapter, tagId, serverId);
                         setChapterData({
                             data: responseData.data,
                             pagination: responseData.pagination,
@@ -107,7 +111,7 @@ function ReadingChapter() {
     // change server when reading
     useEffect(() => {
         if (chapterData?.data && servers && servers.length > 0) {
-            const { id: server_id, name: server_name } = servers.find((server) => server.priority === 1);
+            const { id: server_id, name: server_name } = servers.find((server) => server.id === serverIdState);
 
             console.log('post body: ', {
                 title: chapterData.data.title,
@@ -139,10 +143,13 @@ function ReadingChapter() {
                     const responseData = response.data;
                     if (responseData.statusCode === 200) {
                         // toast.success('Data fetched successfully!');
-                        navigate(`/reading/${responseData.data.comicTagId}/${responseData.pagination.currentPage}`);
+                        navigate(
+                            `/reading/${serverIdState}/${responseData.data.comicTagId}/${responseData.pagination.currentPage}`,
+                        );
                     } else {
                         // thong bao loi
                         console.log(responseData.message);
+                        setServerIdState(serverId);
                         throw new Error(responseData.message);
                         // alert(responseData.message);
                     }
@@ -150,17 +157,20 @@ function ReadingChapter() {
                     // thong bao loi
                     // alert(err.message);
                     console.log(err);
+                    setServerIdState(serverId);
                     throw err;
                 }
             };
 
-            toast.promise(fecthData(), {
-                pending: `Chuyển sang server ${server_name}`,
-                success: 'Chuyển server thành công',
-                error: `Không tìm thấy truyện trên ${server_name}`,
-            });
+            if (serverIdState != serverId) {
+                toast.promise(fecthData(), {
+                    pending: `Chuyển sang server ${server_name}`,
+                    success: 'Chuyển server thành công',
+                    error: `Không tìm thấy truyện trên ${server_name}`,
+                });
+            }
         }
-    }, [servers]);
+    }, [serverIdState]);
 
     return (
         <>
@@ -169,13 +179,19 @@ function ReadingChapter() {
                     <Loading loading={loading} />
                 </div>
             ) : (
-                <div className="min-h-96 mt-16 mx-auto" style={{ maxWidth: 1200 }}>
-                    <h1 className="text-3xl text-center font-semibold">{chapterData.data.chapterTitle}</h1>
-                    <div className="flex justify-center gap-4 mt-4">
+                <div className="min-h-96 mx-auto" style={{ maxWidth: 1200 }}>
+                    <h1 className="text-3xl text-center font-semibold" style={{ height: 36 }}>
+                        {chapterData.data.title}
+                    </h1>
+                    <h1 className="text-xl text-center font-semibold mt-2 text-gray-500" style={{ height: 36 }}>
+                        {chapterData.data.chapterNumber &&
+                            `Chương ${chapterData.data.chapterNumber}: ${chapterData.data.chapterTitle}`}
+                    </h1>
+                    <div className="flex justify-center gap-4 my-4">
                         <Button
                             disabled={!chapterData.pagination.link.prevPage}
                             component={Link}
-                            to={`/reading/${tagId}/${chapterData.pagination.link.prevPage}`}
+                            to={`/reading/${serverId}/${tagId}/${chapterData.pagination.link.prevPage}`}
                             variant="contained"
                             color="success"
                             sx={{ width: 180, textAlign: 'center', padding: '8px 0' }}
@@ -189,7 +205,7 @@ function ReadingChapter() {
                             component={Link}
                             to={
                                 chapterData.pagination.link.nextPage
-                                    ? `/reading/${tagId}/${chapterData.pagination.link.nextPage}`
+                                    ? `/reading/${serverId}/${tagId}/${chapterData.pagination.link.nextPage}`
                                     : ''
                             }
                             variant="contained"
@@ -201,11 +217,13 @@ function ReadingChapter() {
                         </Button>
                     </div>
 
+                    <SettingServer serverId={serverIdState} setServerId={setServerIdState} />
+
                     {/* content + setting properties */}
-                    <div className="w-full mx-auto px-16 mt-8 relative">
+                    <div className="w-full mx-auto px-16 mt-4 relative">
                         <Loading loading={loading} />
                         <div
-                            className={`w-full min-h-72 ${bgColor} sm:p-4 p-2`}
+                            className={`w-full min-h-72 ${bgColor} sm:p-4 p-2 text-slate-700`}
                             style={{ fontSize, lineHeight, fontFamily }}
                             dangerouslySetInnerHTML={{
                                 __html: chapterData.data.content,
@@ -225,7 +243,7 @@ function ReadingChapter() {
                                         {...attrs}
                                         style={{ boxShadow: '0 0 10px rgba(0, 0, 0, 0.4)', width: 380 }}
                                     >
-                                        <ListChapters headerSize="text-xl" tagId={tagId} />
+                                        <ListChapters headerSize="text-xl" tagId={tagId} serverId={serverId} />
                                     </div>
                                 )}
                             >
@@ -239,13 +257,18 @@ function ReadingChapter() {
                                     <MenuRoundedIcon />
                                 </div>
                             </Tippy>
+
                             <Divider orientation="horizontal" variant="middle" />
 
                             {/* Setting properties */}
                             <Tippy
                                 interactive
                                 visible={openSetting}
-                                onClickOutside={() => setOpenSetting(false)}
+                                onClickOutside={() => {
+                                    if (!document.getElementById('menu-')) {
+                                        setOpenSetting(false);
+                                    }
+                                }}
                                 placement="right-start"
                                 offset={[-50, 10]}
                                 render={(attrs) => (

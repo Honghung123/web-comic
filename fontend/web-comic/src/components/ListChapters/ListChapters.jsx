@@ -1,4 +1,4 @@
-import { Divider, Pagination, Stack, PaginationItem } from '@mui/material';
+import { Divider, Pagination, Stack } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
@@ -8,7 +8,7 @@ import { Context } from '../../GlobalContext';
 import Loading from '../Loading';
 import * as Utils from '../../utils';
 
-function ListChapters({ tagId, headerSize = 'text-3xl' }) {
+function ListChapters({ tagId, serverId, headerSize = 'text-3xl' }) {
     const { servers } = useContext(Context);
     const [chapters, setChapters] = useState();
     const [page, setPage] = useState(1);
@@ -19,18 +19,13 @@ function ListChapters({ tagId, headerSize = 'text-3xl' }) {
         setPage(value);
     };
 
-    let server_id;
-    if (servers && servers.length > 0) {
-        server_id = servers.find((server) => server.priority === 1).id;
-    }
-
     useEffect(() => {
-        if (server_id !== undefined) {
+        if (serverId !== undefined) {
             setLoading(true);
             axios
                 .get(`http://localhost:8080/api/v1/comic/reading/${tagId}/chapters`, {
                     params: {
-                        server_id,
+                        server_id: serverId,
                         page,
                     },
                     headers: {
@@ -75,10 +70,14 @@ function ListChapters({ tagId, headerSize = 'text-3xl' }) {
             <ul>
                 {chapters &&
                     chapters.map((chapter) => (
-                        <Link key={chapter.chapterNo} className="block" to={`/reading/${tagId}/${chapter.chapterNo}`}>
+                        <Link
+                            key={chapter.chapterNo}
+                            className="block"
+                            to={`/reading/${serverId}/${tagId}/${chapter.chapterNo}`}
+                        >
                             <div
                                 className={`hover:bg-purple-100/50 rounded ${
-                                    Utils.isRead(chapter.chapterNo, tagId, server_id)
+                                    Utils.isRead(chapter.chapterNo, tagId, serverId)
                                         ? 'text-gray-300'
                                         : 'text-purple-500'
                                 }`}

@@ -1,71 +1,36 @@
 import { Button } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
-import { useContext } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Tippy from '@tippyjs/react';
 
-import { Context, UPDATE_PRIORITY } from '../../GlobalContext';
+import { Context } from '../../GlobalContext';
 
-function SettingServer() {
-    const { servers, serversDispatch } = useContext(Context);
-    const [searchParams, setSearchParams] = useSearchParams();
+function SettingServer({ serverId, setServerId }) {
+    const { servers } = useContext(Context);
 
     const handleChangeServer = (e) => {
-        const newHighestPriority = servers.find((server) => server.id === e.target.id);
-        setSearchParams((prev) => {
-            prev.delete('page');
-            prev.delete('genre');
-            return prev;
-        });
-        serversDispatch({
-            type: UPDATE_PRIORITY,
-            payload: newHighestPriority,
-        });
+        setServerId(e.target.id);
     };
 
     return (
-        <div className="border-2 rounded-lg mx-auto p-4 pt-2" style={{ maxWidth: 500 }}>
-            <div className="flex">
-                <h2 className="text-2xl flex-1 text-center">Danh sách server</h2>
-                <SettingsIcon />
-            </div>
-            <div className="flex flex-wrap justify-center gap-8 mt-4">
-                {servers.map((server) => {
-                    if (server.priority === 1) {
-                        return (
-                            <Button
-                                id={server.id}
-                                key={server.id}
-                                className="w-1/4"
-                                sx={{
-                                    borderRadius: 2,
-                                    boxShadow: 'none',
-                                }}
-                                color="secondary"
-                                variant="contained"
-                            >
-                                {server.name}
-                            </Button>
-                        );
-                    }
-
+        <div className="flex mt-2 text-xl font-semibold items-end">
+            <h2>Nguồn truyện: </h2>
+            <div className="flex flex-wrap justify-center">
+                {servers.map((server, index) => {
                     return (
-                        <Button
-                            onClick={handleChangeServer}
-                            id={server.id}
-                            key={server.id}
-                            className="w-1/4"
-                            variant="contained"
-                            sx={{
-                                borderRadius: 2,
-                                boxShadow: 'none',
-                                backgroundColor: '#D9D9D9',
-                                '&:hover': {
-                                    backgroundColor: 'rgba(155, 86, 244, 0.5)',
-                                },
-                            }}
-                        >
-                            {server.name}
-                        </Button>
+                        <Tippy key={server.id} content={server.name}>
+                            <div
+                                id={server.id}
+                                className={`rounded-md text-lg text-center ml-4 cursor-pointer ${
+                                    server.id === serverId ? 'bg-purple-400 text-white' : 'bg-gray-200'
+                                }`}
+                                style={{ padding: '4px 12px' }}
+                                onClick={handleChangeServer}
+                            >
+                                #{index + 1}
+                            </div>
+                        </Tippy>
                     );
                 })}
             </div>

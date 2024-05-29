@@ -8,12 +8,12 @@ import { Link } from 'react-router-dom';
 
 import { Context } from '../../GlobalContext';
 
-function ListLastUpdate() {
+function ListLastUpdated() {
     const { servers } = useContext(Context);
     const [updatedComics, setUpdatedComics] = useState({});
     const fetchData = (page = 1) => {
         if (servers && servers.length > 0) {
-            const server_id = servers.find((server) => server.priority === 1).id;
+            const server_id = servers[0].id;
             axios
                 .get(`http://localhost:8080/api/v1/comic/lasted-comic`, {
                     params: {
@@ -79,7 +79,10 @@ function ListLastUpdate() {
                                 <tr key={comic.tagId} className="divide-x divide-dashed divide-slate-400">
                                     <td className="p-2 lg:w-1/3 md:w-1/2">
                                         <KeyboardArrowRightIcon sx={{ fontSize: 28, marginBottom: 0.5 }} />
-                                        <Link className="hover:text-purple-500" to={`/info/${comic.tagId}`}>
+                                        <Link
+                                            className="hover:text-purple-500"
+                                            to={`/info/${servers[0]?.id}/${comic.tagId}`}
+                                        >
                                             {comic.title}
                                         </Link>
                                     </td>
@@ -87,7 +90,7 @@ function ListLastUpdate() {
                                         <td className="p-2 w-1/3">
                                             {comic.genres.map((genre, index) => (
                                                 <>
-                                                    <Link key={index} to={`/genre/${genre.tag}`}>
+                                                    <Link key={index} to={`/genre/${servers[0]?.id}/${genre.tag}`}>
                                                         <span className="hover:text-purple-500">{genre.label}</span>
                                                     </Link>
                                                     {index < comic.genres.length - 1 && <>, </>}
@@ -129,4 +132,4 @@ function ListLastUpdate() {
     );
 }
 
-export default ListLastUpdate;
+export default ListLastUpdated;

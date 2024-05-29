@@ -25,7 +25,7 @@ function ListComics() {
         setComicsData({ ...comicsData, comics: undefined, others: undefined });
         if (servers && servers.length > 0) {
             setLoading(true);
-            const server_id = servers.find((server) => server.priority === 1).id;
+            const server_id = servers[0].id;
             console.log(JSON.stringify(servers.map((server) => server.id)));
             axios
                 .get(`http://localhost:8080/api/v1/comic/search`, {
@@ -98,7 +98,7 @@ function ListComics() {
     }
 
     return (
-        <div className="min-h-96 p-2 mt-8 mx-auto relative" style={{ maxWidth: 1200 }}>
+        <div className="min-h-96 p-2 relative w-full">
             <Loading loading={loading} />
             <h2 className="text-3xl pt-2 font-semibold underline underline-offset-8">{headerText}</h2>
             {keyword !== '' && genre === '' && comicsData.others && comicsData.others.length > 0 && (
@@ -107,7 +107,7 @@ function ListComics() {
                     <div className="my-2">
                         {comicsData.others.map((author, index) => (
                             <>
-                                <Link key={index} to={`/author/${author.authorId}`}>
+                                <Link key={index} to={`/author/${servers[0]?.id}/${author.authorId}`}>
                                     <span className="hover:text-purple-500 pl-1 italic text-xl">{author.name}</span>
                                 </Link>
                                 {index < comicsData.others.length - 1 && <>, </>}

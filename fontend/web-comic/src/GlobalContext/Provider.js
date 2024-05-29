@@ -1,14 +1,14 @@
 import { useEffect, useReducer, useState } from 'react';
 import Context from './Context';
 
-import { reducer as serverReducer, UPDATE_LIST, UPDATE_PRIORITY } from './servers';
+import { reducer as serverReducer, UPDATE_LIST } from './servers';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
 function Provider({ children }) {
 
-    let availableServers = JSON.parse(localStorage.getItem('servers'));
-    const [servers, serversDispatch] = useReducer(serverReducer, availableServers || []);
+    let availableServers = JSON.parse(localStorage.getItem('servers')) || [];
+    const [servers, serversDispatch] = useReducer(serverReducer, availableServers);
     const [currentPage, setCurrentPage] = useState('');
     const [loading, setLoading] = useState(true);
 
