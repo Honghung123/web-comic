@@ -149,7 +149,9 @@ function ReadingChapter() {
                     } else {
                         // thong bao loi
                         console.log(responseData.message);
-                        setServerIdState(serverId);
+                        setTimeout(() => {
+                            setServerIdState(serverId);
+                        }, 700);
                         throw new Error(responseData.message);
                         // alert(responseData.message);
                     }
@@ -157,12 +159,14 @@ function ReadingChapter() {
                     // thong bao loi
                     // alert(err.message);
                     console.log(err);
-                    setServerIdState(serverId);
+                    setTimeout(() => {
+                        setServerIdState(serverId);
+                    }, 700);
                     throw err;
                 }
             };
 
-            if (serverIdState != serverId) {
+            if (serverIdState !== serverId) {
                 toast.promise(fecthData(), {
                     pending: `Chuyển sang server ${server_name}`,
                     success: 'Chuyển server thành công',

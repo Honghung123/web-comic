@@ -11,11 +11,11 @@ export default function Home() {
     return (
         <div className="px-4 py-8">
             <div className="flex mx-auto" style={{ maxWidth: 1200 }}>
-                <div className="w-9/12 md:w-10/12">
-                    <ListComics />
-                </div>
-                <div className="w-3/12 md:w-2/12">
+                <div>
                     <ComicSources />
+                </div>
+                <div className="flex-1">
+                    <ListComics />
                 </div>
             </div>
             <ListLastUpdated />

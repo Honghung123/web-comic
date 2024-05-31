@@ -1,24 +1,16 @@
-import { Button } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { useContext, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import ArrowUpwardRoundedIcon from '@mui/icons-material/ArrowUpwardRounded';
-import ArrowDownwardRoundedIcon from '@mui/icons-material/ArrowDownwardRounded';
+import { DndContext, closestCorners } from '@dnd-kit/core';
+import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
-import { Context, DOWN_PRIORITY, UP_PRIORITY, UP_HIGHEST_PRIORITY } from '../../GlobalContext';
+import { Context, UPDATE_PRIORITY } from '../../GlobalContext';
+import ComicSourceItem from './ComicSourceItem';
 
 function ComicSources() {
     const { servers, serversDispatch } = useContext(Context);
-    const [tempState, setTempState] = useState(0);
+    const [tempServers, setTempServers] = useState(servers);
     const [searchParams, setSearchParams] = useSearchParams();
-
-    const setHighestPriority = (e) => {
-        const index = Number(e.target.title);
-        serversDispatch({
-            type: UP_HIGHEST_PRIORITY,
-            payload: index,
-        });
-    };
 
     useEffect(() => {
         setSearchParams((prev) => {
@@ -28,81 +20,53 @@ function ComicSources() {
         });
     }, [servers]);
 
+    const getPosById = (id) => servers.findIndex((server) => server.id === id);
+    const handleChangePriority = (e) => {
+        const { active, over, delta } = e;
+        const oldPos = getPosById(active.id);
+        const newPos = getPosById(over.id);
+        // click
+        if (delta.x === 0 && delta.y === 0) {
+            setTempServers((prev) => {
+                return arrayMove(prev, oldPos, 0);
+            });
+            serversDispatch({
+                type: UPDATE_PRIORITY,
+                payload: { oldPos, newPos: 0 },
+            });
+            return;
+        }
+        // drag
+        if (active.id === over.id) {
+            return;
+        }
+        setTempServers((prev) => {
+            return arrayMove(prev, oldPos, newPos);
+        });
+        serversDispatch({
+            type: UPDATE_PRIORITY,
+            payload: { oldPos, newPos },
+        });
+    };
+
     return (
-        <div className="w-full h-full" style={{ paddingTop: 82, paddingLeft: 20, paddingRight: -20 }}>
-            <div className="border-2 rounded-lg mx-auto w-full">
+        <div className="h-full" style={{ marginLeft: -40, paddingRight: 30 }}>
+            <div className="border-2 rounded-lg mx-auto w-full pb-4">
                 <div className="relative">
-                    <h2 className="text-2xl text-center pt-8">Nguồn truyện</h2>
-                    <div className="absolute top-0 right-0">
-                        <SettingsIcon />
+                    <div className="text-2xl font-semi-bold text-center hidden sm:flex items-center justify-center mt-4">
+                        <SettingsIcon className="cursor-pointer" />
+                        <h2>Nguồn truyện</h2>
                     </div>
                 </div>
-                <div className="flex flex-wrap justify-center gap-4 mt-4 pb-4">
-                    {servers.map((server, index) => {
-                        return (
-                            <div className="flex pl-2">
-                                <Button
-                                    title={`${index}`}
-                                    key={server.id}
-                                    variant="contained"
-                                    color={index === 0 ? 'secondary' : 'primary'}
-                                    onClick={setHighestPriority}
-                                    sx={
-                                        index === 0
-                                            ? { borderRadius: 2, boxShadow: 'none', maxWidth: 130 }
-                                            : {
-                                                  borderRadius: 2,
-                                                  boxShadow: 'none',
-                                                  maxWidth: 130,
-                                                  backgroundColor: '#D9D9D9',
-                                                  '&:hover': {
-                                                      backgroundColor: 'rgba(155, 86, 244, 0.5)',
-                                                  },
-                                              }
-                                    }
-                                >
-                                    {server.name}
-                                </Button>
-                                <div className="ml-2">
-                                    <div
-                                        title={`${index}`}
-                                        className="cursor-pointer hover:text-purple-500 text-gray-300"
-                                        onClick={() => {
-                                            if (index !== 0) {
-                                                serversDispatch({
-                                                    type: UP_PRIORITY,
-                                                    payload: index,
-                                                });
-                                                setTimeout(() => {
-                                                    setTempState((prev) => prev + 1);
-                                                }, 100);
-                                            }
-                                        }}
-                                    >
-                                        <ArrowUpwardRoundedIcon />
-                                    </div>
-                                    <div
-                                        title={`${index}`}
-                                        className="cursor-pointer hover:text-purple-500 text-gray-300"
-                                        onClick={() => {
-                                            if (index < servers.length - 1) {
-                                                serversDispatch({
-                                                    type: DOWN_PRIORITY,
-                                                    payload: index,
-                                                });
-                                                setTimeout(() => {
-                                                    setTempState((prev) => prev + 1);
-                                                }, 100);
-                                            }
-                                        }}
-                                    >
-                                        <ArrowDownwardRoundedIcon />
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
+                <DndContext collisionDetection={closestCorners} onDragEnd={handleChangePriority}>
+                    <div className="sm:flex flex-wrap justify-center gap-4 mt-4 pb-4 hidden" style={{ width: 190 }}>
+                        <SortableContext items={tempServers} strategy={verticalListSortingStrategy}>
+                            {tempServers.map((server, index) => {
+                                return <ComicSourceItem key={index} index={index} server={server} />;
+                            })}
+                        </SortableContext>
+                    </div>
+                </DndContext>
             </div>
         </div>
     );

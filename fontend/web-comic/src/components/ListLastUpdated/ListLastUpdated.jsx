@@ -89,12 +89,12 @@ function ListLastUpdated() {
                                     {comic.genres.length > 0 && (
                                         <td className="p-2 w-1/3">
                                             {comic.genres.map((genre, index) => (
-                                                <>
-                                                    <Link key={index} to={`/genre/${servers[0]?.id}/${genre.tag}`}>
+                                                <span key={index}>
+                                                    <Link to={`/genre/${servers[0]?.id}/${genre.tag}`}>
                                                         <span className="hover:text-purple-500">{genre.label}</span>
                                                     </Link>
                                                     {index < comic.genres.length - 1 && <>, </>}
-                                                </>
+                                                </span>
                                             ))}
                                         </td>
                                     )}
