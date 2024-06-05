@@ -1,17 +1,14 @@
 package com.group17.comic;  
 
-import com.group17.comic.dto.request.AlternatedChapterDTO;
-import com.group17.comic.model.*;
 import com.group17.comic.service.IComicService;
+import com.group17.comic.service.ICrawlerPluginService;
 import com.group17.comic.service.IPluginService;
 import jakarta.annotation.PostConstruct;
-import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
-import java.util.List;
 
 @SpringBootTest
 class ComicServiceTests {
@@ -20,12 +17,12 @@ class ComicServiceTests {
 	private IComicService comicService;
 
 	@Autowired
-	@Qualifier("pluginServiceV1")
-	private IPluginService pluginService;
+	@Qualifier("crawlerPluginServiceV1")
+	private ICrawlerPluginService pluginService;
 
 	@PostConstruct
 	public void init() throws IOException {
-		pluginService.checkCrawlerPlugins();
+		pluginService.checkCurrentPlugins();
 	}
 
 //	public DataModel<Integer, List<Chapter>> getChaptersTest(int pluginId, String tagId, int currentPage) {

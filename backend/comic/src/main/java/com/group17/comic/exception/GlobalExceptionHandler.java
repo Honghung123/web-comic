@@ -14,10 +14,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest; 
 
 import com.group17.comic.dto.response.ErrorResponse;
-import com.group17.comic.exception.customs.IllegalParameterException;
-import com.group17.comic.exception.customs.InvalidPluginListException;
-import com.group17.comic.exception.customs.InvalidTypeException;
-import com.group17.comic.exception.customs.ResourceNotFound;
 import com.group17.comic.log.Logger;
 
 import jakarta.validation.ConstraintViolationException;
@@ -65,9 +61,8 @@ public class GlobalExceptionHandler {
                 new ErrorResponse(httpStatus.value(), error, message, timestamp, path));
     }
 
-    @ExceptionHandler({ ResourceNotFound.class, InvalidTypeException.class, IllegalParameterException.class,
-                        InvalidPluginListException.class })
-    public ResponseEntity<ErrorResponse> handleCustomException(CustomException ex, WebRequest request) {
+    @ExceptionHandler({ BusinessException.class })
+    public ResponseEntity<ErrorResponse> handleCustomException(BusinessException ex, WebRequest request) {
         Logger.logError(ex.getMessage(), null);
         String message = ex.getMessage();
         var httpStatus = ex.getStatus();

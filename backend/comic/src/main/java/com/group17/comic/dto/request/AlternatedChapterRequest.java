@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
 // Không thể dùng chapter bằng int vì server truyen chu th dung chuỗi string.
-public record AlternatedChapterDTO(
+public record AlternatedChapterRequest(
       @NotBlank(message = "Title cannot be blank")
       String title, 
       @NotBlank(message = "Author name cannot be blank")

@@ -1,14 +1,14 @@
 package com.group17.comic.controller;
 
-import com.group17.comic.dto.request.AlternatedChapterDTO;
-import com.group17.comic.dto.request.ChapterDTO;
+import com.group17.comic.dto.request.AlternatedChapterRequest;
+import com.group17.comic.dto.request.ChapterRequest;
 import com.group17.comic.dto.response.ChapterFile;
-import com.group17.comic.dto.response.SuccessfulResponse; 
+import com.group17.comic.dto.response.SuccessfulResponse;
+import com.group17.comic.enums.PluginServiceType;
 import com.group17.comic.model.*;
-import com.group17.comic.service.IComicService;
-import com.group17.comic.service.IPluginService;
-import com.group17.comic.utils.StringUtility;
- 
+import com.group17.comic.service.*;
+import com.group17.comic.service.implementations.PluginServiceProviderImpl;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -17,7 +17,6 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,30 +44,17 @@ import org.springframework.web.bind.annotation.RequestHeader;
 @Tag(name = "Comic Controller")
 @Validated 
 public class ComicController {
-    @Qualifier("pluginServiceV1")
-    private final IPluginService pluginService;
     @Qualifier("comicServiceV1")
     private final IComicService comicService;
-    @Value("${comic.plugin.crawler.default_crawler_name}")
-    private String DEFAULT_CRAWLER;
-    @Value("${comic.plugin.converter.default_converter_name}")
-    private String DEFAULT_CONVERTER; 
-
-    private UUID getDefaultPluginIdByNameIfNull(UUID serverId, String pluginName) {
-        if(serverId == null) {
-            return pluginService.getPluginIdByName(pluginName);
-        }
-        return serverId;
-    }
+    @Qualifier("pluginServiceProviderV1")
+    private final IPluginServiceProvider pluginServiceProvider;
 
     @GetMapping("/genres")
     @Operation(summary = "Get all genres", description = "Get all genres with specific server id. Default server id is 0 - plugin's index in plugin list Default the current page,offset, is 1 Default limit, a number of comics per page is 10")
     public SuccessfulResponse<List<Genre>> getGenres(
             @RequestParam(name = "server_id", required = false) UUID serverId,
             @RequestHeader(name = "list-crawlers", defaultValue = "") String crawlers) {
-        List<String> crawlerList = StringUtility.getArrayFromJSON(crawlers);
-        pluginService.checkCrawlerList(crawlerList);
-        serverId = this.getDefaultPluginIdByNameIfNull(serverId, DEFAULT_CRAWLER);
+        pluginServiceProvider.examinePluginList(crawlers, PluginServiceType.CRAWLER_SERVICE);
         var genres = comicService.getAllGenres(serverId);
         return new SuccessfulResponse<>(HttpStatus.OK, "Success", genres);
     }
@@ -79,9 +65,7 @@ public class ComicController {
             @RequestParam(name = "server_id", required = false)  UUID serverId,
             @RequestParam(name = "page", defaultValue = "1") @Positive int page, 
             @RequestHeader(name = "list-crawlers", defaultValue = "") String crawlers) {
-        List<String> crawlerList = StringUtility.getArrayFromJSON(crawlers);
-        pluginService.checkCrawlerList(crawlerList);
-        serverId = this.getDefaultPluginIdByNameIfNull(serverId, DEFAULT_CRAWLER);
+        pluginServiceProvider.examinePluginList(crawlers, PluginServiceType.CRAWLER_SERVICE);
         var dataDto = comicService.getNewestCommic(serverId, page);
         return new SuccessfulResponse<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
     }
@@ -94,9 +78,7 @@ public class ComicController {
             @RequestParam(name = "server_id", required = false)UUID serverId,
             @RequestParam(name = "page", defaultValue = "1") @Positive int currentPage,
             @RequestHeader(name = "list-crawlers", defaultValue = "") String crawlers) {
-        List<String> crawlerList = StringUtility.getArrayFromJSON(crawlers);
-        pluginService.checkCrawlerList(crawlerList);
-        serverId = this.getDefaultPluginIdByNameIfNull(serverId, DEFAULT_CRAWLER);
+        pluginServiceProvider.examinePluginList(crawlers, PluginServiceType.CRAWLER_SERVICE);
         var dataDto = comicService.searchComic(serverId, keyword, byGenre, currentPage);
         return new SuccessfulResponse<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData(),
                 dataDto.getMeta());
@@ -110,9 +92,7 @@ public class ComicController {
             @RequestParam(name = "page", defaultValue = "1") @Positive int page,
             @RequestParam(name = "server_id", required = false)  UUID serverId,
             @RequestHeader(name = "list-crawlers", defaultValue = "") String crawlers) {
-        List<String> crawlerList = StringUtility.getArrayFromJSON(crawlers);
-        pluginService.checkCrawlerList(crawlerList);
-        serverId = this.getDefaultPluginIdByNameIfNull(serverId, DEFAULT_CRAWLER);
+        pluginServiceProvider.examinePluginList(crawlers, PluginServiceType.CRAWLER_SERVICE);
         var dataDto = comicService.getComicsOfAnAuthor(serverId, authorId, tagId, page); 
         return new SuccessfulResponse<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
     }
@@ -123,9 +103,7 @@ public class ComicController {
             @PathVariable(name = "tagId", required = true) String tagId,
             @RequestParam(name = "server_id", required = false) UUID serverId,
             @RequestHeader(name = "list-crawlers", defaultValue = "") String crawlers) {
-        List<String> crawlerList = StringUtility.getArrayFromJSON(crawlers);
-        pluginService.checkCrawlerList(crawlerList);
-        serverId = this.getDefaultPluginIdByNameIfNull(serverId, DEFAULT_CRAWLER);
+        pluginServiceProvider.examinePluginList(crawlers, PluginServiceType.CRAWLER_SERVICE);
         var comic = comicService.getComicInfo(serverId, tagId);
         return new SuccessfulResponse<>(HttpStatus.OK, "Success", comic);
     }
@@ -137,9 +115,7 @@ public class ComicController {
             @RequestParam(name = "page", defaultValue = "1") @Positive int currentPage,
             @RequestParam(name = "server_id", required = false) UUID serverId,
             @RequestHeader(name = "list-crawlers", defaultValue = "") String crawlers) {
-        List<String> crawlerList = StringUtility.getArrayFromJSON(crawlers);
-        pluginService.checkCrawlerList(crawlerList);
-        serverId = this.getDefaultPluginIdByNameIfNull(serverId, DEFAULT_CRAWLER);
+        pluginServiceProvider.examinePluginList(crawlers, PluginServiceType.CRAWLER_SERVICE);
         var dataDto = comicService.getChapters(serverId, tagId, currentPage);
         return new SuccessfulResponse<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
     }
@@ -147,12 +123,10 @@ public class ComicController {
     @PostMapping("/reading/change-server-comic-info")
     @Operation(summary = "Change comic info on other server", description = "Get comic content base of a chapter on alternate server with specific server id. Default server id is 0 - plugin's index in plugin list.")
     public SuccessfulResponse<Comic> getComicInfoOnOtherServer(
-            @Valid @RequestBody AlternatedChapterDTO altChapterDto,
+            @Valid @RequestBody AlternatedChapterRequest altChapterDto,
             @RequestParam(name = "server_id", required = false) UUID serverId,
             @RequestHeader(name = "list-crawlers", defaultValue = "") String crawlers) {
-        List<String> crawlerList = StringUtility.getArrayFromJSON(crawlers);
-        pluginService.checkCrawlerList(crawlerList);
-        serverId = this.getDefaultPluginIdByNameIfNull(serverId, DEFAULT_CRAWLER);
+        pluginServiceProvider.examinePluginList(crawlers, PluginServiceType.CRAWLER_SERVICE);
         var comic = comicService.getComicInfoOnOtherServer(serverId, altChapterDto);
         return new SuccessfulResponse<>(HttpStatus.OK, "Success", comic);
     }
@@ -164,9 +138,7 @@ public class ComicController {
             @PathVariable(name = "chapter", required = true) String currentChapter,
             @RequestParam(name = "server_id", required = false) UUID serverId,
             @RequestHeader(name = "list-crawlers", defaultValue = "") String crawlers) {
-        List<String> crawlerList = StringUtility.getArrayFromJSON(crawlers);
-        pluginService.checkCrawlerList(crawlerList);
-        serverId = this.getDefaultPluginIdByNameIfNull(serverId, DEFAULT_CRAWLER);
+        pluginServiceProvider.examinePluginList(crawlers, PluginServiceType.CRAWLER_SERVICE);
         var dataDto = comicService.getComicChapterContent(serverId, tagId, currentChapter);
         return new SuccessfulResponse<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
     }
@@ -174,12 +146,10 @@ public class ComicController {
     @PostMapping("/reading/change-server-chapter-content")
     @Operation(summary = "Change comic server", description = "Get comic content base of a chapter on alternate server with specific server id. Default server id is 0 - plugin's index in plugin list.")
     public SuccessfulResponse<ComicChapterContent> getComicChapterContentOnOtherServer(
-            @Valid @RequestBody AlternatedChapterDTO altChapterDto,
+            @Valid @RequestBody AlternatedChapterRequest altChapterDto,
             @RequestParam(name = "server_id", required = false)  UUID serverId,
             @RequestHeader(name = "list-crawlers", defaultValue = "") String crawlers) {
-        List<String> crawlerList = StringUtility.getArrayFromJSON(crawlers);
-        pluginService.checkCrawlerList(crawlerList);
-        serverId = this.getDefaultPluginIdByNameIfNull(serverId, DEFAULT_CRAWLER);
+        pluginServiceProvider.examinePluginList(crawlers, PluginServiceType.CRAWLER_SERVICE);
         var dataDto = comicService.getComicChapterContentOnOtherServer(serverId, altChapterDto);
         return new SuccessfulResponse<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
     }
@@ -187,27 +157,29 @@ public class ComicController {
     @PostMapping("/export-file")
     @Operation(summary = "Export file", description = "Export a chapter content to a specific file. Default converter id is 0 - plugin's index in converter list.")
     public ResponseEntity<InputStreamResource> exportFileFromText(
-            @Valid @RequestBody ChapterDTO chapterDto,
-            @RequestParam(name = "converter_id", required = false) UUID converterId,
-            @RequestHeader(name = "list-converters", defaultValue = "") String converters) {
-        List<String> converterList = StringUtility.getArrayFromJSON(converters);
-        pluginService.checkConverterList(converterList);
-        converterId = this.getDefaultPluginIdByNameIfNull(converterId, DEFAULT_CONVERTER);
-        ChapterFile chapterFile = pluginService.exportFile(chapterDto, converterId);
+            @Valid @RequestBody ChapterRequest chapterDto,
+            @RequestParam(name = "converter_id", required = false) UUID exporterId,
+            @RequestHeader(name = "list-converters", defaultValue = "") String exporters) {
+        pluginServiceProvider.examinePluginList(exporters, PluginServiceType.EXPORTER_SERVICE);
+        var exporterService = (IExporterPluginService)pluginServiceProvider
+                .getPluginServiceByType(PluginServiceType.EXPORTER_SERVICE);
+        ChapterFile chapterFile = exporterService.exportFile(chapterDto, exporterId);
         return new ResponseEntity<>(chapterFile.getResource(), chapterFile.getHeaders(), HttpStatus.OK);
     }
 
     @GetMapping("/crawler-plugins")
     @Operation(summary = "Get all crawler plugins", description = "Get all crawler plugins from the folder to crawl comic. Id of each plugin is the index of it in plugin list")
-    public SuccessfulResponse<List<CrawlerPlugin>> getAllPCrawlerlugins() {
-        var crawlers = pluginService.getAllCrawlerPlugins();
+    public SuccessfulResponse<List<CrawlerPlugin>> getAllCrawlerPlugins() {
+        var crawlerService = (ICrawlerPluginService)pluginServiceProvider.getPluginServiceByType(PluginServiceType.CRAWLER_SERVICE);
+        var crawlers = crawlerService.getAllPlugins();
         return new SuccessfulResponse<>(HttpStatus.OK, "Success", crawlers);
     }
 
     @GetMapping("/converter-plugins")
     @Operation(summary = "Get all converter plugins", description = "Get all converter plugins from the folder to crawl comic. Id of each plugin is the index of it in plugin list")
-    public SuccessfulResponse<List<ConverterPlugin>> getAllPConverterlugins() {
-        var converters = pluginService.getAllConverterPlugins();
+    public SuccessfulResponse<List<ConverterPlugin>> getAllConverterPlugins() {
+        var exporterService = (IExporterPluginService)pluginServiceProvider.getPluginServiceByType(PluginServiceType.EXPORTER_SERVICE);
+        var converters = exporterService.getAllPlugins();
         return new SuccessfulResponse<>(HttpStatus.OK, "Success", converters);
     }
 }

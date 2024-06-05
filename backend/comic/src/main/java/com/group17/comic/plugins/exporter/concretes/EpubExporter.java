@@ -15,15 +15,15 @@ import java.util.zip.ZipOutputStream;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 
-import com.group17.comic.dto.request.ChapterDTO;
+import com.group17.comic.dto.request.ChapterRequest;
 import com.group17.comic.dto.response.ChapterFile; 
-import com.group17.comic.plugins.exporter.IFileConverter;
+import com.group17.comic.plugins.exporter.IFileExporter;
 import com.group17.comic.utils.FileUtility;
 import com.group17.comic.utils.StringUtility;
 
 import lombok.SneakyThrows;
 
-public class EpubConverter implements IFileConverter {
+public class EpubExporter implements IFileExporter {
     private static String uploadDir = "backend/comic/src/main/java/com/group17/comic/plugins/exporter/uploads/";
     private final UUID id = UUID.randomUUID();
     @Override
@@ -42,7 +42,7 @@ public class EpubConverter implements IFileConverter {
 
     @SneakyThrows
     @Override
-    public ChapterFile getConvertedFile(ChapterDTO chapterDto) {
+    public ChapterFile getConvertedFile(ChapterRequest chapterDto) {
         String formatTitle = StringUtility.removeDiacriticalMarks(chapterDto.title());
         formatTitle = formatTitle.replaceAll("[^a-zA-Z0-9\\s]", "-").trim();
         String fileName = formatTitle + ".epub";

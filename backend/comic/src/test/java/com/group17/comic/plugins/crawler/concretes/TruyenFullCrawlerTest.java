@@ -1,16 +1,13 @@
 package com.group17.comic.plugins.crawler.concretes;
 
-import com.group17.comic.dto.request.AlternatedChapterDTO;
+import com.group17.comic.dto.request.AlternatedChapterRequest;
 import com.group17.comic.exception.customs.ResourceNotFound;
 import com.group17.comic.model.*;
-import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class TruyenFullCrawlerTest {
     private TruyenFullCrawler truyenFullCrawler;
@@ -63,7 +60,7 @@ class TruyenFullCrawlerTest {
         String comicTagId = "truyen-tieu-tong-xin-tha-cho-toi";
         int chapterNumber = 2;
 
-        AlternatedChapterDTO alternatedChapterDTO = new AlternatedChapterDTO(title, authorName, comicTagId, chapterNumber);
+        AlternatedChapterRequest alternatedChapterDTO = new AlternatedChapterRequest(title, authorName, comicTagId, chapterNumber);
         TruyenChuTHCrawler truyenChuTHCrawler = new TruyenChuTHCrawler();
         TangThuVienCrawler tangThuVienCrawler = new TangThuVienCrawler();
         Comic comicOnTruyenChu = truyenChuTHCrawler.getComicInfoOnOtherServer(alternatedChapterDTO);

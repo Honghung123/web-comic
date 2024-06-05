@@ -1,14 +1,14 @@
 package com.group17.comic.plugins.exporter;
 
-import com.group17.comic.dto.request.ChapterDTO;
+import com.group17.comic.dto.request.ChapterRequest;
 import com.group17.comic.dto.response.ChapterFile;
 
 import java.util.UUID;
 
-public interface IFileConverter {
+public interface IFileExporter {
     UUID getId();
     String getPluginName();
     String getBlobType();
-    ChapterFile getConvertedFile(ChapterDTO chapterDto);
+    ChapterFile getConvertedFile(ChapterRequest chapterDto);
 
 }

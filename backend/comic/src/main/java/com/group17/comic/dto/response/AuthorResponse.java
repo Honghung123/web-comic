@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class AuthorResponseDTO {
+public class AuthorResponse {
     String authorId;
     String name;
     String comicTagId;

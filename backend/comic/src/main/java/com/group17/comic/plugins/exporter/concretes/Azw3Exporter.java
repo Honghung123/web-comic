@@ -2,9 +2,9 @@ package com.group17.comic.plugins.exporter.concretes;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.Gson;
-import com.group17.comic.dto.request.ChapterDTO;
+import com.group17.comic.dto.request.ChapterRequest;
 import com.group17.comic.dto.response.ChapterFile;
-import com.group17.comic.plugins.exporter.IFileConverter;
+import com.group17.comic.plugins.exporter.IFileExporter;
 import com.group17.comic.utils.FileUtility;
 import com.group17.comic.utils.StringUtility;
 
@@ -63,7 +63,7 @@ class Azw3Conversion {
     private boolean awaiting_chunks;
 }
 
-public class Azw3Converter implements IFileConverter {
+public class Azw3Exporter implements IFileExporter {
     private final UUID id = UUID.randomUUID();
     private final String uploadDir = "backend/comic/src/main/java/com/group17/comic/plugins/exporter/uploads/";
     @Value("${comic.plugin.converter.api_key}")
@@ -90,7 +90,7 @@ public class Azw3Converter implements IFileConverter {
 
     @SneakyThrows
     @Override
-    public ChapterFile getConvertedFile(ChapterDTO chapterDto) {
+    public ChapterFile getConvertedFile(ChapterRequest chapterDto) {
         String formatTitile = StringUtility.removeDiacriticalMarks(chapterDto.title());
         formatTitile = formatTitile.replaceAll("[^a-zA-Z0-9]", "-").trim();
         String fileName = formatTitile + ".azw3";

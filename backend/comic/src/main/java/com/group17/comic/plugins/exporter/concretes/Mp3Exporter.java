@@ -2,9 +2,9 @@ package com.group17.comic.plugins.exporter.concretes;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.group17.comic.dto.request.ChapterDTO;
+import com.group17.comic.dto.request.ChapterRequest;
 import com.group17.comic.dto.response.ChapterFile;
-import com.group17.comic.plugins.exporter.IFileConverter;
+import com.group17.comic.plugins.exporter.IFileExporter;
 import com.group17.comic.utils.StringUtility;
 import lombok.SneakyThrows; 
 
@@ -23,7 +23,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
-public class Mp3Converter implements IFileConverter {
+public class Mp3Exporter implements IFileExporter {
     @Value("${comic.plugin.converter.api_key}")
     private String api_key;
     private final UUID id = UUID.randomUUID(); 
@@ -43,7 +43,7 @@ public class Mp3Converter implements IFileConverter {
     }
     @SneakyThrows
     @Override
-    public ChapterFile getConvertedFile(ChapterDTO chapterDto) {
+    public ChapterFile getConvertedFile(ChapterRequest chapterDto) {
         String formatTitile = StringUtility.removeDiacriticalMarks(chapterDto.title());
         formatTitile = formatTitile.replaceAll("[^a-zA-Z0-9]", "-").trim();
         String fileName = formatTitile + ".mp3";  

@@ -6,7 +6,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.*;
 
-import org.jsoup.HttpStatusException;
+import com.group17.comic.enums.ExceptionType;
+import com.group17.comic.exception.BusinessException;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -17,16 +18,13 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.group17.comic.dto.request.AlternatedChapterDTO;
-import com.group17.comic.dto.response.AuthorResponseDTO;
-import com.group17.comic.exception.customs.InvalidTypeException;
-import com.group17.comic.exception.customs.ResourceNotFound; 
+import com.group17.comic.dto.request.AlternatedChapterRequest;
+import com.group17.comic.dto.response.AuthorResponse;
 import com.group17.comic.model.*; 
 import com.group17.comic.plugins.crawler.IDataCrawler;
 import com.group17.comic.plugins.crawler.WebCrawler;
 import com.group17.comic.utils.*;
- 
-import jakarta.validation.constraints.NotBlank;
+
 import lombok.SneakyThrows;
 
 public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
@@ -58,14 +56,14 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         if(categories.containsKey(genre)) {
             return categories.get(genre);
         }else {
-            throw new InvalidTypeException("Invalid genre: " + genre);
+            throw new BusinessException(ExceptionType.INVALID_GENRE);
         }
     }
 
     @SneakyThrows
     @Override
-    public DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> search(String keyword,
-            String byGenre, int currentPage) {
+    public DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> search(String keyword,
+                                                                                   String byGenre, int currentPage) {
         keyword = StringUtility.removeDiacriticalMarks(keyword);
         if(StringUtils.hasLength(keyword) && StringUtils.hasLength(byGenre)) {
             return searchByKeywordAndGenre(keyword, byGenre, currentPage);
@@ -79,7 +77,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     }
 
     @SneakyThrows
-    private DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> searchByKeywordAndGenre(String keyword, String byGenre, int currentPage) {
+    private DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> searchByKeywordAndGenre(String keyword, String byGenre, int currentPage) {
         List<ComicModel> listMatchedComic = new ArrayList<>();
         String term = keyword.trim().replace(" ", "%20");
         Integer categoryId = this.getCategoryId(byGenre); 
@@ -134,18 +132,18 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                 pagination = new Pagination<>(currentPage, perPage, totalPages, totalItems);
                 PaginationUtility.updatePagination(pagination);
             } else { 
-                throw new ResourceNotFound("Failed to get data from TruyenFull.");
+                throw new BusinessException(ExceptionType.GET_COMIC_INFO_FAILED);
             }
         } catch (Exception e) {
-            throw new HttpStatusException("Cannot make request to get data from TruyenFull", 404, apiUrl);
+            throw new BusinessException(ExceptionType.REQUEST_SERVER_TO_CRAWL_FAILED);
         }
-        DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> result = new DataSearchModel<>(pagination,
+        DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> result = new DataSearchModel<>(pagination,
                 listMatchedComic, null);
         return result;
     }
 
     @SneakyThrows
-    private DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> searchOnlyByGenre(String byGenre, int currentPage) {
+    private DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> searchOnlyByGenre(String byGenre, int currentPage) {
         List<ComicModel> listMatchedComic = new ArrayList<>(); 
         String apiUrl = TRUYEN_API + "/v1/story/cate?cate="+ byGenre +"&type=story_new&page=" + currentPage;
         HttpClient client = HttpClient.newHttpClient();
@@ -198,25 +196,25 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                 pagination = new Pagination<>(currentPage, perPage, totalPages, totalItems);
                 PaginationUtility.updatePagination(pagination);
             } else { 
-                throw new ResourceNotFound("Failed to get data from TruyenFull.");
+                throw new BusinessException(ExceptionType.GET_COMIC_INFO_FAILED);
             }
         } catch (Exception e) {
-            throw new HttpStatusException("Cannot make request to get data from TruyenFull", 404, apiUrl);
+            throw new BusinessException(ExceptionType.REQUEST_SERVER_TO_CRAWL_FAILED);
         }
-        DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> result = new DataSearchModel<>(pagination,
+        DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> result = new DataSearchModel<>(pagination,
                 listMatchedComic, null);
         return result;
     }
 
     @SneakyThrows
-    private DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> searchOnlyByKeyword(String keyword, int currentPage) {
+    private DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> searchOnlyByKeyword(String keyword, int currentPage) {
         List<ComicModel> listMatchedComic = new ArrayList<>();
         String term = keyword.trim().replace(" ", "%20");
         String apiUrl = TRUYEN_API + "/v1/tim-kiem?title=" + term + "&page=" + currentPage;
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
         Pagination<Integer> pagination = null;
-        List<AuthorResponseDTO> authorList = new ArrayList<>();
+        List<AuthorResponse> authorList = new ArrayList<>();
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 200) {
@@ -265,7 +263,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                                 "-");
                         if (!authorList.stream().anyMatch(author -> author.getAuthorId().equals(authorId))) {
                             String comicTagId = jsonObj.get("id").getAsString();
-                            authorList.add(new AuthorResponseDTO(authorId, authorName, comicTagId));
+                            authorList.add(new AuthorResponse(authorId, authorName, comicTagId));
                         }
                     }
                 }
@@ -276,12 +274,12 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                 pagination = new Pagination<>(currentPage, perPage, totalPages, totalItems);
                 PaginationUtility.updatePagination(pagination);
             } else { 
-                throw new ResourceNotFound("Failed to get data from TruyenFull.");
+                throw new BusinessException(ExceptionType.GET_COMIC_INFO_FAILED);
             }
         } catch (Exception e) {
-            throw new HttpStatusException("Cannot make request to get data from TruyenFull", 404, apiUrl);
+            throw new BusinessException(ExceptionType.REQUEST_SERVER_TO_CRAWL_FAILED);
         }
-        DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> result = new DataSearchModel<>(pagination,
+        DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> result = new DataSearchModel<>(pagination,
                 listMatchedComic, authorList);
         return result;
     }
@@ -360,10 +358,10 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                 pagination = new Pagination<>(currentPage, perPage, totalPages, totalItems);
                 PaginationUtility.updatePagination(pagination);
             } else {
-                throw new ResourceNotFound("Failed to get lasted chapter list from Truyen Full");
+                throw new BusinessException(ExceptionType.GET_LASTED_COMIC_FAILED);
             }
-        } catch (Exception e) {  
-            throw new HttpStatusException("Failed to request to get lasted chapter list from Truyen Full", 404, apiUrl);
+        } catch (Exception e) {
+            throw new BusinessException(ExceptionType.REQUEST_SERVER_TO_CRAWL_FAILED);
         }
         DataModel<Integer, List<ComicModel>> result = new DataModel<>(pagination, lastedComics);
         return result;
@@ -373,7 +371,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     @Override
     public Comic getComicInfo(String comicTagId) {
         if(!comicTagId.matches("^\\d+$")) {
-            throw new InvalidTypeException("Invalid comic tag id"); 
+            throw new BusinessException(ExceptionType.INVALID_COMIC_TAG_ID);
         }
         int id = Integer.parseInt(comicTagId); 
         String apiUrl = TRUYEN_API + "v1/story/detail/" + id;
@@ -404,16 +402,16 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                         .alternateImage(this.alternateImage)
                         .build();
             } else {
-                throw new ResourceNotFound("Failed to request comic information from TruyenFull");
+                throw new BusinessException(ExceptionType.GET_COMIC_INFO_FAILED);
             }
         } catch (Exception e) {
-            throw new HttpStatusException("Cannot make request to get comic information from TruyenFull", 404, apiUrl);
+            throw new BusinessException(ExceptionType.REQUEST_SERVER_TO_CRAWL_FAILED);
         }
         return comic;
     }
 
     @SneakyThrows
-    private DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> getHotOrPromoteComics(int currentPage) {
+    private DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> getHotOrPromoteComics(int currentPage) {
         List<ComicModel> listMatchedComic = new ArrayList<>(); 
         String apiUrl = TRUYEN_API + "/v1/story/all?type=story_full_rate&page=" + currentPage;
         HttpClient client = HttpClient.newHttpClient();
@@ -466,12 +464,12 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                 pagination = new Pagination<>(currentPage, perPage, totalPages, totalItems);
                 PaginationUtility.updatePagination(pagination);
             } else { 
-                throw new ResourceNotFound("Failed to get data from TruyenFull.");
+                throw new BusinessException(ExceptionType.GET_COMIC_INFO_FAILED);
             }
         } catch (Exception e) {
-            throw new HttpStatusException("Cannot make request to get data from TruyenFull", 404, apiUrl);
+            throw new BusinessException(ExceptionType.REQUEST_SERVER_TO_CRAWL_FAILED);
         }
-        DataSearchModel<Integer, List<ComicModel>, List<AuthorResponseDTO>> result = new DataSearchModel<>(pagination,
+        DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> result = new DataSearchModel<>(pagination,
                 listMatchedComic, null);
         return result;
     }
@@ -480,7 +478,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     @SneakyThrows
     public DataModel<Integer, List<Chapter>> getChapters(String comicTagId, int currentPage) {
         if(!comicTagId.matches("^\\d+$")) {
-            throw new InvalidTypeException("Invalid comic tag id"); 
+            throw new BusinessException(ExceptionType.INVALID_COMIC_TAG_ID);
         }
         int id = Integer.parseInt(comicTagId);
         String apiUrl = TRUYEN_API + "v1/story/detail/" + id + "/chapters?page=" + currentPage;
@@ -514,10 +512,10 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                     chapters.add(new Chapter(chapterNumber, chapterNo, title));
                 }
             } else { 
-                throw new ResourceNotFound("Failed to get chapters from TruyenFull");
+                throw new BusinessException(ExceptionType.GET_COMIC_CHAPTER_CONTENT_FAILED);
             }
         } catch (Exception e) { 
-            throw new HttpStatusException("Failed to make request to get chapters from TruyenFull", 404, apiUrl);
+            throw new BusinessException(ExceptionType.REQUEST_SERVER_TO_CRAWL_FAILED);
         }
         DataModel<Integer, List<Chapter>> result = new DataModel<>(pagination, chapters);
         return result;
@@ -525,13 +523,13 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
 
     @Override
     @SneakyThrows
-    public Comic getComicInfoOnOtherServer(AlternatedChapterDTO altChapterDto) {
+    public Comic getComicInfoOnOtherServer(AlternatedChapterRequest altChapterDto) {
         String tagId = this.getTagIdComicFromTitleAndAuthor(altChapterDto.title(),
              altChapterDto.authorName(), altChapterDto.comicTagId());
         return this.getComicInfo(tagId);
     }
 
-    private String getTagIdComicFromTitleAndAuthor(String _title, String _authorName, String _comicTagId) throws HttpStatusException {
+    private String getTagIdComicFromTitleAndAuthor(String _title, String _authorName, String _comicTagId) {
         String keyword = _title;
         keyword = StringUtility.removeDiacriticalMarks(keyword).toLowerCase()
                 .replace("[dich]", "").replaceAll("- suu tam", "");
@@ -565,10 +563,10 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                 }
             }
         } catch (Exception e) {
-            throw new HttpStatusException("Failed to make request to get chapter content from TruyenFull", 404, apiUrl);
+            throw new BusinessException(ExceptionType.REQUEST_SERVER_TO_CRAWL_FAILED);
         }     
         if(tagId == ""){
-            throw new ResourceNotFound("Not found any comic on TruyenFull.");
+            throw new BusinessException(ExceptionType.COMIC_NOT_FOUND);
         } 
         return tagId;
     }
@@ -577,7 +575,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     @SneakyThrows
     public DataModel<Integer, ComicChapterContent> getComicChapterContent(String comicTagId, String currentChapter) {
         if(!comicTagId.matches("^\\d+$")) { 
-            throw new InvalidTypeException("Invalid comic tag id"); 
+            throw new BusinessException(ExceptionType.INVALID_COMIC_TAG_ID);
         }
         Integer chapterId = Integer.parseInt(currentChapter);
         String apiUrl = TRUYEN_API + "v1/chapter/detail/" + currentChapter;
@@ -611,10 +609,10 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                 chapterContent = new ComicChapterContent(title, 
                                 chapterTitle, content, comicTagId, author, chapterNumber);
             } else {
-                throw new ResourceNotFound("Failed to get chapter content from TruyenFull");
+                throw new BusinessException(ExceptionType.GET_COMIC_CHAPTER_CONTENT_FAILED);
             }
         } catch (Exception e) {
-            throw new HttpStatusException("Failed to make request to get chapter content from TruyenFull", 404, apiUrl);
+            throw new BusinessException(ExceptionType.REQUEST_SERVER_TO_CRAWL_FAILED);
         }
         DataModel<Integer, ComicChapterContent> result = new DataModel<>(pagination, chapterContent);
         return result;
@@ -634,16 +632,16 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                 String authorId = StringUtility.removeDiacriticalMarks(authorName).toLowerCase().replace(" ", "-");
                 return new Author(authorId, authorName);
             } else {
-                throw new ResourceNotFound("Failed to request comic information from TruyenFull");
+                throw new BusinessException(ExceptionType.GET_COMIC_INFO_FAILED);
             }
         } catch (Exception e) {
-            throw new HttpStatusException("Cannot make request to get comic information from TruyenFull", 404, apiUrl);
+            throw new BusinessException(ExceptionType.REQUEST_SERVER_TO_CRAWL_FAILED);
         }
     }
 
     @Override
     @SneakyThrows
-    public DataModel<?, ComicChapterContent> getComicChapterContentOnOtherServer(AlternatedChapterDTO altChapterDto) {
+    public DataModel<?, ComicChapterContent> getComicChapterContentOnOtherServer(AlternatedChapterRequest altChapterDto) {
         String tagId = this.getTagIdComicFromTitleAndAuthor(altChapterDto.title(),
                 altChapterDto.authorName(), altChapterDto.comicTagId());
         String chapterUrl = ""; 
@@ -652,10 +650,10 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
             DataModel<Integer, List<Chapter>> result = this.getChapters(tagId, currentPage);
             List<Chapter> chapters = result.getData();
             if(chapters == null) {
-                throw new ResourceNotFound("Failed to get chapter list from Truyen Full");
+                throw new BusinessException(ExceptionType.GET_COMIC_CHAPTER_LIST_FAILED);
             }
             if(chapters.isEmpty()) {
-                throw new ResourceNotFound("Failed to get chapter list from Truyen Full");
+                throw new BusinessException(ExceptionType.GET_COMIC_CHAPTER_LIST_FAILED);
             }
             for (Chapter chapter : chapters) {
                 if(chapter.getChapterNumber() == altChapterDto.chapterNumber()) {
@@ -712,10 +710,10 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                 DataModel<Integer, List<ComicModel>> result = new DataModel<>(pagination, authorComics);
                 return result;
             } else {
-                throw new ResourceNotFound("Failed to request comic information from TruyenFull");
+                throw new BusinessException(ExceptionType.GET_COMIC_INFO_FAILED);
             }
         } catch (Exception e) {
-            throw new HttpStatusException("Cannot make request to get comic information from TruyenFull", 404, apiUrl);
+            throw new BusinessException(ExceptionType.REQUEST_SERVER_TO_CRAWL_FAILED);
         } 
     }
 }

@@ -2,7 +2,7 @@ package com.group17.comic.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record ChapterDTO(
+public record ChapterRequest(
       @NotBlank(message = "Title cannot be blank")
       String title,
 

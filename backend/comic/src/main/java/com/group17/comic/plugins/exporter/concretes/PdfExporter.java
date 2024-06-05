@@ -17,9 +17,9 @@ import org.jsoup.HttpStatusException;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders; 
 
-import com.group17.comic.dto.request.ChapterDTO;
+import com.group17.comic.dto.request.ChapterRequest;
 import com.group17.comic.dto.response.ChapterFile;
-import com.group17.comic.plugins.exporter.IFileConverter;
+import com.group17.comic.plugins.exporter.IFileExporter;
 
 /**
  * @author: estakov
@@ -28,7 +28,7 @@ import com.group17.comic.plugins.exporter.IFileConverter;
  * 
  */
 
-public class PdfConverter implements IFileConverter {
+public class PdfExporter implements IFileExporter {
     private static String uploadDir = "backend/comic/src/main/java/com/group17/comic/plugins/exporter/uploads/";
     private final UUID id = UUID.randomUUID();
     @Override
@@ -48,7 +48,7 @@ public class PdfConverter implements IFileConverter {
 
     @Override
     @SneakyThrows
-    public ChapterFile getConvertedFile(ChapterDTO chapterDto) {
+    public ChapterFile getConvertedFile(ChapterRequest chapterDto) {
         String formatTitile = StringUtility.removeDiacriticalMarks(chapterDto.title());
         formatTitile = formatTitile.replaceAll("[^a-zA-Z0-9]", "-").trim();
         String fileName = formatTitile + ".pdf";
