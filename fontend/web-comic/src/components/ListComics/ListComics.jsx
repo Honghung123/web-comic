@@ -78,8 +78,8 @@ function ListComics() {
             `?${keyword === '' ? '' : `keyword=${keyword}`}` +
             `${genre === '' ? '' : `&genre=${genre}`}` +
             `${page === 1 ? '' : `&page=${page}`}`;
-        if (searchStr.length > 0 && searchStr[0] === '&') {
-            searchStr = searchStr.substring(1);
+        if (searchStr.length > 0 && searchStr[1] === '&') {
+            searchStr = `?${searchStr.substring(2)}`;
         }
         return searchStr;
     };

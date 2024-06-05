@@ -17,11 +17,11 @@ function ComicSourceItem({ index, server }) {
                 color={index === 0 ? 'secondary' : 'primary'}
                 sx={
                     index === 0
-                        ? { borderRadius: 2, boxShadow: 'none', maxWidth: 130 }
+                        ? { borderRadius: 2, boxShadow: 'none', maxWidth: 120 }
                         : {
                               borderRadius: 2,
                               boxShadow: 'none',
-                              maxWidth: 130,
+                              maxWidth: 120,
                               backgroundColor: '#D9D9D9',
                               '&:hover': {
                                   backgroundColor: '#D9D9D9',
