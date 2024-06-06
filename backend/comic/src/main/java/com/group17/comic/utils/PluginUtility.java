@@ -10,8 +10,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class PluginUtility {
     /**
@@ -99,12 +101,11 @@ public class PluginUtility {
     }
 
     public static String resolveAbsolutePath(String absolutePath) {
-        String baseProject = "/backend/comic"; // Use forward slashes for directory separation
-        Path basePath = Paths.get(absolutePath);
-        Path baseProjectPath = Paths.get(baseProject);
-        if (!basePath.endsWith(baseProjectPath)) {
-            basePath = Paths.get(absolutePath, baseProject);
+        String[] basePath = {"/backend/comic", "\\backend\\comic"};
+        boolean isEndsWithBasePath = Arrays.stream(basePath).anyMatch(absolutePath::endsWith);
+        if (isEndsWithBasePath) {
+            return absolutePath;
         }
-        return basePath.toString();
+        return absolutePath + basePath[0];
     }
 }

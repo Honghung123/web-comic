@@ -1,7 +1,7 @@
 package com.group17.comic.plugins.crawler.concretes;
 
 import com.group17.comic.dto.request.AlternatedChapterRequest;
-import com.group17.comic.exception.customs.ResourceNotFound;
+import com.group17.comic.exception.BusinessException;
 import com.group17.comic.model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,7 +67,7 @@ class TruyenFullCrawlerTest {
         Comic comicOnTangThuVien = null;
         try{
             comicOnTangThuVien = tangThuVienCrawler.getComicInfoOnOtherServer(alternatedChapterDTO);
-        } catch(ResourceNotFound ex){
+        } catch(BusinessException ex){
             comicOnTangThuVien = null;
         }
 
