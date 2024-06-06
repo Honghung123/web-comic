@@ -12,7 +12,7 @@ const publicRoutes = [
     { path: "/", component: Home },
     { path: "/info/:serverId/:tagId", component: ComicInfo },
     { path: "/reading/:serverId/:tagId/:chapter", component: Reading },
-    { path: "/author/:serverId/:authorId", component: AuthorGenreListComics },
+    { path: "/author/:serverId/:authorId/:tagId", component: AuthorGenreListComics },
     { path: "/genre/:serverId/:genreId", component: AuthorGenreListComics },
 ];
 

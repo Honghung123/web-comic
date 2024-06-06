@@ -51,19 +51,17 @@ function ComicSources() {
     };
 
     return (
-        <div className="h-full" style={{ marginLeft: -40, paddingRight: 30 }}>
-            <div className="border-2 rounded-lg mx-auto w-full py-4">
-                <div className="text-2xl font-semi-bold text-center">Nguồn truyện</div>
-                <DndContext collisionDetection={closestCorners} onDragEnd={handleChangePriority}>
-                    <div className="flex flex-wrap justify-center gap-4 mt-4" style={{ width: 180 }}>
-                        <SortableContext items={tempServers} strategy={verticalListSortingStrategy}>
-                            {tempServers.map((server, index) => {
-                                return <ComicSourceItem key={index} index={index} server={server} />;
-                            })}
-                        </SortableContext>
-                    </div>
-                </DndContext>
-            </div>
+        <div className="border-2 rounded-lg mx-auto py-4">
+            <div className="text-2xl font-semibold text-center">Nguồn truyện</div>
+            <DndContext collisionDetection={closestCorners} onDragEnd={handleChangePriority}>
+                <div className="mx-auto flex flex-wrap justify-center gap-4 mt-4" style={{ width: 180 }}>
+                    <SortableContext items={tempServers} strategy={verticalListSortingStrategy}>
+                        {tempServers.map((server, index) => {
+                            return <ComicSourceItem key={index} index={index} server={server} />;
+                        })}
+                    </SortableContext>
+                </div>
+            </DndContext>
         </div>
     );
 }

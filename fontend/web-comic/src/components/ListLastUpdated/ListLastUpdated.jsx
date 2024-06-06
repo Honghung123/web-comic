@@ -7,10 +7,12 @@ import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
 
 import { Context } from '../../GlobalContext';
+import * as Utils from '../../utils';
 
 function ListLastUpdated() {
     const { servers } = useContext(Context);
     const [updatedComics, setUpdatedComics] = useState({});
+
     const fetchData = (page = 1) => {
         if (servers && servers.length > 0) {
             const server_id = servers[0].id;
@@ -28,6 +30,8 @@ function ListLastUpdated() {
                     console.log('last update chapters: ', response);
                     const responseData = response.data;
                     if (responseData.statusCode === 200) {
+                        // convert datetime to string
+
                         setUpdatedComics({
                             comics: responseData.data,
                             pagination: responseData.pagination,
@@ -68,7 +72,7 @@ function ListLastUpdated() {
     };
 
     return (
-        <div className="min-h-96 p-2 mx-auto mt-32" style={{ maxWidth: 1200 }}>
+        <div className="min-h-96 p-2 mx-auto mt-16" style={{ maxWidth: 1200 }}>
             <h2 className="text-3xl font-medium underline underline-offset-8">Truyện mới cập nhật: </h2>
 
             <table className="divide-dashed divide-slate-400 w-full mt-4 text-lg text-gray-500 font-medium">
@@ -77,40 +81,48 @@ function ListLastUpdated() {
                         updatedComics.comics.map((comic) => {
                             return (
                                 <tr key={comic.tagId} className="divide-x divide-dashed divide-slate-400">
-                                    <td className="p-2 lg:w-1/3 md:w-1/2">
-                                        <KeyboardArrowRightIcon sx={{ fontSize: 28, marginBottom: 0.5 }} />
-                                        <Link
-                                            className="hover:text-purple-500"
-                                            to={`/info/${servers[0]?.id}/${comic.tagId}`}
-                                        >
-                                            {comic.title}
-                                        </Link>
+                                    <td className="p-2 w-9/12 lg:w-1/2 xl:w-5/12">
+                                        <div className="line-clamp-1">
+                                            <KeyboardArrowRightIcon sx={{ fontSize: 28, marginBottom: 0.5 }} />
+                                            <Link
+                                                className="hover:text-purple-500"
+                                                to={`/info/${servers[0]?.id}/${comic.tagId}`}
+                                            >
+                                                {comic.title}
+                                            </Link>
+                                        </div>
                                     </td>
                                     {comic.genres.length > 0 && (
-                                        <td className="p-2 w-1/3">
-                                            {comic.genres.map((genre, index) => (
-                                                <span key={index}>
-                                                    <Link to={`/genre/${servers[0]?.id}/${genre.tag}`}>
-                                                        <span className="hover:text-purple-500">{genre.label}</span>
-                                                    </Link>
-                                                    {index < comic.genres.length - 1 && <>, </>}
-                                                </span>
-                                            ))}
+                                        <td className="p-2 hidden lg:block">
+                                            <div className="line-clamp-1 xl:w-72 w-56">
+                                                {comic.genres.map((genre, index) => (
+                                                    <span key={index} className="w-full">
+                                                        <Link to={`/genre/${servers[0]?.id}/${genre.tag}`}>
+                                                            <span className="hover:text-purple-500">{genre.label}</span>
+                                                        </Link>
+                                                        {index < comic.genres.length - 1 && <>, </>}
+                                                    </span>
+                                                ))}
+                                            </div>
                                         </td>
                                     )}
                                     {comic.newestChapter && (
-                                        <td className="p-2 text-purple-500 lg:w-1/6 md:w-1/5">
-                                            Chương {comic.newestChapter}
+                                        <td className="p-2 w-40 text-purple-500">
+                                            <div className="w-40">Chương {comic.newestChapter}</div>
                                         </td>
                                     )}
-                                    {comic.updatedTime && <td className="p-2">{comic.updatedTime}</td>}
+                                    {comic.updatedTime && (
+                                        <td className="p-2 w-40 hidden lg:block">
+                                            <div className="w-40">{Utils.getDiffTime(comic.updatedTime)}</div>
+                                        </td>
+                                    )}
                                 </tr>
                             );
                         })}
                 </tbody>
             </table>
 
-            <div className="flex justify-end">
+            <div className="flex justify-end items-center">
                 <IconButton
                     color="secondary"
                     aria-label="previous"
@@ -119,6 +131,7 @@ function ListLastUpdated() {
                 >
                     <KeyboardArrowLeftIcon aria-label="previous" sx={{ fontSize: 32 }} />
                 </IconButton>
+                <span className="text-gray-400">{updatedComics.pagination?.currentPage}</span>
                 <IconButton
                     color="secondary"
                     aria-label="next"

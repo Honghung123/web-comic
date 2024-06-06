@@ -13,4 +13,6 @@ import axios from "axios";
 
 // export default request;
 
-export * from './StorageUtil';
+export * from './StorageUtils';
+export * from './StringUtils';
+export * from './DateTimeUtils';

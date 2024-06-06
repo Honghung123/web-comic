@@ -15,15 +15,11 @@ function BookItem({ comic }) {
                 className="w-full h-full object-cover hover:transform hover:scale-110 transition-all duration-300"
                 src={comic.image}
                 onError={(e) => (e.target.src = comic.alternateImage)}
-                alt=""
+                alt="image"
             />
             <div
-                className="w-full absolute bottom-0 bg-zinc-800/70 text-white text-center"
-                style={{
-                    height: 48,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                }}
+                className="w-full absolute bottom-0 bg-zinc-800/70 text-white text-center line-clamp-2"
+                style={{ minHeight: 48 }}
             >
                 {comic.title}
             </div>

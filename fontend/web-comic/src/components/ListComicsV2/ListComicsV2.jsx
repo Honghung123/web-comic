@@ -6,14 +6,17 @@ import { Pagination, Stack } from '@mui/material';
 
 import { Context } from '../../GlobalContext';
 import Loading from '../Loading';
+import * as Utils from '../../utils';
 
 function ListComicsV2() {
     const location = useLocation();
     const { pathname } = location;
     const isAuthorPage = pathname.startsWith('/author');
-    const serverId = pathname.substring(pathname.indexOf('/', 1) + 1, pathname.lastIndexOf('/'));
-    const authorId = isAuthorPage ? pathname.substring(pathname.lastIndexOf('/') + 1) : '';
-    const genre = isAuthorPage ? '' : pathname.substring(pathname.lastIndexOf('/') + 1);
+    const seperateIdices = Utils.getIdicesOfCharacter(pathname, '/');
+    const serverId = pathname.substring(seperateIdices[1] + 1, seperateIdices[2]);
+    const authorId = isAuthorPage ? pathname.substring(seperateIdices[2] + 1, seperateIdices[3]) : '';
+    const tagId = isAuthorPage ? pathname.substring(seperateIdices[3] + 1) : '';
+    const genre = isAuthorPage ? '' : pathname.substring(seperateIdices[2] + 1);
     const { servers } = useContext(Context);
     const [comicsData, setComicsData] = useState({});
     const [page, setPage] = useState(1);
@@ -38,7 +41,7 @@ function ListComicsV2() {
                         server_id: serverId,
                         page,
                         genre,
-                        tagId: 'hihi',
+                        tagId,
                     },
                     headers: {
                         'list-crawlers': JSON.stringify(servers.map((server) => server.id)),
@@ -96,7 +99,7 @@ function ListComicsV2() {
                             return (
                                 <div className="my-2 py-2 flex items-center justify-between">
                                     <div className="flex items-center">
-                                        <div className="w-52 h-32 overflow-hidden">
+                                        <div className="w-32 md:w-52 h-32 overflow-hidden">
                                             <img
                                                 className="w-full h-full object-cover hover:transform hover:scale-110 transition-all duration-300"
                                                 src={comic.image}
@@ -106,13 +109,13 @@ function ListComicsV2() {
                                                 alt={comic.tagId}
                                             />
                                         </div>
-                                        <div className="px-4" style={{ maxWidth: 580 }}>
+                                        <div className="px-4 flex-1" style={{ maxWidth: 580 }}>
                                             <Link to={`/info/${serverId}/${comic.tagId}`}>
-                                                <h3 className="text-xl font-semibold hover:text-purple-500">
+                                                <h3 className="text-xl font-semibold hover:text-purple-500 line-clamp-2">
                                                     {comic.title}
                                                 </h3>
                                             </Link>
-                                            <Link to={`/author/${serverId}/${comic.author.authorId}`}>
+                                            <Link to={`/author/${serverId}/${comic.author.authorId}/${comic.tagId}`}>
                                                 <div className="italic py-2 hover:text-purple-500">
                                                     {comic.author.name}
                                                 </div>

@@ -98,49 +98,58 @@ function ListComics() {
     }
 
     return (
-        <div className="min-h-96 p-2 relative w-full">
-            <Loading loading={loading} />
+        <div className="p-2 w-full h-full">
             <h2 className="text-3xl pt-2 font-semibold underline underline-offset-8">{headerText}</h2>
             {keyword !== '' && genre === '' && comicsData.others && comicsData.others.length > 0 && (
                 <div>
-                    <h3 className="text-xl font-semibold underline underline-offset-4 mt-2">Danh sách tác giả:</h3>
-                    <div className="my-2">
+                    <h3 className="text-xl font-semibold underline mt-2" style={{ textUnderlineOffset: 5 }}>
+                        Danh sách tác giả:
+                    </h3>
+                    <div className="my-2 flex flex-wrap">
                         {comicsData.others.map((author, index) => (
-                            <>
-                                <Link key={index} to={`/author/${servers[0]?.id}/${author.authorId}`}>
+                            <div key={index} className="bg-violet-100 rounded my-2 mr-4 p-2">
+                                <Link to={`/author/${servers[0]?.id}/${author.authorId}/${author.comicTagId}`}>
                                     <span className="hover:text-purple-500 pl-1 italic text-xl">{author.name}</span>
                                 </Link>
-                                {index < comicsData.others.length - 1 && <>, </>}
-                            </>
+                                {/* {index < comicsData.others.length - 1 && <>, </>} */}
+                            </div>
                         ))}
                     </div>
-                    <h3 className="text-xl font-semibold underline underline-offset-4 mt-4">Danh sách truyện:</h3>
+                    <h3 className="text-xl font-semibold underline mt-4" style={{ textUnderlineOffset: 5 }}>
+                        Danh sách truyện:
+                    </h3>
                 </div>
             )}
-            <div className="flex flex-wrap min-h-full" style={{ marginLeft: '-1rem', marginRight: '-1rem' }}>
-                {comicsData.comics &&
-                    comicsData.comics.map((comic) => (
-                        <div key={comic.tagId} className="lg:w-1/6 md:w-1/4 sm:w-1/3 w-1/2 px-4 mt-8">
-                            <ComicItem comic={comic} />
-                        </div>
-                    ))}
+            <div className="min-h-full relative mt-4">
+                <Loading loading={loading} />
+                <div className="flex flex-wrap" style={{ marginLeft: '-1rem', marginRight: '-1rem' }}>
+                    {comicsData.comics &&
+                        comicsData.comics.map((comic) => (
+                            <div key={comic.tagId} className="xl:w-1/6 lg:w-1/5 sm:w-1/3 w-1/2 px-4 mb-8">
+                                <ComicItem comic={comic} />
+                            </div>
+                        ))}
+                </div>
+                <Stack spacing={2} className="mt-8" direction="row" justifyContent="center">
+                    <Pagination
+                        showFirstButton
+                        showLastButton
+                        variant="outlined"
+                        color="secondary"
+                        page={page}
+                        count={(comicsData.pagination && comicsData.pagination.totalPages) || 1}
+                        renderItem={(item) => {
+                            return (
+                                <PaginationItem
+                                    component={Link}
+                                    to={getSearchStr(keyword, genre, item.page)}
+                                    {...item}
+                                />
+                            );
+                        }}
+                    />
+                </Stack>
             </div>
-
-            <Stack spacing={2} className="mt-8" direction="row" justifyContent="center">
-                <Pagination
-                    showFirstButton
-                    showLastButton
-                    variant="outlined"
-                    color="secondary"
-                    page={page}
-                    count={(comicsData.pagination && comicsData.pagination.totalPages) || 1}
-                    renderItem={(item) => {
-                        return (
-                            <PaginationItem component={Link} to={getSearchStr(keyword, genre, item.page)} {...item} />
-                        );
-                    }}
-                />
-            </Stack>
         </div>
     );
 }

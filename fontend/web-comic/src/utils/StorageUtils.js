@@ -1,6 +1,5 @@
 // add chapter to reading history
 export const addChapter = (chapterNo, tagId, serverId) => {
-    console.log('addd chapter');
     if (serverId !== null && serverId !== undefined && tagId) {
         let listChapters = localStorage.getItem(`${serverId}_${tagId}`);
         listChapters = listChapters ? JSON.parse(listChapters) : [];
@@ -36,5 +35,25 @@ export const getLastReadingChapter = (tagId, serverId) => {
         let listChapters = localStorage.getItem(`${serverId}_${tagId}`);
         listChapters = listChapters ? JSON.parse(listChapters) : [];
         return listChapters[listChapters.length - 1];
+    }
+}
+
+
+//add comic to history of a server
+export const addComic = (tagId, title, serverId) => {
+    if (serverId !== null && serverId !== undefined && tagId && title) {
+        let listComics = localStorage.getItem(`${serverId}_comics`);
+        listComics = listComics ? JSON.parse(listComics) : [];
+        const index = listComics.findIndex((comic) => comic.tagId === tagId);
+        if (index === -1) {
+            if (listComics.length >= 10) {
+                listComics.pop();
+            }
+        }
+        else {
+            listComics.splice(index, 1);
+        }
+        listComics.unshift({ tagId, title });
+        localStorage.setItem(`${serverId}_comics`, JSON.stringify(listComics));
     }
 }

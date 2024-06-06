@@ -79,6 +79,7 @@ function ReadingChapter() {
                     if (responseData.statusCode === 200) {
                         // save chapter into history
                         Utils.addChapter(chapter, tagId, serverId);
+                        Utils.addComic(tagId, responseData.data.title, serverId);
                         setChapterData({
                             data: responseData.data,
                             pagination: responseData.pagination,
@@ -224,16 +225,14 @@ function ReadingChapter() {
                     <SettingServer serverId={serverIdState} setServerId={setServerIdState} />
 
                     {/* content + setting properties */}
-                    <div className="w-full mx-auto px-16 mt-4 relative">
+                    <div className="w-full mx-auto md:px-16 mt-4 relative">
                         <Loading loading={loading} />
+
                         <div
-                            className={`w-full min-h-72 ${bgColor} sm:p-4 p-2 text-slate-700`}
-                            style={{ fontSize, lineHeight, fontFamily }}
-                            dangerouslySetInnerHTML={{
-                                __html: chapterData.data.content,
-                            }}
-                        ></div>
-                        <div className={`${bgColor} absolute z-50 top-0 left-0 divide-black rounded`}>
+                            className={`${bgColor}${
+                                bgColor === 'bg-white' ? ' border-2' : ''
+                            } md:absolute z-50 top-0 left-0 divide-black rounded flex w-40 px-4 md:px-0 md:w-auto md:block mb-4`}
+                        >
                             {/* List Chapters */}
                             <Tippy
                                 interactive
@@ -460,6 +459,16 @@ function ReadingChapter() {
                                 </div>
                             </Tippy>
                         </div>
+
+                        <div
+                            className={`w-full min-h-96 rounded ${bgColor}${
+                                bgColor === 'bg-white' ? ' border-2' : ''
+                            } sm:p-4 p-2 text-slate-700`}
+                            style={{ fontSize, lineHeight, fontFamily }}
+                            dangerouslySetInnerHTML={{
+                                __html: chapterData.data.content,
+                            }}
+                        ></div>
                         {/* <Modal
                             open={openListChapters}
                             onClose={() => {
@@ -630,6 +639,35 @@ function ReadingChapter() {
                                 </div>
                             </div>
                         </Modal> */}
+                    </div>
+                    <div className="flex justify-center gap-4 my-4">
+                        <Button
+                            disabled={!chapterData.pagination.link.prevPage}
+                            component={Link}
+                            to={`/reading/${serverId}/${tagId}/${chapterData.pagination.link.prevPage}`}
+                            variant="contained"
+                            color="success"
+                            sx={{ width: 180, textAlign: 'center', padding: '8px 0' }}
+                        >
+                            <NavigateBeforeRoundedIcon />
+                            Chương trước
+                        </Button>
+
+                        <Button
+                            disabled={!chapterData.pagination.link.nextPage}
+                            component={Link}
+                            to={
+                                chapterData.pagination.link.nextPage
+                                    ? `/reading/${serverId}/${tagId}/${chapterData.pagination.link.nextPage}`
+                                    : ''
+                            }
+                            variant="contained"
+                            color="success"
+                            sx={{ width: 180, textAlign: 'center', padding: '8px 0' }}
+                        >
+                            Chương sau
+                            <NavigateNextRoundedIcon />
+                        </Button>
                     </div>
                 </div>
             )}

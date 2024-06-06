@@ -16,7 +16,6 @@ export default function Footer() {
             >
                 Group 17
             </h1>
-            <br />
         </>
     );
 }

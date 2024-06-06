@@ -210,6 +210,7 @@ function ComicDetail({ tagId, serverId }) {
                         )}
                         <div className="flex gap-2 mt-8">
                             <Button
+                                className="text-center"
                                 component={Link}
                                 to={
                                     chapterBound && chapterBound.first
@@ -218,11 +219,12 @@ function ComicDetail({ tagId, serverId }) {
                                 }
                                 variant="contained"
                                 color="success"
-                                sx={{ borderRadius: 40 }}
+                                sx={{ borderRadius: 40, width: 148 }}
                             >
                                 Đọc từ đầu
                             </Button>
                             <Button
+                                className="text-center"
                                 disabled={Utils.getLastReadingChapter(tagId, serverId) === undefined}
                                 component={Link}
                                 to={`/reading/${serverId}/${tagId}/${Utils.getLastReadingChapter(tagId, serverId)}`}
@@ -233,6 +235,7 @@ function ComicDetail({ tagId, serverId }) {
                                 Tiếp tục
                             </Button>
                             <Button
+                                className="text-center"
                                 component={Link}
                                 to={
                                     chapterBound && chapterBound.last
@@ -241,7 +244,7 @@ function ComicDetail({ tagId, serverId }) {
                                 }
                                 variant="contained"
                                 color="success"
-                                sx={{ borderRadius: 40 }}
+                                sx={{ borderRadius: 40, width: 148 }}
                             >
                                 Đọc mới nhất
                             </Button>
@@ -263,7 +266,7 @@ function ComicDetail({ tagId, serverId }) {
                         <div className="text-xl font-semibold mt-4">
                             Tác giả:{' '}
                             <Link
-                                to={`/author/${serverId}/${comicData.author?.authorId}`}
+                                to={`/author/${serverId}/${comicData.author?.authorId}/${comicData.tagId}`}
                                 className="hover:text-purple-500"
                             >
                                 {' ' + comicData.author?.name}

@@ -127,7 +127,7 @@ function SearchBox() {
 
     return (
         <div className="flex" style={{ margin: 20 }}>
-            <FormControl sx={{ minWidth: 120 }}>
+            <FormControl className="lg:w-[120px] w-[100px]">
                 <InputLabel id="genres-label">Thể loại</InputLabel>
                 <Select
                     labelId="genres-label"
@@ -161,14 +161,14 @@ function SearchBox() {
 
             <Divider variant="middle" flexItem orientation="vertical"></Divider>
 
-            <FormControl sx={{ minWidth: 400 }}>
+            <FormControl className="lg:w-[400px] md:w-[300px]">
                 <TextField
                     id="keyword-input"
                     value={keyword}
                     onChange={handleKeywordChange}
                     placeholder="Tìm kiếm theo tên truyện, tên tác giả"
                     variant="outlined"
-                    className="bg-white"
+                    className="bg-white line-clamp-1"
                     sx={{
                         '& .MuiOutlinedInput-root': {
                             '& fieldset': {
@@ -180,12 +180,19 @@ function SearchBox() {
                             '&.Mui-focused fieldset': {
                                 border: 'none',
                             },
+                            '& input::placeholder': {
+                                opacity: 0.5,
+                                transition: 'opacity 0.3s',
+                            },
+                            '& input:focus::placeholder': {
+                                opacity: 0,
+                            },
                         },
                     }}
                 />
             </FormControl>
 
-            <FormControl sx={{ minWidth: 80 }}>
+            <FormControl className="lg:w-[80px] md:w-[70px]">
                 <Button
                     variant="contained"
                     onClick={handleSubmit}
