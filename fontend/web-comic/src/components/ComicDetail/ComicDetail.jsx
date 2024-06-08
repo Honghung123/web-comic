@@ -19,9 +19,6 @@ function ComicDetail({ tagId, serverId }) {
     const toggleDescription = () => {
         setShowFullDescription(!showFullDescription);
     };
-    const truncate = (text, length) => {
-        return text.length > length ? text.slice(0, length) : text;
-    };
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -36,7 +33,7 @@ function ComicDetail({ tagId, serverId }) {
                 .then((response) => {
                     const responseData = response.data;
                     if (responseData.statusCode === 200) {
-                        console.log(responseData.data);
+                        // console.log(responseData.data);
                         setComicData(responseData.data);
                     } else {
                         //thong bao loi
@@ -71,7 +68,7 @@ function ComicDetail({ tagId, serverId }) {
                 .then((response) => {
                     const responseData = response.data;
                     if (responseData.statusCode === 200) {
-                        console.log('chapter bound: ', responseData);
+                        // console.log('chapter bound: ', responseData);
                         setChapterBound({ first: responseData.data[0] });
                         axios
                             .get(`${process.env.REACT_APP_API_URL}/comic/reading/${tagId}/chapters`, {
@@ -113,13 +110,6 @@ function ComicDetail({ tagId, serverId }) {
         if (comicData && servers && servers.length > 0) {
             const { id: server_id, name: server_name } = servers.find((server) => server.id === serverIdState);
 
-            console.log('post body: ', {
-                title: comicData.title,
-                authorName: comicData.author?.name,
-                comicTagId: comicData.tagId,
-                chapterNumber: 1,
-            });
-
             const fecthData = async () => {
                 try {
                     const response = await axios.post(
@@ -139,7 +129,8 @@ function ComicDetail({ tagId, serverId }) {
                             },
                         },
                     );
-                    console.log('change server: ', response);
+
+                    // console.log('change server: ', response);
                     const responseData = response.data;
                     if (responseData.statusCode === 200) {
                         // toast.success('Data fetched successfully!');
@@ -174,28 +165,28 @@ function ComicDetail({ tagId, serverId }) {
         }
     }, [serverIdState]);
 
-    console.log('comic data: ', comicData);
+    // console.log('comic data: ', comicData);
 
     return (
         <div className="min-h-96 mb-16 mx-auto relative" style={{ maxWidth: 1200 }}>
             {comicData && (
-                <div className="flex flex-wrap">
-                    <div className="md:w-1/4 sm:w-1/3 w-full overflow-hidden">
+                <div className="flex flex-wrap items-start">
+                    <div className="md:w-1/4 sm:w-1/3 w-full overflow-hidden sm:shadow-[15px_15px_8px_#999]">
                         <img
-                            className="w-full object-cover hover:transform hover:scale-110 transition-all duration-300 shadow-lg"
+                            className="w-full object-cover hover:transform hover:scale-110 transition-all duration-300"
                             src={comicData.image}
                             onError={(e) => (e.target.src = comicData.alternateImage)}
                             alt={comicData.tagId}
                         />
                     </div>
-                    <div className="md:w-3/4 sm:w-2/3 w-full sm:pl-8">
+                    <div className="md:w-3/4 sm:w-2/3 w-full sm:pl-8 pt-4 sm:pt-0">
                         <div className="text-3xl font-semibold">{comicData.title}</div>
                         <div className="text-xl font-semibold mt-2">Mô tả:</div>
                         <span
                             dangerouslySetInnerHTML={{
                                 __html: showFullDescription
                                     ? comicData.description
-                                    : truncate(comicData.description, 750),
+                                    : Utils.truncateStr(comicData.description, 750),
                             }}
                         ></span>
                         {!showFullDescription && (
@@ -250,7 +241,7 @@ function ComicDetail({ tagId, serverId }) {
                             </Button>
                         </div>
                     </div>
-                    <div className="w-full mt-4">
+                    <div className="w-full mt-8">
                         <div className="text-xl font-semibold">
                             Thể loại:{' '}
                             {comicData.genres.length > 0 &&
