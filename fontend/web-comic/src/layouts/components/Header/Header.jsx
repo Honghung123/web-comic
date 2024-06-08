@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 import SearchBox from '../../../components/SearchBox';
 
-export default function Header() {
+function Header() {
     return (
         <div
             className="flex justify-end lg:justify-center relative"
@@ -23,3 +23,5 @@ export default function Header() {
         </div>
     );
 }
+
+export default Header;

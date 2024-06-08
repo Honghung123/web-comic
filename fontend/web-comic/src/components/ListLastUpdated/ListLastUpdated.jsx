@@ -6,7 +6,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
 
-import { Context } from '../../GlobalContext';
+import { Context } from '../GlobalContext';
 import * as Utils from '../../utils';
 
 function ListLastUpdated() {
@@ -17,7 +17,7 @@ function ListLastUpdated() {
         if (servers && servers.length > 0) {
             const server_id = servers[0].id;
             axios
-                .get(`http://localhost:8080/api/v1/comic/lasted-comic`, {
+                .get(`${process.env.REACT_APP_API_URL}/comic/lasted-comic`, {
                     params: {
                         server_id,
                         page,

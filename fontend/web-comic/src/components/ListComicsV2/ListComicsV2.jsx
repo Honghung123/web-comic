@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 import { Pagination, Stack } from '@mui/material';
 
-import { Context } from '../../GlobalContext';
+import { Context } from '../GlobalContext';
 import Loading from '../Loading';
 import * as Utils from '../../utils';
 
@@ -32,8 +32,8 @@ function ListComicsV2() {
         if (serverId) {
             setLoading(true);
             let requestUrl = isAuthorPage
-                ? `http://localhost:8080/api/v1/comic/author/${authorId}`
-                : 'http://localhost:8080/api/v1/comic/search';
+                ? `${process.env.REACT_APP_API_URL}/comic/author/${authorId}`
+                : `${process.env.REACT_APP_API_URL}/comic/search`;
 
             axios
                 .get(requestUrl, {

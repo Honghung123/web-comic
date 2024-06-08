@@ -2,7 +2,7 @@ import { FormControl, MenuItem, Select, InputLabel, TextField, Button, Divider }
 import SearchIcon from '@mui/icons-material/Search';
 import { useContext, useEffect, useState } from 'react';
 
-import { Context } from '../../GlobalContext';
+import { Context } from '../GlobalContext';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -67,7 +67,7 @@ function SearchBox() {
         if (servers && servers.length > 0) {
             const server_id = servers[0].id;
             axios
-                .get('http://localhost:8080/api/v1/comic/genres', {
+                .get(`${process.env.REACT_APP_API_URL}/comic/genres`, {
                     params: {
                         server_id,
                     },

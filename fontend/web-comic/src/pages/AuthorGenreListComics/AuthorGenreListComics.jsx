@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 
-import { Context } from '../../GlobalContext';
+import { Context } from '../../components/GlobalContext';
 import ListComicsV2 from '../../components/ListComicsV2';
 
 function AuthorGenreListComics() {

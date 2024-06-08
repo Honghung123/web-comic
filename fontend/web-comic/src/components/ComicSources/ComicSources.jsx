@@ -2,8 +2,10 @@ import { useContext, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { DndContext, closestCorners } from '@dnd-kit/core';
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
+import Tippy from '@tippyjs/react';
 
-import { Context, UPDATE_PRIORITY } from '../../GlobalContext';
+import { Context, UPDATE_PRIORITY } from '../GlobalContext';
 import ComicSourceItem from './ComicSourceItem';
 
 function ComicSources() {
@@ -52,7 +54,18 @@ function ComicSources() {
 
     return (
         <div className="border-2 rounded-lg mx-auto py-4">
-            <div className="text-2xl font-semibold text-center">Nguồn truyện</div>
+            <div className="text-2xl font-semibold text-center mr-4">
+                <Tippy
+                    content="Hãy kéo thả các nguồn truyện để thay đổi mức độ ưu tiên theo ý của bạn. Độ ưu tiên theo thứ tự giảm dần từ trên xuống."
+                    trigger="click"
+                >
+                    <SettingsRoundedIcon
+                        className="hover:cursor-pointer"
+                        sx={{ marginBottom: 0.5, marginRight: 0.5 }}
+                    />
+                </Tippy>
+                Nguồn truyện
+            </div>
             <DndContext collisionDetection={closestCorners} onDragEnd={handleChangePriority}>
                 <div className="mx-auto flex flex-wrap justify-center gap-4 mt-4" style={{ width: 180 }}>
                     <SortableContext items={tempServers} strategy={verticalListSortingStrategy}>

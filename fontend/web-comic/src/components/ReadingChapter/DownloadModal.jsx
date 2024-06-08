@@ -21,7 +21,7 @@ function DownloadModal({ open, setOpen, chapter }) {
             title: chapter?.chapterTitle || '',
             content: chapter?.content || '',
         };
-        const url = `http://localhost:8080/api/v1/comic/export-file`;
+        const url = `${process.env.REACT_APP_API_URL}/comic/export-file`;
         try {
             const response = await axios.post(url, payload, {
                 params: {
@@ -76,7 +76,7 @@ function DownloadModal({ open, setOpen, chapter }) {
     useEffect(() => {
         if (open) {
             axios
-                .get(`http://localhost:8080/api/v1/comic/converter-plugins`)
+                .get(`${process.env.REACT_APP_API_URL}/comic/converter-plugins`)
                 .then((response) => {
                     const responseData = response.data;
                     if (responseData.statusCode === 200) {

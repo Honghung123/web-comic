@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useContext } from 'react';
 
-import { Context } from '../../GlobalContext';
+import { Context } from '../GlobalContext';
 
 function BookItem({ comic }) {
     const { servers } = useContext(Context);

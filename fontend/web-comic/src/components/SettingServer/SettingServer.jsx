@@ -1,10 +1,7 @@
-import { Button } from '@mui/material';
-import SettingsIcon from '@mui/icons-material/Settings';
-import { useContext, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useContext } from 'react';
 import Tippy from '@tippyjs/react';
 
-import { Context } from '../../GlobalContext';
+import { Context } from '../GlobalContext';
 
 function SettingServer({ serverId, setServerId }) {
     const { servers } = useContext(Context);

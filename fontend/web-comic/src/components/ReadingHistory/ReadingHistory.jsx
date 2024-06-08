@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import { Link } from 'react-router-dom';
 
-import { Context } from '../../GlobalContext';
+import { Context } from '../GlobalContext';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 
 function ReadingHistory() {

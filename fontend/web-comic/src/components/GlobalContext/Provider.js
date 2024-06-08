@@ -14,7 +14,7 @@ function Provider({ children }) {
 
     useEffect(() => {
         // lay danh sach cac serverE tu backend
-        axios.get('http://localhost:8080/api/v1/comic/crawler-plugins').then(response => {
+        axios.get(`${process.env.REACT_APP_API_URL}/comic/crawler-plugins`).then(response => {
             const responseData = response.data;
             if (responseData.statusCode === 200) {
                 serversDispatch({

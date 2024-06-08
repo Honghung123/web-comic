@@ -4,7 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Pagination, PaginationItem, Stack } from '@mui/material';
 import { toast } from 'react-toastify';
 
-import { Context } from '../../GlobalContext';
+import { Context } from '../GlobalContext';
 import ComicItem from '../ComicItem';
 import Loading from '../Loading';
 
@@ -12,13 +12,12 @@ function ListComics() {
     const { servers } = useContext(Context);
 
     const [comicsData, setComicsData] = useState({});
+    const [loading, setLoading] = useState(false);
 
     const [searchParams] = useSearchParams();
     const page = parseInt(searchParams.get('page')) || 1;
     const genre = searchParams.get('genre') || '';
     const keyword = searchParams.get('keyword') || '';
-
-    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -28,7 +27,7 @@ function ListComics() {
             const server_id = servers[0].id;
             console.log(JSON.stringify(servers.map((server) => server.id)));
             axios
-                .get(`http://localhost:8080/api/v1/comic/search`, {
+                .get(`${process.env.REACT_APP_API_URL}/comic/search`, {
                     params: {
                         server_id,
                         page,
@@ -125,7 +124,7 @@ function ListComics() {
                 <div className="flex flex-wrap" style={{ marginLeft: '-1rem', marginRight: '-1rem' }}>
                     {comicsData.comics &&
                         comicsData.comics.map((comic) => (
-                            <div key={comic.tagId} className="xl:w-1/6 lg:w-1/5 sm:w-1/3 w-1/2 px-4 mb-8">
+                            <div key={comic.tagId} className="xl:w-1/6 lg:w-1/5 w-1/3 px-4 mb-8">
                                 <ComicItem comic={comic} />
                             </div>
                         ))}

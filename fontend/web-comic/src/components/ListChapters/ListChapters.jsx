@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-import { Context } from '../../GlobalContext';
+import { Context } from '../GlobalContext';
 import Loading from '../Loading';
 import * as Utils from '../../utils';
 
@@ -23,7 +23,7 @@ function ListChapters({ tagId, serverId, headerSize = 'text-3xl' }) {
         if (serverId !== undefined) {
             setLoading(true);
             axios
-                .get(`http://localhost:8080/api/v1/comic/reading/${tagId}/chapters`, {
+                .get(`${process.env.REACT_APP_API_URL}/comic/reading/${tagId}/chapters`, {
                     params: {
                         server_id: serverId,
                         page,

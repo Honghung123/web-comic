@@ -15,7 +15,7 @@ import { toast } from 'react-toastify';
 import Tippy from '@tippyjs/react/headless';
 import 'tippy.js/dist/tippy.css';
 
-import { Context } from '../../GlobalContext';
+import { Context } from '../GlobalContext';
 import ListChapters from '../ListChapters';
 import SettingServer from '../SettingServer';
 import Loading from '../Loading';
@@ -65,7 +65,7 @@ function ReadingChapter() {
             }
 
             axios
-                .get(`http://localhost:8080/api/v1/comic/reading/${tagId}/chapters/${chapter}`, {
+                .get(`${process.env.REACT_APP_API_URL}/comic/reading/${tagId}/chapters/${chapter}`, {
                     params: {
                         server_id: serverId,
                     },
@@ -124,7 +124,7 @@ function ReadingChapter() {
             const fecthData = async () => {
                 try {
                     const response = await axios.post(
-                        'http://localhost:8080/api/v1/comic/reading/change-server-chapter-content',
+                        `${process.env.REACT_APP_API_URL}/comic/reading/change-server-chapter-content`,
                         {
                             title: chapterData.data.title,
                             authorName: chapterData.data.author?.name,

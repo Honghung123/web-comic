@@ -4,7 +4,7 @@ import { Button } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-import { Context } from '../../GlobalContext';
+import { Context } from '../../components/GlobalContext';
 import * as Utils from '../../utils';
 import SettingServer from '../SettingServer';
 
@@ -27,7 +27,7 @@ function ComicDetail({ tagId, serverId }) {
         window.scrollTo(0, 0);
         if (serverId !== undefined) {
             axios
-                .get(`http://localhost:8080/api/v1/comic/reading/${tagId}`, {
+                .get(`${process.env.REACT_APP_API_URL}/comic/reading/${tagId}`, {
                     params: { server_id: serverIdState },
                     headers: {
                         'list-crawlers': JSON.stringify(servers.map((server) => server.id)),
@@ -59,7 +59,7 @@ function ComicDetail({ tagId, serverId }) {
                 });
 
             axios
-                .get(`http://localhost:8080/api/v1/comic/reading/${tagId}/chapters`, {
+                .get(`${process.env.REACT_APP_API_URL}/comic/reading/${tagId}/chapters`, {
                     params: {
                         server_id: serverId,
                         page: 1,
@@ -74,7 +74,7 @@ function ComicDetail({ tagId, serverId }) {
                         console.log('chapter bound: ', responseData);
                         setChapterBound({ first: responseData.data[0] });
                         axios
-                            .get(`http://localhost:8080/api/v1/comic/reading/${tagId}/chapters`, {
+                            .get(`${process.env.REACT_APP_API_URL}/comic/reading/${tagId}/chapters`, {
                                 params: {
                                     server_id: serverId,
                                     page: responseData.pagination?.totalPages,
@@ -123,7 +123,7 @@ function ComicDetail({ tagId, serverId }) {
             const fecthData = async () => {
                 try {
                     const response = await axios.post(
-                        'http://localhost:8080/api/v1/comic/reading/change-server-comic-info',
+                        `${process.env.REACT_APP_API_URL}/comic/reading/change-server-comic-info`,
                         {
                             title: comicData.title,
                             authorName: comicData.author?.name,

@@ -5,7 +5,7 @@ import Header from '../components/Header';
 import Content from '../components/Content';
 import Footer from '../components/Footer';
 
-export default function DefaultLayout({ children }) {
+function DefaultLayout({ children }) {
     return (
         <>
             <ToastContainer />
@@ -15,3 +15,5 @@ export default function DefaultLayout({ children }) {
         </>
     );
 }
+
+export default DefaultLayout;

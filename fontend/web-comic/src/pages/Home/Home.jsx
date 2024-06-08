@@ -1,14 +1,15 @@
+import { useContext } from 'react';
+
+import { Context } from '../../components/GlobalContext';
 import ComicSources from '../../components/ComicSources';
 import ListComics from '../../components/ListComics';
 import ListLastUpdated from '../../components/ListLastUpdated';
 import ReadingHistory from '../../components/ReadingHistory';
-import { useContext } from 'react';
 
-import { Context } from '../../GlobalContext';
-
-export default function Home() {
+function Home() {
     const { setCurrentPage } = useContext(Context);
     setCurrentPage('');
+
     return (
         <div className="px-4 py-2">
             <div className="flex flex-wrap mx-auto" style={{ maxWidth: 1200 }}>
@@ -30,3 +31,5 @@ export default function Home() {
         </div>
     );
 }
+
+export default Home;
