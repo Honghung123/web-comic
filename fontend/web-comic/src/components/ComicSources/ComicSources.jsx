@@ -67,7 +67,7 @@ function ComicSources() {
                 Nguồn truyện
             </div>
             <DndContext collisionDetection={closestCorners} onDragEnd={handleChangePriority}>
-                <div className="mx-auto flex flex-wrap justify-center gap-4 mt-4" style={{ width: 180 }}>
+                <div className="mx-auto flex flex-wrap justify-center gap-4 mt-4 w-[180px]">
                     <SortableContext items={tempServers} strategy={verticalListSortingStrategy}>
                         {tempServers.map((server, index) => {
                             return <ComicSourceItem key={index} index={index} server={server} />;

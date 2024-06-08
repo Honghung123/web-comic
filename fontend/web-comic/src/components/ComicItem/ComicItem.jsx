@@ -17,10 +17,7 @@ function BookItem({ comic }) {
                 onError={(e) => (e.target.src = comic.alternateImage)}
                 alt="image"
             />
-            <div
-                className="w-full absolute bottom-0 bg-zinc-800/70 text-white text-center line-clamp-2"
-                style={{ minHeight: 48 }}
-            >
+            <div className="w-full absolute bottom-0 bg-zinc-800/70 text-white text-center line-clamp-2 min-h-[48px]">
                 {comic.title}
             </div>
         </Link>

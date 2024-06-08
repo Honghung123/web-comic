@@ -42,6 +42,9 @@ function ListComics() {
                     const responseData = response.data;
                     console.log('list-comic: ', responseData);
                     if (responseData.statusCode === 200) {
+                        if (responseData.data?.length === 0) {
+                            toast.warning('Không tìm thấy kết quả phù hợp!', { toastId: 500 });
+                        }
                         setComicsData({
                             comics: responseData.data,
                             pagination: responseData.pagination,
@@ -50,21 +53,18 @@ function ListComics() {
                     } else {
                         // thong bao loi
                         console.log(responseData.message);
-                        toast.error(responseData.message);
+                        toast.error('Có lỗi xảy ra. Vui lòng thử lại sau!', { toastId: 500 });
                     }
                     setLoading(false);
                 })
                 .catch((err) => {
                     //thong bao loi
                     console.log(err);
-                    if (err.response?.status === 503) {
+                    if (err.response?.status === 400) {
                         // back end update list servers
-                        toast.error(err.response.data?.message, {
-                            toastId: 503,
-                            autoClose: false,
-                        });
+                        toast.error('Hệ thống đã cập nhật. Vui lòng tải lại trang!', { toastId: 400 });
                     } else {
-                        toast.error('Internal server error');
+                        toast.warning('Không tìm thấy kết quả phù hợp!', { toastId: 500 });
                     }
                     setLoading(false);
                 });
@@ -101,9 +101,7 @@ function ListComics() {
             <h2 className="text-3xl pt-2 font-semibold underline underline-offset-8">{headerText}</h2>
             {keyword !== '' && genre === '' && comicsData.others && comicsData.others.length > 0 && (
                 <div>
-                    <h3 className="text-xl font-semibold underline mt-2" style={{ textUnderlineOffset: 5 }}>
-                        Danh sách tác giả:
-                    </h3>
+                    <h3 className="text-xl font-semibold underline mt-2 underline-offset-[5px]">Danh sách tác giả:</h3>
                     <div className="my-2 flex flex-wrap">
                         {comicsData.others.map((author, index) => (
                             <div key={index} className="bg-violet-100 rounded my-2 mr-4 p-2">
@@ -114,9 +112,7 @@ function ListComics() {
                             </div>
                         ))}
                     </div>
-                    <h3 className="text-xl font-semibold underline mt-4" style={{ textUnderlineOffset: 5 }}>
-                        Danh sách truyện:
-                    </h3>
+                    <h3 className="text-xl font-semibold underline mt-4 underline-offset-[5px]">Danh sách truyện:</h3>
                 </div>
             )}
             <div className="min-h-full relative mt-4">

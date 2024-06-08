@@ -41,21 +41,18 @@ function ListChapters({ tagId, serverId, headerSize = 'text-3xl' }) {
                     } else {
                         // thong bao loi
                         console.log(responseData.message);
-                        toast.error(responseData.message);
+                        toast.error('Có lỗi xảy ra. Vui lòng thử lại sau!', { toastId: 500 });
                     }
                     setLoading(false);
                 })
                 .catch((err) => {
                     // thong bao loi
                     console.log(err);
-                    if (err.response?.status === 503) {
+                    if (err.response?.status === 400) {
                         // back end update list servers
-                        toast.error(err.response.data?.message, {
-                            toastId: 503,
-                            autoClose: false,
-                        });
+                        toast.error('Hệ thống đã cập nhật. Vui lòng tải lại trang!', { toastId: 400 });
                     } else {
-                        toast.error('Internal server error');
+                        toast.error('Có lỗi xảy ra. Vui lòng thử lại sau!', { toastId: 500 });
                     }
                     setLoading(false);
                 });
@@ -63,7 +60,7 @@ function ListChapters({ tagId, serverId, headerSize = 'text-3xl' }) {
     }, [page, tagId]);
 
     return (
-        <div className="min-h-64 mx-auto relative" style={{ maxWidth: 1200 }}>
+        <div className="min-h-64 mx-auto relative max-w-[1200px]">
             <Loading loading={loading} />
             <div className={`${headerSize} font-semibold`}>Danh sách chương: </div>
             <Divider orientation="horizontal" className={`${headerSize === 'text-xl' ? 'h-2' : 'h-4'}`} />

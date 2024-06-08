@@ -38,20 +38,17 @@ function ListLastUpdated() {
                         });
                     } else {
                         console.log(responseData.message);
-                        toast.error(responseData.message);
+                        toast.error('Có lỗi xảy ra. Vui lòng thử lại sau!', { toastId: 500 });
                     }
                 })
                 .catch((err) => {
                     // thong bao loi
                     console.log(err);
-                    if (err.response?.status === 503) {
+                    if (err.response?.status === 400) {
                         // back end update list servers
-                        toast.error(err.response.data?.message, {
-                            toastId: 503,
-                            autoClose: false,
-                        });
+                        toast.error('Hệ thống đã cập nhật. Vui lòng tải lại trang!', { toastId: 400 });
                     } else {
-                        toast.error('Internal server error');
+                        toast.error('Có lỗi xảy ra. Vui lòng thử lại sau!', { toastId: 500 });
                     }
                 });
         }
@@ -72,7 +69,7 @@ function ListLastUpdated() {
     };
 
     return (
-        <div className="min-h-96 p-2 mx-auto mt-16" style={{ maxWidth: 1200 }}>
+        <div className="min-h-96 p-2 mx-auto mt-16 max-w-[1200px]">
             <h2 className="text-3xl font-medium underline underline-offset-8">Truyện mới cập nhật: </h2>
 
             <table className="divide-dashed divide-slate-400 w-full mt-4 text-lg text-gray-500 font-medium">

@@ -88,19 +88,16 @@ function SearchBox() {
                     } else {
                         // Thong bao loi
                         console.log(responseData.message);
-                        toast.error(responseData.message);
+                        toast.error('Có lỗi xảy ra. Vui lòng thử lại sau!', { toastId: 500 });
                     }
                 })
                 .catch((err) => {
                     console.log(err);
-                    if (err.response?.status === 503) {
+                    if (err.response?.status === 400) {
                         // back end update list servers
-                        toast.error(err.response.data?.message, {
-                            toastId: 503,
-                            autoClose: false,
-                        });
+                        toast.error('Hệ thống đã cập nhật. Vui lòng tải lại trang!', { toastId: 400 });
                     } else {
-                        toast.error('Internal server error');
+                        toast.error('Có lỗi xảy ra. Vui lòng thử lại sau!', { toastId: 500 });
                     }
                 });
         }
@@ -126,7 +123,7 @@ function SearchBox() {
     }, [searchParams.get('genre')]);
 
     return (
-        <div className="flex" style={{ margin: 20 }}>
+        <div className="flex m-[20px]">
             <FormControl className="lg:w-[120px] w-[100px]">
                 <InputLabel id="genres-label">Thể loại</InputLabel>
                 <Select

@@ -38,20 +38,17 @@ function ComicDetail({ tagId, serverId }) {
                     } else {
                         //thong bao loi
                         console.log(responseData.message);
-                        toast.error(responseData.message);
+                        toast.error('Có lỗi xảy ra. Vui lòng thử lại sau!', { toastId: 500 });
                     }
                 })
                 .catch((err) => {
                     //thong bao loi
                     console.log(err);
-                    if (err.response?.status === 503) {
+                    if (err.response?.status === 400) {
                         // back end update list servers
-                        toast.error(err.response.data?.message, {
-                            toastId: 503,
-                            autoClose: false,
-                        });
+                        toast.error('Hệ thống đã cập nhật. Vui lòng tải lại trang!', { toastId: 400 });
                     } else {
-                        toast.error('Internal server error');
+                        toast.error('Có lỗi xảy ra. Vui lòng thử lại sau!', { toastId: 500 });
                     }
                 });
 
@@ -168,7 +165,7 @@ function ComicDetail({ tagId, serverId }) {
     // console.log('comic data: ', comicData);
 
     return (
-        <div className="min-h-96 mb-16 mx-auto relative" style={{ maxWidth: 1200 }}>
+        <div className="min-h-96 mb-16 mx-auto relative max-w-[1200px]">
             {comicData && (
                 <div className="flex flex-wrap items-start">
                     <div className="md:w-1/4 sm:w-1/3 w-full overflow-hidden sm:shadow-[15px_15px_8px_#999]">

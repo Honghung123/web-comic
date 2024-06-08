@@ -58,21 +58,18 @@ function ListComicsV2() {
                     } else {
                         // thong bao loi
                         console.log(responseData.message);
-                        toast.error(responseData.message);
+                        toast.error('Có lỗi xảy ra. Vui lòng thử lại sau!', { toastId: 500 });
                     }
                     setLoading(false);
                 })
                 .catch((err) => {
                     //thong bao loi
                     console.log(err);
-                    if (err.response?.status === 503) {
+                    if (err.response?.status === 400) {
                         // back end update list servers
-                        toast.error(err.response.data?.message, {
-                            toastId: 503,
-                            autoClose: false,
-                        });
+                        toast.error('Hệ thống đã cập nhật. Vui lòng tải lại trang!', { toastId: 400 });
                     } else {
-                        toast.error('Internal server error');
+                        toast.error('Có lỗi xảy ra. Vui lòng thử lại sau!', { toastId: 500 });
                     }
                     setLoading(false);
                 });
@@ -80,7 +77,7 @@ function ListComicsV2() {
     }, [page, pathname]);
 
     return (
-        <div className="p-2 mx-auto relative" style={{ maxWidth: 1000, minHeight: 480 }}>
+        <div className="p-2 mx-auto relative max-w-[1000px] min-h-[480px]">
             <Loading loading={loading} />
             {comicsData.comics && (
                 <>
@@ -109,7 +106,7 @@ function ListComicsV2() {
                                                 alt={comic.tagId}
                                             />
                                         </div>
-                                        <div className="px-4 flex-1" style={{ maxWidth: 580 }}>
+                                        <div className="px-4 flex-1 max-w-[580px]">
                                             <Link to={`/info/${serverId}/${comic.tagId}`}>
                                                 <h3 className="text-xl font-semibold hover:text-purple-500 line-clamp-2">
                                                     {comic.title}

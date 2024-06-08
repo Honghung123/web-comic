@@ -25,12 +25,12 @@ function Provider({ children }) {
             }
             else {
                 //thong bao loi
-                toast.error('');
+                toast.error('Có lỗi xảy ra. Vui lòng thử lại sau!', { toastId: 500 });
             }
         })
             .catch(err => {
                 console.log(err);
-                toast.error('Internal server error');
+                toast.error('Có lỗi xảy ra. Vui lòng thử lại sau!', { toastId: 500 });
             })
     }, [])
 

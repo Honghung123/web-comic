@@ -95,7 +95,7 @@ function DownloadModal({ open, setOpen, chapter }) {
     }, [open]);
 
     return (
-        <div className="bg-white rounded p-4" style={{ boxShadow: '0 0 10px rgba(0, 0, 0, 0.4)', width: 380 }}>
+        <div className="bg-white rounded p-4 shadow-[0_0_10px_rgba(0,0,0,0.4)] w-[380px]">
             <div className="text-xl font-semibold">Tải xuống:</div>
             <Divider orientation="horizontal" className="h-2" />
             <RadioGroup
@@ -104,7 +104,7 @@ function DownloadModal({ open, setOpen, chapter }) {
                 onChange={(e) => {
                     setCurrentConverterId(e.target.value);
                 }}
-                style={{ display: 'flex', flexDirection: 'row' }}
+                sx={{ display: 'flex', flexDirection: 'row' }}
             >
                 {converters &&
                     converters.map((converter) => {
@@ -114,7 +114,7 @@ function DownloadModal({ open, setOpen, chapter }) {
                                 value={converter.id}
                                 control={<Radio color="secondary" />}
                                 label={converter.name}
-                                style={{ width: 110 }}
+                                sx={{ width: 110 }}
                             />
                         );
                     })}

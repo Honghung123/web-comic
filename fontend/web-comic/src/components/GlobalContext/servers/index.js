@@ -8,13 +8,21 @@ export const reducer = (state, action) => {
     if (action.type === UPDATE_LIST) {
         // payload is list of server: [{}, {}, {}]
         const newList = action.payload;
-        newList.forEach((server) => {
-            if (!state.find(oldServer => oldServer.id === server.id)) {
-                state.push(server);
+        const newState = [];
+        // preserve priority of old exist servers
+        state.forEach((server) => {
+            if (newList.find(newServer => newServer.id === server.id)) {
+                newState.push(server);
             }
         });
-        localStorage.setItem('servers', JSON.stringify(state));
-        return [...state];
+        // add new servers
+        newList.forEach((newServer) => {
+            if (!newState.find(server => server.id === newServer.id)) {
+                newState.push(newServer);
+            }
+        })
+        localStorage.setItem('servers', JSON.stringify(newState));
+        return newState;
     }
     else {
         const { oldPos, newPos } = action.payload;

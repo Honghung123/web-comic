@@ -87,21 +87,18 @@ function ReadingChapter() {
                     } else {
                         // thong bao loi
                         console.log(responseData.message);
-                        toast.error(responseData.message);
+                        toast.error('Có lỗi xảy ra. Vui lòng thử lại sau!', { toastId: 500 });
                     }
                     setLoading(false);
                 })
                 .catch((err) => {
                     // thong bao loi
                     console.log(err);
-                    if (err.response?.status === 503) {
+                    if (err.response?.status === 400) {
                         // back end update list servers
-                        toast.error(err.response.data?.message, {
-                            toastId: 503,
-                            autoClose: false,
-                        });
+                        toast.error('Hệ thống đã cập nhật. Vui lòng tải lại trang!', { toastId: 400 });
                     } else {
-                        toast.error('Internal server error');
+                        toast.error('Có lỗi xảy ra. Vui lòng thử lại sau!', { toastId: 500 });
                     }
                     setLoading(false);
                 });
@@ -180,15 +177,13 @@ function ReadingChapter() {
     return (
         <>
             {!chapterData ? (
-                <div className="min-h-96 mt-16 mx-auto relative" style={{ maxWidth: 1200 }}>
+                <div className="min-h-96 mt-16 mx-auto relative max-w-[1200px]">
                     <Loading loading={loading} />
                 </div>
             ) : (
-                <div className="min-h-96 mx-auto" style={{ maxWidth: 1200 }}>
-                    <h1 className="text-3xl text-center font-semibold" style={{ height: 36 }}>
-                        {chapterData.data.title}
-                    </h1>
-                    <h1 className="text-xl text-center font-semibold mt-2 text-gray-500" style={{ height: 36 }}>
+                <div className="min-h-96 mx-auto max-w-[1200px]">
+                    <h1 className="text-3xl text-center font-semibold h-[36px]">{chapterData.data.title}</h1>
+                    <h1 className="text-xl text-center font-semibold mt-2 text-gray-500 h-[36px]">
                         {chapterData.data.chapterNumber &&
                             `Chương ${chapterData.data.chapterNumber}: ${chapterData.data.chapterTitle}`}
                     </h1>
@@ -241,10 +236,9 @@ function ReadingChapter() {
                                 placement="right-start"
                                 render={(attrs) => (
                                     <div
-                                        className="h-64 overflow-auto bg-white rounded p-4"
+                                        className="h-64 overflow-auto bg-white rounded p-4 shadow-[0_0_10px_rgba(0,0,0,0.4)] w-[380px]"
                                         tabIndex={-1}
                                         {...attrs}
-                                        style={{ boxShadow: '0 0 10px rgba(0, 0, 0, 0.4)', width: 380 }}
                                     >
                                         <ListChapters headerSize="text-xl" tagId={tagId} serverId={serverId} />
                                     </div>
@@ -252,10 +246,9 @@ function ReadingChapter() {
                             >
                                 <div
                                     onClick={() => setOpenListChapters(true)}
-                                    className={`flex justify-center items-center cursor-pointer ${
+                                    className={`flex justify-center items-center cursor-pointer w-[50px] h-[50px] ${
                                         openListChapters ? 'text-purple-500' : ''
                                     }`}
-                                    style={{ width: 50, height: 50 }}
                                 >
                                     <MenuRoundedIcon />
                                 </div>
@@ -278,8 +271,7 @@ function ReadingChapter() {
                                     <div
                                         tabIndex={-1}
                                         {...attrs}
-                                        className="bg-white rounded p-4"
-                                        style={{ boxShadow: '0 0 10px rgba(0, 0, 0, 0.4)', width: 380 }}
+                                        className="bg-white rounded p-4 shadow-[0_0_10px_rgba(0,0,0,0.4)] w-[380px]"
                                     >
                                         <div className="text-xl font-semibold">Tùy chỉnh:</div>
                                         <Divider orientation="horizontal" className="h-2" />
@@ -314,7 +306,7 @@ function ReadingChapter() {
                                         </div>
 
                                         <div className="flex justify-between gap-8 mt-4 items-center">
-                                            <div style={{ width: 90 }}>Font chữ</div>
+                                            <div className="w-[90px]">Font chữ</div>
                                             <Select
                                                 onChange={(e) => {
                                                     localStorage.setItem('fontFamily', e.target.value);
@@ -344,7 +336,7 @@ function ReadingChapter() {
                                         </div>
 
                                         <div className="flex justify-between gap-8 mt-4 items-center">
-                                            <div style={{ width: 90 }}>Cách dòng</div>
+                                            <div className="w-[90px]">Cách dòng</div>
                                             <Select
                                                 onChange={(e) => {
                                                     localStorage.setItem('lineHeight', e.target.value);
@@ -374,7 +366,7 @@ function ReadingChapter() {
                                         </div>
 
                                         <div className="flex justify-between gap-8 mt-4 items-center">
-                                            <div style={{ width: 90 }}>Cỡ chữ</div>
+                                            <div className="w-[90px]">Cỡ chữ</div>
                                             <div className="flex grow">
                                                 <Button
                                                     onClick={(e) => {
@@ -392,10 +384,7 @@ function ReadingChapter() {
                                                 >
                                                     -
                                                 </Button>
-                                                <div
-                                                    className="border flex grow justify-center items-center"
-                                                    style={{ borderColor: 'rgba(25, 118, 210, 0.5)' }}
-                                                >
+                                                <div className="border flex grow justify-center items-center border-[rgba(25,118,210,0.5)]">
                                                     {fontSize}
                                                 </div>
                                                 <Button
@@ -421,10 +410,9 @@ function ReadingChapter() {
                             >
                                 <div
                                     onClick={() => setOpenSetting(true)}
-                                    className={`flex justify-center items-center cursor-pointer ${
+                                    className={`flex justify-center items-center cursor-pointer w-[50px] h-[50px] ${
                                         openSetting ? 'text-purple-500' : ''
                                     }`}
-                                    style={{ width: 50, height: 50 }}
                                 >
                                     <SettingsRoundedIcon />
                                 </div>
@@ -450,10 +438,9 @@ function ReadingChapter() {
                             >
                                 <div
                                     onClick={() => setOpenDownload(true)}
-                                    className={`flex justify-center items-center cursor-pointer ${
+                                    className={`flex justify-center items-center cursor-pointer w-[50px] h-[50px] ${
                                         openDownload ? 'text-purple-500' : ''
                                     }`}
-                                    style={{ width: 50, height: 50 }}
                                 >
                                     <FileDownloadIcon />
                                 </div>

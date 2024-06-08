@@ -12,7 +12,7 @@ function Home() {
 
     return (
         <div className="px-4 py-2">
-            <div className="flex flex-wrap mx-auto" style={{ maxWidth: 1200 }}>
+            <div className="flex flex-wrap mx-auto max-w-[1200px]">
                 <div className="flex-1">
                     <ListComics />
                 </div>
