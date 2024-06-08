@@ -1,58 +1,47 @@
 package com.group17.comic;
 
+import com.group17.comic.enums.PluginServiceType;
+import com.group17.comic.factories.IPluginFactory;
 import com.group17.comic.model.ConverterPlugin;
 import com.group17.comic.model.CrawlerPlugin;
 import com.group17.comic.service.ICrawlerPluginService;
-import com.group17.comic.service.IPluginService;
+import com.group17.comic.service.IExporterPluginService;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 class PluginTypeServiceTests {
 
     @Autowired
-    @Qualifier("crawlerPluginServiceV1")
-    private ICrawlerPluginService pluginService;
+    private IPluginFactory pluginFactory;
 
     @Test
     public void checkAutoWiredDependencyTest(){
-        assertThat(pluginService).isNotNull();
-        assertThat(pluginService).isInstanceOf(IPluginService.class);
+        assertThat(pluginFactory).isNotNull();
     }
 
     @Test
-    public void getAllConverterPluginsTest(){
-//        List<ConverterPlugin> plugins = pluginService.getAllPlugins();
-//        assertThat(plugins).isNotNull();
-//        assertThat(plugins.size()).isGreaterThan(0);
+    public void getAllExporterPluginsTest(){
+        var pluginService = (IExporterPluginService)pluginFactory.getPluginService(PluginServiceType.EXPORTER_SERVICE);
+        List<ConverterPlugin> plugins = pluginService.getAllPlugins();
+        assertThat(plugins).isNotNull();
+        assertThat(plugins.size()).isGreaterThan(0);
+        assertThat(plugins.size()).isEqualTo(5);
     }
     @Test
     public void  canGetAllCrawlerPlugins(){
+        var pluginService = (ICrawlerPluginService)pluginFactory.getPluginService(PluginServiceType.CRAWLER_SERVICE);
         List<CrawlerPlugin> plugins = pluginService.getAllPlugins();
         assertThat(plugins).isNotNull();
         assertThat(plugins.size()).isGreaterThan(0);
+        assertThat(plugins.size()).isEqualTo(3);
     }
-    @Test
-    public void canCheckCrawlerPlugins(){
-        pluginService.checkCurrentPlugins();
-
-    }
-    @Test
-    public void getCrawlerPluginTest(){
-        String pluginName = "Tang Thu Vien";
-
-    }
-
-
-
 }
