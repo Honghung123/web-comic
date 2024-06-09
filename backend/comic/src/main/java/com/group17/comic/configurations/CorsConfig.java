@@ -1,4 +1,4 @@
-package com.group17.comic.configuration;
+package com.group17.comic.configurations;
 
 import java.util.List;
 

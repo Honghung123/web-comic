@@ -1,4 +1,4 @@
-package com.group17.comic.exception;
+package com.group17.comic.exceptions;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice; 
 import org.springframework.web.context.request.WebRequest; 
 
-import com.group17.comic.dto.response.ErrorResponse;
+import com.group17.comic.dtos.response.ErrorResponse;
 import com.group17.comic.log.Logger;
 
 import jakarta.validation.ConstraintViolationException;

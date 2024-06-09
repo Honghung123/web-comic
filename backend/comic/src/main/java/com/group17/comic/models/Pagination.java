@@ -1,4 +1,4 @@
-package com.group17.comic.model;
+package com.group17.comic.models;
  
 
 import lombok.AllArgsConstructor; 

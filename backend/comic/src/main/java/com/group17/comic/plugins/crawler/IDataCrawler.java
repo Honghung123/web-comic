@@ -3,9 +3,9 @@ package com.group17.comic.plugins.crawler;
 import java.util.List;
 import java.util.UUID;
 
-import com.group17.comic.dto.request.AlternatedChapterRequest;
-import com.group17.comic.dto.response.AuthorResponse;
-import com.group17.comic.model.*; 
+import com.group17.comic.dtos.request.AlternatedChapterRequest;
+import com.group17.comic.dtos.response.AuthorResponse;
+import com.group17.comic.models.*;
 
 public interface IDataCrawler {
     UUID getID();

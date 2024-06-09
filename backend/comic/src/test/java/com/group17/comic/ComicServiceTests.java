@@ -1,10 +1,10 @@
 package com.group17.comic;  
 
-import com.group17.comic.dto.request.AlternatedChapterRequest;
-import com.group17.comic.dto.response.AuthorResponse;
+import com.group17.comic.dtos.request.AlternatedChapterRequest;
+import com.group17.comic.dtos.response.AuthorResponse;
 import com.group17.comic.enums.PluginServiceType;
 import com.group17.comic.factories.PluginFactory;
-import com.group17.comic.model.*;
+import com.group17.comic.models.*;
 import com.group17.comic.service.IComicService;
 import com.group17.comic.service.IPluginServiceProvider;
 import jakarta.annotation.PostConstruct;

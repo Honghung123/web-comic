@@ -1,8 +1,8 @@
 package com.group17.comic.service;
 
-import com.group17.comic.dto.request.ChapterRequest;
-import com.group17.comic.dto.response.ChapterFile;
-import com.group17.comic.model.ConverterPlugin;
+import com.group17.comic.dtos.request.ChapterRequest;
+import com.group17.comic.dtos.response.ChapterFile;
+import com.group17.comic.models.ConverterPlugin;
 
 import java.util.UUID;
 

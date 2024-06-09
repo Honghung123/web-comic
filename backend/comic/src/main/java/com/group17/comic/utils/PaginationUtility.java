@@ -1,6 +1,6 @@
 package com.group17.comic.utils;
 
-import com.group17.comic.model.Pagination;
+import com.group17.comic.models.Pagination;
 
 public class PaginationUtility {
     public static void updatePagination(Pagination<Integer> pagination){

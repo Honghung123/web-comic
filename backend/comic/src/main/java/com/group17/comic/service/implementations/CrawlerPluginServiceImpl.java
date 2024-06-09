@@ -1,12 +1,12 @@
 package com.group17.comic.service.implementations;
 
 import com.group17.comic.enums.ExceptionType;
-import com.group17.comic.exception.BusinessException;
+import com.group17.comic.exceptions.BusinessException;
 import com.group17.comic.service.ICrawlerPluginService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import com.group17.comic.model.*;
+import com.group17.comic.models.*;
 import com.group17.comic.plugins.crawler.IDataCrawler;
 import com.group17.comic.utils.ListUtility;
 import com.group17.comic.utils.PluginUtility;

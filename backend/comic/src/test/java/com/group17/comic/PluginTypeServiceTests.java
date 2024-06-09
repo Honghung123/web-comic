@@ -2,8 +2,8 @@ package com.group17.comic;
 
 import com.group17.comic.enums.PluginServiceType;
 import com.group17.comic.factories.IPluginFactory;
-import com.group17.comic.model.ConverterPlugin;
-import com.group17.comic.model.CrawlerPlugin;
+import com.group17.comic.models.ConverterPlugin;
+import com.group17.comic.models.CrawlerPlugin;
 import com.group17.comic.service.ICrawlerPluginService;
 import com.group17.comic.service.IExporterPluginService;
 import org.junit.jupiter.api.Test;

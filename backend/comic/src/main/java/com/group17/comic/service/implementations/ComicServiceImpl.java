@@ -2,16 +2,16 @@ package com.group17.comic.service.implementations;
 
 import com.group17.comic.enums.ExceptionType;
 import com.group17.comic.enums.PluginServiceType;
-import com.group17.comic.exception.BusinessException;
+import com.group17.comic.exceptions.BusinessException;
 import com.group17.comic.plugins.crawler.IDataCrawler;
 import com.group17.comic.service.IComicService;
 import com.group17.comic.service.ICrawlerPluginService;
 import com.group17.comic.service.IExporterPluginService;
 import org.springframework.stereotype.Service;
 
-import com.group17.comic.dto.request.AlternatedChapterRequest;
-import com.group17.comic.dto.response.AuthorResponse;
-import com.group17.comic.model.*;
+import com.group17.comic.dtos.request.AlternatedChapterRequest;
+import com.group17.comic.dtos.response.AuthorResponse;
+import com.group17.comic.models.*;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;

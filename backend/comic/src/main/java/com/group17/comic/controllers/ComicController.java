@@ -1,13 +1,12 @@
-package com.group17.comic.controller;
+package com.group17.comic.controllers;
 
-import com.group17.comic.dto.request.AlternatedChapterRequest;
-import com.group17.comic.dto.request.ChapterRequest;
-import com.group17.comic.dto.response.ChapterFile;
-import com.group17.comic.dto.response.SuccessfulResponse;
+import com.group17.comic.dtos.request.AlternatedChapterRequest;
+import com.group17.comic.dtos.request.ChapterRequest;
+import com.group17.comic.dtos.response.ChapterFile;
+import com.group17.comic.dtos.response.SuccessfulResponse;
 import com.group17.comic.enums.PluginServiceType;
-import com.group17.comic.model.*;
+import com.group17.comic.models.*;
 import com.group17.comic.service.*;
-import com.group17.comic.service.implementations.PluginServiceProviderImpl;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

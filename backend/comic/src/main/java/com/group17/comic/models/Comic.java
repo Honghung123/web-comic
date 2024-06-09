@@ -1,6 +1,5 @@
-package com.group17.comic.model;
+package com.group17.comic.models;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import lombok.AllArgsConstructor; 

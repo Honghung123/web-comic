@@ -1,4 +1,4 @@
-package com.group17.comic.dto.request;
+package com.group17.comic.dtos.request;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

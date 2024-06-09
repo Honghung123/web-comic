@@ -1,9 +1,9 @@
-package com.group17.comic.dto.response;
+package com.group17.comic.dtos.response;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import com.group17.comic.model.Pagination;
+import com.group17.comic.models.Pagination;
  
 import lombok.Getter; 
 

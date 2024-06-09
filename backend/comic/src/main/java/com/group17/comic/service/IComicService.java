@@ -3,15 +3,15 @@ package com.group17.comic.service;
 import java.util.List;
 import java.util.UUID;
 
-import com.group17.comic.dto.request.AlternatedChapterRequest;
-import com.group17.comic.dto.response.AuthorResponse;
-import com.group17.comic.model.Chapter;
-import com.group17.comic.model.Comic;
-import com.group17.comic.model.ComicChapterContent;
-import com.group17.comic.model.ComicModel;
-import com.group17.comic.model.DataModel;
-import com.group17.comic.model.DataSearchModel;
-import com.group17.comic.model.Genre;
+import com.group17.comic.dtos.request.AlternatedChapterRequest;
+import com.group17.comic.dtos.response.AuthorResponse;
+import com.group17.comic.models.Chapter;
+import com.group17.comic.models.Comic;
+import com.group17.comic.models.ComicChapterContent;
+import com.group17.comic.models.ComicModel;
+import com.group17.comic.models.DataModel;
+import com.group17.comic.models.DataSearchModel;
+import com.group17.comic.models.Genre;
 
 public interface IComicService {
        List<Genre> getAllGenres(UUID pluginId);

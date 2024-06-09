@@ -3,15 +3,15 @@ package com.group17.comic.plugins.crawler.concretes;
 import java.util.*;
 
 import com.group17.comic.enums.ExceptionType;
-import com.group17.comic.exception.BusinessException;
+import com.group17.comic.exceptions.BusinessException;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.util.StringUtils;
 
-import com.group17.comic.dto.request.AlternatedChapterRequest;
-import com.group17.comic.dto.response.AuthorResponse;
-import com.group17.comic.model.*;
+import com.group17.comic.dtos.request.AlternatedChapterRequest;
+import com.group17.comic.dtos.response.AuthorResponse;
+import com.group17.comic.models.*;
 import com.group17.comic.plugins.crawler.IDataCrawler;
 import com.group17.comic.plugins.crawler.WebCrawler;
 import com.group17.comic.utils.*;

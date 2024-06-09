@@ -15,8 +15,8 @@ import java.util.zip.ZipOutputStream;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 
-import com.group17.comic.dto.request.ChapterRequest;
-import com.group17.comic.dto.response.ChapterFile; 
+import com.group17.comic.dtos.request.ChapterRequest;
+import com.group17.comic.dtos.response.ChapterFile;
 import com.group17.comic.plugins.exporter.IFileExporter;
 import com.group17.comic.utils.FileUtility;
 import com.group17.comic.utils.StringUtility;

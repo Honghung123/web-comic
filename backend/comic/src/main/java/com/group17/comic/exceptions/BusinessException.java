@@ -1,4 +1,4 @@
-package com.group17.comic.exception;
+package com.group17.comic.exceptions;
 
 import com.group17.comic.enums.ExceptionType;
 import org.springframework.http.HttpStatus;

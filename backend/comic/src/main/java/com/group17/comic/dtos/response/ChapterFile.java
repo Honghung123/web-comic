@@ -1,4 +1,4 @@
-package com.group17.comic.dto.response;
+package com.group17.comic.dtos.response;
 
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;

@@ -1,8 +1,8 @@
 package com.group17.comic.plugins.crawler.concretes;
 
-import com.group17.comic.dto.request.AlternatedChapterRequest;
-import com.group17.comic.exception.BusinessException;
-import com.group17.comic.model.*;
+import com.group17.comic.dtos.request.AlternatedChapterRequest;
+import com.group17.comic.exceptions.BusinessException;
+import com.group17.comic.models.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

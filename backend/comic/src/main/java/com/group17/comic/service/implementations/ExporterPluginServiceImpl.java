@@ -1,10 +1,10 @@
 package com.group17.comic.service.implementations;
 
-import com.group17.comic.dto.request.ChapterRequest;
-import com.group17.comic.dto.response.ChapterFile;
+import com.group17.comic.dtos.request.ChapterRequest;
+import com.group17.comic.dtos.response.ChapterFile;
 import com.group17.comic.enums.ExceptionType;
-import com.group17.comic.exception.BusinessException;
-import com.group17.comic.model.ConverterPlugin;
+import com.group17.comic.exceptions.BusinessException;
+import com.group17.comic.models.ConverterPlugin;
 import com.group17.comic.plugins.exporter.IFileExporter;
 import com.group17.comic.service.IExporterPluginService;
 import com.group17.comic.utils.ListUtility;
