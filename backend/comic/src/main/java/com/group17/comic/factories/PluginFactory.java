@@ -13,11 +13,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PluginFactory implements IPluginFactory{
     @Qualifier("crawlerPluginServiceV1")
+    @Lazy
     private final ICrawlerPluginService crawlerPluginService;
     @Qualifier("exporterPluginServiceV1")
     private final IExporterPluginService exporterPluginService;
 
     @Override
+    @Lazy
     public IPluginService getPluginService(PluginServiceType plugin){
         switch (plugin){
             case CRAWLER_SERVICE:

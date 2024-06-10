@@ -12,7 +12,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.ResourceAccessException;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -28,12 +27,12 @@ import com.group17.comic.utils.*;
 import lombok.SneakyThrows;
 
 public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
-    private final String TRUYEN_API = "https://api.truyenfull.vn/";
-    private final String TRUYEN_URL = "https://truyenfull.vn/";
-    private final UUID id = UUID.fromString("123e4567-e89b-12d3-a456-426614173002");
+    private static final String COMIC_API_URL = "https://api.truyenfull.vn/";
+    private static final String COMIC_BASE_URL = "https://truyenfull.vn/";
+    private static final UUID PLUGIN_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614173002");
     @Override
     public UUID getID() {
-        return id;
+        return PLUGIN_ID;
     }
 
     @Override
@@ -81,10 +80,10 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         List<ComicModel> listMatchedComic = new ArrayList<>();
         String term = keyword.trim().replace(" ", "%20");
         Integer categoryId = this.getCategoryId(byGenre); 
-        String apiUrl = TRUYEN_API + "v1/tim-kiem?title=" + term + "&category=[" + categoryId + "]&page=" + currentPage;
+        String apiUrl = COMIC_API_URL + "v1/tim-kiem?title=" + term + "&category=[" + categoryId + "]&page=" + currentPage;
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
-        Pagination<Integer> pagination = null; 
+        Pagination<Integer> pagination;
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 200) {
@@ -96,12 +95,12 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                     String comicTagId = jsonObj.get("id").getAsString();
                     String title = jsonObj.get("title").getAsString();
                     String image = jsonObj.get("image").getAsString();
-                    String[] categories = jsonObj.get("categories").getAsString().split("[,]");
+                    String[] categories = jsonObj.get("categories").getAsString().split(",");
                     List<Genre> genres = new ArrayList<>();
                     for (String untrimedCategory : categories) {
                         String category = untrimedCategory.trim();
                         String convertedCategory = StringUtility.removeDiacriticalMarks(category).toLowerCase()
-                                .replaceAll(" ", "-");
+                                .replace(" ", "-");
                         genres.add(new Genre(category, convertedCategory, "the-loai/" + convertedCategory));
                     }
                     String authorName = jsonObj.get("author").getAsString();
@@ -115,7 +114,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                             .tagId(comicTagId)
                             .title(title)
                             .image(image)
-                            .alternateImage(this.alternateImage)
+                            .alternateImage(this.ALTERNATE_IMAGE)
                             .genres(genres)
                             .author(author)
                             .newestChapter(newestChapter)
@@ -137,18 +136,16 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         } catch (Exception e) {
             throw new BusinessException(ExceptionType.REQUEST_SERVER_TO_CRAWL_FAILED);
         }
-        DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> result = new DataSearchModel<>(pagination,
-                listMatchedComic, null);
-        return result;
+        return new DataSearchModel<>(pagination, listMatchedComic, null);
     }
 
     @SneakyThrows
     private DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> searchOnlyByGenre(String byGenre, int currentPage) {
         List<ComicModel> listMatchedComic = new ArrayList<>(); 
-        String apiUrl = TRUYEN_API + "/v1/story/cate?cate="+ byGenre +"&type=story_new&page=" + currentPage;
+        String apiUrl = COMIC_API_URL + "/v1/story/cate?cate="+ byGenre +"&type=story_new&page=" + currentPage;
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
-        Pagination<Integer> pagination = null; 
+        Pagination<Integer> pagination;
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 200) {
@@ -160,12 +157,12 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                     String comicTagId = jsonObj.get("id").getAsString();
                     String title = jsonObj.get("title").getAsString();
                     String image = jsonObj.get("image").getAsString();
-                    String[] categories = jsonObj.get("categories").getAsString().split("[,]");
+                    String[] categories = jsonObj.get("categories").getAsString().split(",");
                     List<Genre> genres = new ArrayList<>();
                     for (String untrimedCategory : categories) {
                         String category = untrimedCategory.trim();
                         String convertedCategory = StringUtility.removeDiacriticalMarks(category).toLowerCase()
-                                .replaceAll(" ", "-");
+                                .replace(" ", "-");
                         genres.add(new Genre(category, convertedCategory, "the-loai/" + convertedCategory));
                     }
                     String authorName = jsonObj.get("author").getAsString();
@@ -179,7 +176,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                             .tagId(comicTagId)
                             .title(title)
                             .image(image)
-                            .alternateImage(this.alternateImage)
+                            .alternateImage(this.ALTERNATE_IMAGE)
                             .genres(genres)
                             .author(author)
                             .newestChapter(newestChapter)
@@ -201,19 +198,17 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         } catch (Exception e) {
             throw new BusinessException(ExceptionType.REQUEST_SERVER_TO_CRAWL_FAILED);
         }
-        DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> result = new DataSearchModel<>(pagination,
-                listMatchedComic, null);
-        return result;
+        return new DataSearchModel<>(pagination, listMatchedComic, null);
     }
 
     @SneakyThrows
     private DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> searchOnlyByKeyword(String keyword, int currentPage) {
         List<ComicModel> listMatchedComic = new ArrayList<>();
         String term = keyword.trim().replace(" ", "%20");
-        String apiUrl = TRUYEN_API + "/v1/tim-kiem?title=" + term + "&page=" + currentPage;
+        String apiUrl = COMIC_API_URL + "/v1/tim-kiem?title=" + term + "&page=" + currentPage;
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
-        Pagination<Integer> pagination = null;
+        Pagination<Integer> pagination;
         List<AuthorResponse> authorList = new ArrayList<>();
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -229,12 +224,12 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                     if (formatedTitle.contains(formatedKeyword)) {
                         String comicTagId = jsonObj.get("id").getAsString();
                         String image = jsonObj.get("image").getAsString();
-                        String[] categories = jsonObj.get("categories").getAsString().split("[,]");
+                        String[] categories = jsonObj.get("categories").getAsString().split(",");
                         List<Genre> genres = new ArrayList<>();
                         for (String untrimedCategory : categories) {
                             String category = untrimedCategory.trim();
                             String convertedCategory = StringUtility.removeDiacriticalMarks(category).toLowerCase()
-                                    .replaceAll(" ", "-");
+                                    .replace(" ", "-");
                             genres.add(new Genre(category, convertedCategory, "the-loai/" + convertedCategory));
                         }
                         String authorName = jsonObj.get("author").getAsString();
@@ -248,7 +243,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                                 .tagId(comicTagId)
                                 .title(title)
                                 .image(image)
-                                .alternateImage(this.alternateImage)
+                                .alternateImage(this.ALTERNATE_IMAGE)
                                 .genres(genres)
                                 .author(author)
                                 .newestChapter(newestChapter)
@@ -261,7 +256,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                         String authorName = jsonObj.get("author").getAsString();
                         String authorId = StringUtility.removeDiacriticalMarks(authorName).toLowerCase().replace(" ",
                                 "-");
-                        if (!authorList.stream().anyMatch(author -> author.getAuthorId().equals(authorId))) {
+                        if (authorList.stream().noneMatch(author -> author.getAuthorId().equals(authorId))) {
                             String comicTagId = jsonObj.get("id").getAsString();
                             authorList.add(new AuthorResponse(authorId, authorName, comicTagId));
                         }
@@ -279,9 +274,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         } catch (Exception e) {
             throw new BusinessException(ExceptionType.REQUEST_SERVER_TO_CRAWL_FAILED);
         }
-        DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> result = new DataSearchModel<>(pagination,
-                listMatchedComic, authorList);
-        return result;
+        return new DataSearchModel<>(pagination, listMatchedComic, authorList);
     }
 
     @SneakyThrows
@@ -289,11 +282,8 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     public List<Genre> getGenres() {
         List<Genre> genres = new ArrayList<>();
         // Covert html to Document instance
-        Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL);
+        Document doc = this.getDocumentInstanceFromUrl(COMIC_BASE_URL);
         Elements elements = doc.select(".nav.navbar-nav li:nth-child(2) ul.dropdown-menu li a");
-        if(elements == null){
-            throw new ResourceAccessException("Cannot get the genre list from Truyen full");
-        }
         for (Element element : elements) {
             String url = element.attr("href");
             String fullTagWithRedundantSlash = url.substring(url.lastIndexOf("the-loai"));
@@ -308,11 +298,11 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     @SneakyThrows
     @Override
     public DataModel<Integer, List<ComicModel>> getLastedComics(int currentPage) {
-        String apiUrl = TRUYEN_API + "v1/story/all?type=story_update&page=" + currentPage;
+        String apiUrl = COMIC_API_URL + "v1/story/all?type=story_update&page=" + currentPage;
         List<ComicModel> lastedComics = new ArrayList<>();
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
-        Pagination<Integer> pagination = null;
+        Pagination<Integer> pagination;
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 200) {
@@ -327,11 +317,11 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                     String authorId = StringUtility.removeDiacriticalMarks(authorName).toLowerCase().replace(" ", "-");
                     Author author = new Author(authorId, authorName);
                     List<Genre> genres = new ArrayList<>();
-                    String[] categories = element.getAsJsonObject().get("categories").getAsString().split("[,]");
+                    String[] categories = element.getAsJsonObject().get("categories").getAsString().split(",");
                     for (String category : categories) {
                         category = category.trim(); 
                         String convertedCategory = StringUtility.removeDiacriticalMarks(category).toLowerCase()
-                                .replaceAll(" ", "-");
+                                .replace(" ", "-");
                         genres.add(new Genre(category, convertedCategory, "the-loai/" + convertedCategory));
                     }
                     int newestChapter = element.getAsJsonObject().get("total_chapters").getAsInt();
@@ -341,7 +331,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                             .tagId(comicTagId)
                             .title(title)
                             .image(image)
-                            .alternateImage(this.alternateImage)
+                            .alternateImage(this.ALTERNATE_IMAGE)
                             .genres(genres)
                             .author(author)
                             .newestChapter(newestChapter)
@@ -363,8 +353,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         } catch (Exception e) {
             throw new BusinessException(ExceptionType.REQUEST_SERVER_TO_CRAWL_FAILED);
         }
-        DataModel<Integer, List<ComicModel>> result = new DataModel<>(pagination, lastedComics);
-        return result;
+        return new DataModel<>(pagination, lastedComics);
     }
 
     @SneakyThrows
@@ -373,23 +362,23 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         if(!comicTagId.matches("^\\d+$")) {
             throw new BusinessException(ExceptionType.INVALID_COMIC_TAG_ID);
         }
-        int id = Integer.parseInt(comicTagId); 
-        String apiUrl = TRUYEN_API + "v1/story/detail/" + id;
+        int _id = Integer.parseInt(comicTagId);
+        String apiUrl = COMIC_API_URL + "v1/story/detail/" + _id;
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
-        Comic comic = null;
+        Comic comic;
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 200) {
                 String responseBody = response.body(); 
                 JsonObject jsonObject = new Gson().fromJson(responseBody, JsonObject.class).getAsJsonObject("data");
-                String[] genresArray = jsonObject.get("categories").getAsString().split("[,]");
+                String[] genresArray = jsonObject.get("categories").getAsString().split(",");
                 String authorName = jsonObject.get("author").getAsString();
                 String authorId = StringUtility.removeDiacriticalMarks(authorName).toLowerCase().replace(" ", "-");
-                var genres = Arrays.asList(genresArray).stream().map(genre -> {
+                var genres = Arrays.stream(genresArray).map(genre -> {
                     String category = genre.trim(); 
                     String convertedCategory = StringUtility.removeDiacriticalMarks(category).toLowerCase()
-                            .replaceAll(" ", "-");
+                            .replace(" ", "-");
                     return new Genre(category, convertedCategory, "the-loai/" + convertedCategory);
                 }).toList();
                 comic = Comic.builder()
@@ -399,7 +388,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                         .description(jsonObject.get("description").getAsString())
                         .author(new Author(authorId, authorName))
                         .genres(genres)
-                        .alternateImage(this.alternateImage)
+                        .alternateImage(this.ALTERNATE_IMAGE)
                         .build();
             } else {
                 throw new BusinessException(ExceptionType.GET_COMIC_INFO_FAILED);
@@ -413,10 +402,10 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     @SneakyThrows
     private DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> getHotOrPromoteComics(int currentPage) {
         List<ComicModel> listMatchedComic = new ArrayList<>(); 
-        String apiUrl = TRUYEN_API + "/v1/story/all?type=story_full_rate&page=" + currentPage;
+        String apiUrl = COMIC_API_URL + "/v1/story/all?type=story_full_rate&page=" + currentPage;
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
-        Pagination<Integer> pagination = null; 
+        Pagination<Integer> pagination;
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 200) {
@@ -428,12 +417,12 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                     String comicTagId = jsonObj.get("id").getAsString();
                     String title = jsonObj.get("title").getAsString();
                     String image = jsonObj.get("image").getAsString();
-                    String[] categories = jsonObj.get("categories").getAsString().split("[,]");
+                    String[] categories = jsonObj.get("categories").getAsString().split(",");
                     List<Genre> genres = new ArrayList<>();
                     for (String untrimedCategory : categories) {
                         String category = untrimedCategory.trim();
                         String convertedCategory = StringUtility.removeDiacriticalMarks(category).toLowerCase()
-                                .replaceAll(" ", "-");
+                                .replace(" ", "-");
                         genres.add(new Genre(category, convertedCategory, "the-loai/" + convertedCategory));
                     }
                     String authorName = jsonObj.get("author").getAsString();
@@ -447,7 +436,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                             .tagId(comicTagId)
                             .title(title)
                             .image(image)
-                            .alternateImage(this.alternateImage)
+                            .alternateImage(this.ALTERNATE_IMAGE)
                             .genres(genres)
                             .author(author)
                             .newestChapter(newestChapter)
@@ -469,9 +458,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         } catch (Exception e) {
             throw new BusinessException(ExceptionType.REQUEST_SERVER_TO_CRAWL_FAILED);
         }
-        DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> result = new DataSearchModel<>(pagination,
-                listMatchedComic, null);
-        return result;
+        return new DataSearchModel<>(pagination, listMatchedComic, null);
     }
 
     @Override
@@ -480,9 +467,9 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         if(!comicTagId.matches("^\\d+$")) {
             throw new BusinessException(ExceptionType.INVALID_COMIC_TAG_ID);
         }
-        int id = Integer.parseInt(comicTagId);
-        String apiUrl = TRUYEN_API + "v1/story/detail/" + id + "/chapters?page=" + currentPage;
-        Pagination<Integer> pagination = null;
+        int _id = Integer.parseInt(comicTagId);
+        String apiUrl = COMIC_API_URL + "v1/story/detail/" + _id + "/chapters?page=" + currentPage;
+        Pagination<Integer> pagination;
         List<Chapter> chapters = new ArrayList<>();
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
@@ -517,8 +504,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         } catch (Exception e) { 
             throw new BusinessException(ExceptionType.REQUEST_SERVER_TO_CRAWL_FAILED);
         }
-        DataModel<Integer, List<Chapter>> result = new DataModel<>(pagination, chapters);
-        return result;
+        return new DataModel<>(pagination, chapters);
     }
 
     @Override
@@ -532,13 +518,13 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     private String getTagIdComicFromTitleAndAuthor(String _title, String _authorName, String _comicTagId) {
         String keyword = _title;
         keyword = StringUtility.removeDiacriticalMarks(keyword).toLowerCase()
-                .replace("[dich]", "").replaceAll("- suu tam", "");
+                .replace("[dich]", "").replace("- suu tam", "");
         if(keyword.contains("-")){
             keyword = keyword.substring(0, keyword.lastIndexOf("-")).trim();
         }
         String term = keyword.replace(" ", "%20");
         var formattedAuthor = StringUtility.removeDiacriticalMarks(_authorName).toLowerCase().trim();
-        String apiUrl = TRUYEN_API + "/v1/tim-kiem?title=" + term;
+        String apiUrl = COMIC_API_URL + "/v1/tim-kiem?title=" + term;
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
         String tagId = "";
@@ -565,7 +551,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         } catch (Exception e) {
             throw new BusinessException(ExceptionType.REQUEST_SERVER_TO_CRAWL_FAILED);
         }     
-        if(tagId == ""){
+        if(tagId.isEmpty()){
             throw new BusinessException(ExceptionType.COMIC_NOT_FOUND);
         } 
         return tagId;
@@ -578,9 +564,9 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
             throw new BusinessException(ExceptionType.INVALID_COMIC_TAG_ID);
         }
         Integer chapterId = Integer.parseInt(currentChapter);
-        String apiUrl = TRUYEN_API + "v1/chapter/detail/" + currentChapter;
-        Pagination<Integer> pagination = null;
-        ComicChapterContent chapterContent = null;
+        String apiUrl = COMIC_API_URL + "v1/chapter/detail/" + currentChapter;
+        Pagination<Integer> pagination;
+        ComicChapterContent chapterContent;
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
         try {
@@ -614,13 +600,12 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         } catch (Exception e) {
             throw new BusinessException(ExceptionType.REQUEST_SERVER_TO_CRAWL_FAILED);
         }
-        DataModel<Integer, ComicChapterContent> result = new DataModel<>(pagination, chapterContent);
-        return result;
+        return new DataModel<>(pagination, chapterContent);
     }
 
     @SneakyThrows
     private Author getAuthorOfComic(String comicTagId) { 
-        String apiUrl = TRUYEN_API + "v1/story/detail/" + comicTagId;
+        String apiUrl = COMIC_API_URL + "v1/story/detail/" + comicTagId;
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
         try {
@@ -661,7 +646,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                     break;
                 }
             }
-            if(chapterUrl.length() > 0) {
+            if(!chapterUrl.isEmpty()) {
                 break;
             }
             currentPage++;
@@ -673,7 +658,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     @SneakyThrows
     public DataModel<Integer, List<ComicModel>> getComicsByAuthor(String authorId, String tagId, int currentPage) {
         List<ComicModel> authorComics = new ArrayList<>();
-        String apiUrl = TRUYEN_API + "/v1/story/detail/" + tagId + "/story_author";
+        String apiUrl = COMIC_API_URL + "/v1/story/detail/" + tagId + "/story_author";
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
         try {
@@ -695,7 +680,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                             .tagId(comicTagId)
                             .title(title)
                             .image(image)
-                            .alternateImage(this.alternateImage)
+                            .alternateImage(this.ALTERNATE_IMAGE)
                             .genres(genres)
                             .author(author)
                             .isFull(isFull)
@@ -707,8 +692,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                 int perPage = jsonPagination.get("per_page").getAsInt();
                 int totalPages = jsonPagination.get("total_pages").getAsInt();
                 Pagination<Integer> pagination = new Pagination<>(currentPage, perPage, totalPages, -1);
-                DataModel<Integer, List<ComicModel>> result = new DataModel<>(pagination, authorComics);
-                return result;
+                return new DataModel<>(pagination, authorComics);
             } else {
                 throw new BusinessException(ExceptionType.GET_COMIC_INFO_FAILED);
             }

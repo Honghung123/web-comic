@@ -24,18 +24,12 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-/** 
- * @date: 20.04.2024
- * @source: https://apyhub.com/utility/html-to-docx
- * 
- */
-
 public class DocxExporter implements IFileExporter {
-    private static String uploadDir = "backend/comic/src/main/java/com/group17/comic/plugins/exporter/uploads/";
-    private final UUID id = UUID.randomUUID();
+    private static final String UPLOAD_DIR = "backend/comic/src/main/java/com/group17/comic/plugins/exporter/uploads/";
+    private static final UUID PLUGIN_ID = UUID.randomUUID();
     @Override
     public UUID getId() {
-        return id;
+        return PLUGIN_ID;
     }
     @Override
     public String getPluginName() {
@@ -65,8 +59,8 @@ public class DocxExporter implements IFileExporter {
             + "\n" 
             + "</body>\n" 
             + "</html>";
-        String htmlFilePath = uploadDir + htmlFile;
-        String uploadFolderAbsolutePath = Paths.get(uploadDir).toAbsolutePath().toString();
+        String htmlFilePath = UPLOAD_DIR + htmlFile;
+        String uploadFolderAbsolutePath = Paths.get(UPLOAD_DIR).toAbsolutePath().toString();
         File uploadFolderFile = new File(uploadFolderAbsolutePath);
         FileUtility.deleteDirectory(uploadFolderFile);
         FileUtility.createDirectory(uploadFolderFile);
@@ -74,13 +68,13 @@ public class DocxExporter implements IFileExporter {
         // Then get the saved html file from folder to convert to docx, and download it afterwards
         byte[] fileBytes = this.convertFileOnline(htmlFile, htmlFilePath, fileOutputName);
         // Next, save download converted docx to folder 
-        File destinationFile = Paths.get(uploadDir + fileOutputName).toFile();
+        File destinationFile = Paths.get(UPLOAD_DIR + fileOutputName).toFile();
         FileUtility.saveDownloadedBytesToFolder(fileBytes, destinationFile); 
         // Finally, get the saved docx file from folder to return to client
         InputStreamResource resource = 
-                    new InputStreamResource(new FileInputStream(uploadDir + fileOutputName));
+                    new InputStreamResource(new FileInputStream(UPLOAD_DIR + fileOutputName));
         HttpHeaders headers = new HttpHeaders();  
-        headers.setContentLength(Files.size(Paths.get(uploadDir + fileOutputName))); 
+        headers.setContentLength(Files.size(Paths.get(UPLOAD_DIR + fileOutputName)));
         headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);  
         return new ChapterFile(headers, resource); 
     }

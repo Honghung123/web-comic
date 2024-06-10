@@ -1,7 +1,6 @@
 package com.group17.comic.service.implementations;
 
 import com.group17.comic.enums.PluginServiceType;
-import com.group17.comic.service.ICrawlerPluginService;
 import com.group17.comic.service.IPluginService;
 import com.group17.comic.factories.IPluginFactory;
 import com.group17.comic.service.IPluginServiceProvider;

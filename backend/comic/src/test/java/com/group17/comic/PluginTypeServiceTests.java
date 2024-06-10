@@ -24,24 +24,20 @@ class PluginTypeServiceTests {
     private IPluginFactory pluginFactory;
 
     @Test
-    public void checkAutoWiredDependencyTest(){
+    void checkAutoWiredDependencyTest(){
         assertThat(pluginFactory).isNotNull();
     }
 
     @Test
-    public void getAllExporterPluginsTest(){
+    void getAllExporterPluginsTest(){
         var pluginService = (IExporterPluginService)pluginFactory.getPluginService(PluginServiceType.EXPORTER_SERVICE);
         List<ConverterPlugin> plugins = pluginService.getAllPlugins();
-        assertThat(plugins).isNotNull();
-        assertThat(plugins.size()).isGreaterThan(0);
-        assertThat(plugins.size()).isEqualTo(5);
+        assertThat(plugins).hasSize(5);
     }
     @Test
-    public void  canGetAllCrawlerPlugins(){
+    void  canGetAllCrawlerPlugins(){
         var pluginService = (ICrawlerPluginService)pluginFactory.getPluginService(PluginServiceType.CRAWLER_SERVICE);
         List<CrawlerPlugin> plugins = pluginService.getAllPlugins();
-        assertThat(plugins).isNotNull();
-        assertThat(plugins.size()).isGreaterThan(0);
-        assertThat(plugins.size()).isEqualTo(3);
+        assertThat(plugins).hasSize(3);
     }
 }

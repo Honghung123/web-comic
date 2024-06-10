@@ -10,9 +10,9 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-public class ListUtilityTests {
+class ListUtilityTests {
     @Test
-    public void testEqual_CompareTwoArrays_ReturnsTrue(){
+    void testEqual_CompareTwoArrays_ReturnsTrue(){
         var exampleArr = List.of("apple", "banana", "cherry" );
         String arrJson = "[\"apple\", \"banana\", \"cherry\"]";
         try {
@@ -25,7 +25,7 @@ public class ListUtilityTests {
     }
 
     @Test
-    public void testEqual_CompareTwoArrays_ReturnsFalse(){
+    void testEqual_CompareTwoArrays_ReturnsFalse(){
         var exampleArr = List.of("apple", "banana", "orange" );
         String arrJson = "[\"apple\", \"banana\", \"cherry\"]";
         try {

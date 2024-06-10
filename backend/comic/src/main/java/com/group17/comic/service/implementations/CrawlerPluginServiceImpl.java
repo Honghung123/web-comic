@@ -88,7 +88,7 @@ public class CrawlerPluginServiceImpl implements ICrawlerPluginService {
     @SneakyThrows
     public void checkPluginList(List<String> pluginList) {
         this.checkCurrentPlugins();
-        List<String> crawlerIdList = crawlers.stream().map(crawler -> crawler.getID().toString()).collect(Collectors.toList());
+        List<String> crawlerIdList = crawlers.stream().map(crawler -> crawler.getID().toString()).toList();
         if (!pluginList.isEmpty() && !ListUtility.areListsEqual(pluginList, crawlerIdList)) {
             throw new BusinessException(ExceptionType.PLUGIN_LIST_CHANGED);
         }

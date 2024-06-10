@@ -3,6 +3,7 @@ package com.group17.comic.utils;
 import com.group17.comic.models.Pagination;
 
 public class PaginationUtility {
+    private PaginationUtility() {}
     public static void updatePagination(Pagination<Integer> pagination){
         Integer currentPage = pagination.getCurrentPage();
         Integer totalPages = pagination.getTotalPages();

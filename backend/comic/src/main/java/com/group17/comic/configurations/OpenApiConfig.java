@@ -42,18 +42,7 @@ public class OpenApiConfig {
                                             .version(version)
                                             .description(description)
                                             .license(license))
-                            .servers(serverList)
-                            // Cau hình cai nay neu can su dung token moi khi request
-                            // .components(
-                            //     new Components().addSecuritySchemes(
-                            //         "Bearer",
-                            //         new SecurityScheme()
-                            //             .type(SecurityScheme.Type.HTTP)
-                            //             .scheme("bearer")
-                            //             .bearerFormat("JWT")
-                            //     ) )
-                            // .security(List.of(new SecurityRequirement().addList("bearerAuth")))
-                            ;
+                            .servers(serverList);
     }
 
     @Bean

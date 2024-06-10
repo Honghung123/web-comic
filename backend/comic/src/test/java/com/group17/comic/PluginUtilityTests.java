@@ -16,12 +16,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
-public class PluginUtilityTests {
+class PluginUtilityTests {
     @TempDir
     Path tempDir;
 
     @Test
-    public void testResolveAbsolutePath_SuccessWithUnixPath() {
+    void testResolveAbsolutePath_SuccessWithUnixPath() {
         String input = "/home/user/projects/backend/comic";
         String expected = "/home/user/projects/backend/comic";
         String actual = PluginUtility.resolveAbsolutePath(input);
@@ -29,7 +29,7 @@ public class PluginUtilityTests {
     }
 
     @Test
-    public void testResolveAbsolutePath_SuccessWithWindowsPath() {
+    void testResolveAbsolutePath_SuccessWithWindowsPath() {
         String input = "C:\\Users\\user\\projects\\backend\\comic";
         String expected = "C:\\Users\\user\\projects\\backend\\comic";
         String actual = PluginUtility.resolveAbsolutePath(input);
@@ -37,11 +37,11 @@ public class PluginUtilityTests {
     }
 
     @Test
-    public void testGetAllFilesFromDirectory_Success() throws IOException {
+    void testGetAllFilesFromDirectory_Success() throws IOException {
         // Create temporary files
-        Path file1 = Files.createFile(tempDir.resolve("file1.txt"));
-        Path file2 = Files.createFile(tempDir.resolve("file2.txt"));
-        Path file3 = Files.createFile(tempDir.resolve("file3.txt"));
+        Files.createFile(tempDir.resolve("file1.txt"));
+        Files.createFile(tempDir.resolve("file2.txt"));
+        Files.createFile(tempDir.resolve("file3.txt"));
         List<File> files = PluginUtility.getAllFilesFromDirectory(tempDir.toString());
         assertEquals(3, files.size());
         List<String> fileNames = files.stream().map(File::getName).collect(Collectors.toList());
@@ -49,13 +49,13 @@ public class PluginUtilityTests {
     }
 
     @Test
-    public void testGetAllFilesFromDirectory_EmptyDirectory() throws IOException {
+    void testGetAllFilesFromDirectory_EmptyDirectory() throws IOException {
         List<File> files = PluginUtility.getAllFilesFromDirectory(tempDir.toString());
         assertEquals(0, files.size());
     }
 
     @Test
-    public void testGetAllFilesFromDirectory_NonExistentDirectory() {
+    void testGetAllFilesFromDirectory_NonExistentDirectory() {
         String nonExistentPath = tempDir.resolve("nonExistentDir").toString();
         assertThrows(IOException.class, () -> PluginUtility.getAllFilesFromDirectory(nonExistentPath));
     }

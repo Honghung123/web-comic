@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.Gson;
 import com.group17.comic.dtos.request.ChapterRequest;
 import com.group17.comic.dtos.response.ChapterFile;
+import com.group17.comic.enums.ExceptionType;
+import com.group17.comic.exceptions.BusinessException;
 import com.group17.comic.plugins.exporter.IFileExporter;
 import com.group17.comic.utils.FileUtility;
 import com.group17.comic.utils.StringUtility;
@@ -18,12 +20,12 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response; 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.UUID;
@@ -64,18 +66,15 @@ class Azw3Conversion {
 }
 
 public class Azw3Exporter implements IFileExporter {
-    private final UUID id = UUID.randomUUID();
-    private final String uploadDir = "backend/comic/src/main/java/com/group17/comic/plugins/exporter/uploads/";
-    @Value("${comic.plugin.converter.api_key}")
-    private String api_key;
-    // private final String apiKey = "8QmXYtnup34hFyAL831icx3KDYHyUEJ9";
-    private final String apiKey = "zLa4koLMvk0tKOeDxoZBQLhB7j8oEveU";
-    private final String apiUrl = "https://api.mconverter.eu/v1/start_conversion.php";
-    private final String targetFormat = "azw3";
+    private static final UUID PLUGIN_ID = UUID.randomUUID();
+    private static final String UPLOAD_DIR = "backend/comic/src/main/java/com/group17/comic/plugins/exporter/uploads/";
+    private static final String API_KEY = "zLa4koLMvk0tKOeDxoZBQLhB7j8oEveU";
+    private static final String API_URL = "https://api.mconverter.eu/v1/start_conversion.php";
+    private static final String TARGET_FORMAT = "azw3";
 
     @Override
     public UUID getId() {
-        return id;
+        return PLUGIN_ID;
     }
 
     @Override
@@ -96,38 +95,38 @@ public class Azw3Exporter implements IFileExporter {
         String fileName = formatTitile + ".azw3";
         // Save txt file to uploads folder
         String removedHtmlTags = StringUtility.removeHtmlTags(chapterDto.content());
-        FileUtility.createFile(uploadDir + formatTitile + ".txt", removedHtmlTags);
+        FileUtility.createFile(UPLOAD_DIR + formatTitile + ".txt", removedHtmlTags);
         // Convert txt to azw3 online, and download it afterwards
-        byte[] fileBytes = saveAsAZW3FromText(removedHtmlTags, formatTitile + ".txt");
+        byte[] fileBytes = saveAsAZW3FromText(formatTitile + ".txt");
         // Then save the azw3 file to folder
-        String uploadFolderAbsolutePath = Paths.get(uploadDir).toAbsolutePath().toString();
+        String uploadFolderAbsolutePath = Paths.get(UPLOAD_DIR).toAbsolutePath().toString();
         File uploadFolderFile = new File(uploadFolderAbsolutePath);
         FileUtility.deleteDirectory(uploadFolderFile);
         FileUtility.createDirectory(uploadFolderFile);
-        File destinationFile = Paths.get(uploadDir + fileName).toFile();
+        File destinationFile = Paths.get(UPLOAD_DIR + fileName).toFile();
         FileUtility.saveDownloadedBytesToFolder(fileBytes, destinationFile);
         // Get the azw3 file from folder to return to client
-        InputStreamResource resource = new InputStreamResource(new FileInputStream(uploadDir + fileName));
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(UPLOAD_DIR + fileName));
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
-        headers.setContentLength(Files.size(Paths.get(uploadDir + fileName)));
+        headers.setContentLength(Files.size(Paths.get(UPLOAD_DIR + fileName)));
         headers.setContentType(org.springframework.http.MediaType.parseMediaType("application/vnd.amazon.mobi8-ebook"));
         return new ChapterFile(headers, resource);
 
     }
 
-    public byte[] saveAsAZW3FromText(String content, String fileInputName) throws Exception {
-        var azw3Conversion = this.startTheConversion(content, fileInputName);
+    public byte[] saveAsAZW3FromText(String fileInputName) throws Exception {
+        var azw3Conversion = this.startTheConversion(fileInputName);
         this.trackCurrentProgress(azw3Conversion.getConversion_data().getId());
         return this.downloadConvertedFile(azw3Conversion.getConversion_data().getId());
     }
 
-    private byte[] downloadConvertedFile(long converterId) throws Exception {
+    private byte[] downloadConvertedFile(long converterId) throws IOException {
         OkHttpClient client = new OkHttpClient();
         var reqUrl = "https://api.mconverter.eu/v1/get_file.php";
         RequestBody requestBody = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
-                .addFormDataPart("api_key", apiKey)
+                .addFormDataPart("api_key", API_KEY)
                 .addFormDataPart("conversion_id", String.valueOf(converterId))
                 .build();
         Request request = new Request.Builder()
@@ -138,18 +137,16 @@ public class Azw3Exporter implements IFileExporter {
         if (response.isSuccessful() && response.body() != null) {
             return response.body().bytes();
         } else {
-            // Handle the error
-            System.err.println("Request failed: " + response);
-            throw new Exception("Request failed");
+            throw new BusinessException(ExceptionType.GET_CONVERTED_FILE_FAILED);
         }
     }
 
-    private void trackCurrentProgress(long converterId) throws Exception {
+    private void trackCurrentProgress(long converterId) throws IOException, InterruptedException {
         OkHttpClient client = new OkHttpClient();
         var reqUrl = "https://api.mconverter.eu/v1/check_progress.php";
         while (true) {
             RequestBody requestBody = new FormBody.Builder()
-                    .add("api_key", apiKey)
+                    .add("api_key", API_KEY)
                     .add("conversion_id", String.valueOf(converterId))
                     .build();
             Request request = new Request.Builder()
@@ -164,26 +161,23 @@ public class Azw3Exporter implements IFileExporter {
                     return;
                 }
                 Thread.sleep(1000);
-                continue;
             } else {
-                // Handle the error
-                System.err.println("Request failed: " + response);
-                throw new Exception("Request failed");
+                throw new BusinessException(ExceptionType.TRACK_CONVERT_PROGRESS_FAILED);
             }
         }
     }
 
-    private Azw3Conversion startTheConversion(String content, String fileInputName) throws Exception {
+    private Azw3Conversion startTheConversion(String fileInputName) throws IOException {
         OkHttpClient client = new OkHttpClient();
         RequestBody requestBody = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
-                .addFormDataPart("api_key", apiKey)
-                .addFormDataPart("target_format", targetFormat)
+                .addFormDataPart("api_key", API_KEY)
+                .addFormDataPart("target_format", TARGET_FORMAT)
                 .addFormDataPart("source", fileInputName,
-                        RequestBody.create(MediaType.parse("plain/txt"), new File(uploadDir + fileInputName)))
+                        RequestBody.create(MediaType.parse("plain/txt"), new File(UPLOAD_DIR + fileInputName)))
                 .build();
         Request request = new Request.Builder()
-                .url(apiUrl)
+                .url(API_URL)
                 .post(requestBody)
                 .build();
         Response response = client.newCall(request).execute();
@@ -191,9 +185,7 @@ public class Azw3Exporter implements IFileExporter {
         if (response.isSuccessful()) {
             return new Gson().fromJson(res, Azw3Conversion.class);
         } else {
-            // Handle the error
-            System.err.println("Request failed: " + response);
-            throw new Exception("Request failed");
+            throw new BusinessException(ExceptionType.GET_CONVERTED_FILE_FAILED);
         }
     }
 }

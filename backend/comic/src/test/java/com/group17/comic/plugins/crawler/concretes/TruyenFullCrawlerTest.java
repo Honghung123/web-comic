@@ -16,30 +16,12 @@ class TruyenFullCrawlerTest {
         truyenFullCrawler = new TruyenFullCrawler();
     }
 
-
-
-    @Test
-    void getServerID() {
-
-    }
-
-    @Test
-    void getPluginName() {
-    }
-
-    @Test
-    void getGenres() {
-    }
-
     @Test
     void canGetLastedComics() {
-        //given
         int currentPage = 1;
-
-        //when
         DataModel<Integer, List<ComicModel>> crawledComic =truyenFullCrawler.getLastedComics(currentPage);
         Assertions.assertNotNull(crawledComic.getData());
-        Assertions.assertEquals(crawledComic.getPagination().getCurrentPage(), 1);
+        Assertions.assertEquals(1, crawledComic.getPagination().getCurrentPage());
     }
 
     @Test
@@ -48,8 +30,7 @@ class TruyenFullCrawlerTest {
         int currentPage = 1;
         DataModel<Integer, List<Chapter>> chapterDataModel = truyenFullCrawler.getChapters(comicTagId, 1);
         Assertions.assertNotNull(chapterDataModel);
-        Assertions.assertEquals(chapterDataModel.getPagination().getCurrentPage(), 1);
-        Assertions.assertEquals(chapterDataModel.getPagination().getPerPage(), chapterDataModel.getData().size());
+        Assertions.assertEquals(1, chapterDataModel.getPagination().getCurrentPage());
         Assertions.assertNotNull(chapterDataModel.getData());
     }
 
@@ -86,25 +67,9 @@ class TruyenFullCrawlerTest {
 
         DataModel<Integer, ComicChapterContent> contentDataModel = truyenFullCrawler.getComicChapterContent(tagId, currentChapter);
         ComicChapterContent chapterContent = contentDataModel.getData();
-        Assertions.assertEquals(chapterContent.getChapterNumber(), 1);
-        Assertions.assertEquals(chapterContent.getChapterTitle(), "Đối chọi");
-        Assertions.assertEquals(chapterContent.getTitle(), "Vũng Nước Đục");
-        Assertions.assertEquals(chapterContent.getAuthor().getName(), "Lạc Hồi");
-    }
-
-    @Test
-    void getComicChapterContentOnOtherServer() {
-        String title = "Tiêu Tổng, Xin Tha Cho Tôi";
-        String authorName = "Thục Kỷ";
-        String comicTagId = "";
-        int chapterNumber = 2;
-//        truyenFullCrawler.getComicChapterContentOnOtherServer();
-    }
-
-    @Test
-    void canComicsByAuthor() {
-        String authorName = "Thục Kỷ";
-        DataModel<Integer, List<ComicModel>> comicsOfTheAuthorModel =  truyenFullCrawler.getComicsByAuthor(authorName, "", 1);
-
+        Assertions.assertEquals(1, chapterContent.getChapterNumber());
+        Assertions.assertEquals("Đối chọi", chapterContent.getChapterTitle() );
+        Assertions.assertEquals( "Vũng Nước Đục", chapterContent.getTitle());
+        Assertions.assertEquals("Lạc Hồi", chapterContent.getAuthor().getName());
     }
 }

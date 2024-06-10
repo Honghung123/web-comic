@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import com.group17.comic.enums.ExceptionType;
 import com.group17.comic.exceptions.BusinessException;
+import com.group17.comic.log.Logger;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -21,11 +22,11 @@ import com.group17.comic.utils.*;
 import lombok.SneakyThrows;
 
 public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
-    private final String TRUYEN_URL = "https://truyenchuth.com/";
-    private final UUID id = UUID.fromString("123e4567-e89b-12d3-a456-426614173001");
+    private static final String COMIC_BASE_URL = "https://truyenchuth.com/";
+    private static final UUID PLUGIN_ID =  UUID.fromString("b1f6f5e0-6f6d-11ed-9d6c-0242ac120001");
     @Override
     public UUID getID() {
-        return id;
+        return PLUGIN_ID;
     }
 
     @Override
@@ -64,25 +65,20 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
                     }
                 });
             } catch (Exception e) {
-                continue;
+                Logger.logError("Error in getting this comic", e);
             }
         }
-        Pagination<Integer> pagination = new Pagination<Integer>(currentPage, listMatchedComic.size(), 1, -1);
-        DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> result = new DataSearchModel<>(pagination,
-                listMatchedComic, null);
-        return result;
+        Pagination<Integer> pagination = new Pagination<>(currentPage, listMatchedComic.size(), 1, -1);
+        return new DataSearchModel<>(pagination, listMatchedComic, null);
     }
 
     @SneakyThrows
     private DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> searchOnlyByGenre(String byGenre,
                                                                                                int currentPage) {
         List<ComicModel> listMatchedComic = new ArrayList<>();
-        String requestUrl = TRUYEN_URL + "loadmore?type=Theloai&cat=" + byGenre + "&p=" + currentPage;
+        String requestUrl = COMIC_BASE_URL + "loadmore?type=Theloai&cat=" + byGenre + "&p=" + currentPage;
         Document doc = this.getDocumentInstanceFromUrl(requestUrl);
         Elements comicElements = doc.select(".list-row-img");
-        if (comicElements == null) {
-            throw new BusinessException(ExceptionType.GET_COMIC_CHAPTER_LIST_FAILED);
-        }
         for (Element element : comicElements) {
             String image = element.selectFirst(".row-image a img").attr("src");
             String comicUrl = element.selectFirst(".row-info h3 a").attr("href");
@@ -90,7 +86,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
             String title = element.selectFirst(".row-info h3 a").text();
             String authorName = element.select(".row-author").text();
             String authorId = StringUtility.removeDiacriticalMarks(authorName).trim()
-                    .toLowerCase().replaceAll(" ", "-");
+                    .toLowerCase().replace(" ", "-");
             Author author = new Author(authorId, authorName);
             List<Genre> genres = new ArrayList<>();
             boolean isFull = false;
@@ -98,18 +94,16 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
                     .tagId(comicTagId)
                     .title(title)
                     .image(image)
-                    .alternateImage(this.alternateImage)
+                    .alternateImage(this.ALTERNATE_IMAGE)
                     .genres(genres)
                     .author(author)
                     .isFull(isFull)
                     .build();
             listMatchedComic.add(comicModel);
         }
-        Pagination<Integer> pagination = new Pagination<Integer>(currentPage, listMatchedComic.size(), 1, -1);
+        Pagination<Integer> pagination = new Pagination<>(currentPage, listMatchedComic.size(), 1, -1);
         PaginationUtility.updatePagination(pagination);
-        DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> result = new DataSearchModel<>(pagination,
-                listMatchedComic, null);
-        return result;
+        return new DataSearchModel<>(pagination, listMatchedComic, null);
     }
 
     @SneakyThrows
@@ -117,22 +111,14 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
                                                                                                  int currentPage) {
         List<ComicModel> listMatchedComic = new ArrayList<>();
         String term = keyword.trim().replace(" ", "+");
-        Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "searching?key=" + term);
+        Document doc = this.getDocumentInstanceFromUrl(COMIC_BASE_URL + "searching?key=" + term);
         Elements authorElements = doc.select(".list-author .list-content .author h3 a");
-        if (authorElements == null) {
-            throw new BusinessException(ExceptionType.GET_AUTHOR_LIST_FAILED);
-        }
         Elements comicElements = doc.select(".list-story .list-content .list-row-img");
-        if (comicElements == null) {
-            throw new BusinessException(ExceptionType.GET_COMIC_CHAPTER_LIST_FAILED);
-        }
         List<AuthorResponse> authorList = new ArrayList<>();
         for (Element authorElement : authorElements) {
             String authorId = authorElement.attr("href").substring(authorElement.attr("href").lastIndexOf("/") + 1);
             String authorName = authorElement.text();
-            String _comicUrl = "default comic tag id";
-            String _comicTagId = _comicUrl.substring(_comicUrl.lastIndexOf("/") + 1);
-            authorList.add(new AuthorResponse(authorId, authorName, _comicTagId));
+            authorList.add(new AuthorResponse(authorId, authorName, "Default comic tagId"));
         }
         for (Element element : comicElements) {
             String image = element.selectFirst(".row-image a img").attr("src");
@@ -141,7 +127,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
             String title = element.selectFirst(".row-info h3 a").text();
             String authorName = element.select(".row-author").text();
             String authorId = StringUtility.removeDiacriticalMarks(authorName).trim()
-                    .toLowerCase().replaceAll(" ", "-");
+                    .toLowerCase().replace(" ", "-");
             Author author = new Author(authorId, authorName);
             List<Genre> genres = new ArrayList<>();
             boolean isFull = false;
@@ -149,28 +135,23 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
                     .tagId(comicTagId)
                     .title(title)
                     .image(image)
-                    .alternateImage(this.alternateImage)
+                    .alternateImage(this.ALTERNATE_IMAGE)
                     .genres(genres)
                     .author(author)
                     .isFull(isFull)
                     .build();
             listMatchedComic.add(comicModel);
         }
-        Pagination<Integer> pagination = new Pagination<Integer>(currentPage, listMatchedComic.size(), 1, -1);
-        DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> result = new DataSearchModel<>(pagination,
-                listMatchedComic, authorList);
-        return result;
+        Pagination<Integer> pagination = new Pagination<>(currentPage, listMatchedComic.size(), 1, -1);
+        return new DataSearchModel<>(pagination, listMatchedComic, authorList);
     }
 
     @SneakyThrows
     @Override
     public List<Genre> getGenres() {
-        List<Genre> genres = new ArrayList<Genre>();
-        Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL);
+        List<Genre> genres = new ArrayList<>();
+        Document doc = this.getDocumentInstanceFromUrl(COMIC_BASE_URL);
         Elements elements = doc.select(".sidebar-content ul li b a");
-        if (elements == null) {
-            throw new BusinessException(ExceptionType.GET_GENRE_LIST_FAILED);
-        }
         for (Element element : elements) {
             String url = element.attr("href");
             String tag = url.substring(url.lastIndexOf("/") + 1);
@@ -184,12 +165,9 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
     @SneakyThrows
     @Override
     public DataModel<Integer, List<ComicModel>> getLastedComics(int currentPage) {
-        Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "loadmore?p=" + currentPage);
+        Document doc = this.getDocumentInstanceFromUrl(COMIC_BASE_URL + "loadmore?p=" + currentPage);
         List<ComicModel> lastedComics = new ArrayList<>();
         Elements elements = doc.select(".list-row-img");
-        if (elements == null) {
-            throw new BusinessException(ExceptionType.GET_LASTED_COMIC_FAILED);
-        }
         for (Element element : elements) {
             var anchorTag = element.selectFirst(".row-info a");
             String title = anchorTag.text();
@@ -198,7 +176,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
             String image = element.selectFirst(".row-image a img").attr("src");
             var authorTag = element.selectFirst(".row-author");
             String authorName = authorTag.text();
-            String authorId = StringUtility.removeDiacriticalMarks(authorName).toLowerCase().replaceAll(" ", "-");
+            String authorId = StringUtility.removeDiacriticalMarks(authorName).toLowerCase().replace(" ", "-");
             Author author = new Author(authorId, authorName);
             List<Genre> genres = new ArrayList<>();
             boolean isFull = false;
@@ -206,7 +184,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
                     .tagId(tagId)
                     .title(title)
                     .image(image)
-                    .alternateImage(this.alternateImage)
+                    .alternateImage(this.ALTERNATE_IMAGE)
                     .genres(genres)
                     .author(author)
                     .isFull(isFull)
@@ -216,20 +194,16 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
         int perPage = elements.size();
         int totalPages = 25;
         int totalItems = totalPages * perPage;
-        var pagination = new Pagination<Integer>(currentPage, perPage, totalPages, totalItems);
+        var pagination = new Pagination<>(currentPage, perPage, totalPages, totalItems);
         PaginationUtility.updatePagination(pagination);
-        DataModel<Integer, List<ComicModel>> result = new DataModel<>(pagination, lastedComics);
-        return result;
+        return new DataModel<>(pagination, lastedComics);
     }
 
     @SneakyThrows
     @Override
     public Comic getComicInfo(String comicTagId) {
-        Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + comicTagId);
+        Document doc = this.getDocumentInstanceFromUrl(COMIC_BASE_URL + comicTagId);
         Element element = doc.getElementById("list");
-        if (element.selectFirst(".detail") == null) {
-            throw new BusinessException(ExceptionType.GET_COMIC_INFO_FAILED);
-        }
         String image = element.select(".detail-thumbnail img").attr("src");
         String title = element.selectFirst(".detail-right h2 a").text();
         var authorTag = element.selectFirst(".detail-info ul li:nth-of-type(1) h2 a");
@@ -248,29 +222,25 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
         Element descriptionElement = doc.selectFirst(".summary article");
         String description = descriptionElement.html();
         boolean isFull = false;
-        var comic = Comic.builder()
+        return Comic.builder()
                 .tagId(comicTagId)
                 .title(title)
                 .image(image)
-                .alternateImage(this.alternateImage)
+                .alternateImage(this.ALTERNATE_IMAGE)
                 .genres(genres)
                 .author(author)
                 .description(description)
                 .rate(rate)
                 .isFull(isFull)
                 .build();
-        return comic;
     }
 
     @SneakyThrows
     private DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> getHotOrPromoteComics(int currentPage) {
         List<ComicModel> listMatchedComic = new ArrayList<>();
-        String requestUrl = TRUYEN_URL + "loadmore?type=TruyenHay&cat=truyen-hay" + "&p=" + currentPage;
+        String requestUrl = COMIC_BASE_URL + "loadmore?type=TruyenHay&cat=truyen-hay" + "&p=" + currentPage;
         Document doc = this.getDocumentInstanceFromUrl(requestUrl);
         Elements comicElements = doc.select(".list-row-img");
-        if (comicElements == null) {
-            throw new BusinessException(ExceptionType.GET_COMIC_LIST_FAILED);
-        }
         for (Element element : comicElements) {
             String image = element.selectFirst(".row-image a img").attr("src");
             String comicUrl = element.selectFirst(".row-info h3 a").attr("href");
@@ -278,7 +248,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
             String title = element.selectFirst(".row-info h3 a").text();
             String authorName = element.select(".row-author").text();
             String authorId = StringUtility.removeDiacriticalMarks(authorName).trim()
-                    .toLowerCase().replaceAll(" ", "-");
+                    .toLowerCase().replace(" ", "-");
             Author author = new Author(authorId, authorName);
             List<Genre> genres = new ArrayList<>();
             boolean isFull = false;
@@ -286,30 +256,25 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
                     .tagId(comicTagId)
                     .title(title)
                     .image(image)
-                    .alternateImage(this.alternateImage)
+                    .alternateImage(this.ALTERNATE_IMAGE)
                     .genres(genres)
                     .author(author)
                     .isFull(isFull)
                     .build();
             listMatchedComic.add(comicModel);
         }
-        Pagination<Integer> pagination = new Pagination<Integer>(currentPage, listMatchedComic.size(), 1, -1);
+        Pagination<Integer> pagination = new Pagination<>(currentPage, listMatchedComic.size(), 1, -1);
         PaginationUtility.updatePagination(pagination);
-        DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> result = new DataSearchModel<>(pagination,
-                listMatchedComic, null);
-        return result;
+        return new DataSearchModel<>(pagination, listMatchedComic, null);
     }
 
     @SneakyThrows
     @Override
     public DataModel<Integer, List<Chapter>> getChapters(String comicTagId, int currentPage) {
-        Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + comicTagId + "?p=" + currentPage);
-        Pagination<Integer> pagination = null;
+        Document doc = this.getDocumentInstanceFromUrl(COMIC_BASE_URL + comicTagId + "?p=" + currentPage);
+        Pagination<Integer> pagination;
         List<Chapter> chapters = new ArrayList<>();
         Elements elements = doc.select("#divtab ul li h4 a");
-        if (elements == null) {
-            throw new BusinessException(ExceptionType.GET_COMIC_CHAPTER_LIST_FAILED);
-        }
         for (Element element : elements) {
             String comicUrl = element.attr("href");
             String chapterNo = comicUrl.substring(comicUrl.lastIndexOf("/") + 1);
@@ -324,13 +289,11 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
         var lastPageTag = doc.select(".pagination ul.paging li.last a");
         var lastPageHref = lastPageTag.attr("href");
         int totalPages = Integer.parseInt(lastPageHref.substring(lastPageHref.lastIndexOf("=") + 1));
-        var lastestChapterText = doc.selectFirst("#newchaps ul li:last-child").text();
+        String lastestChapterText = doc.selectFirst("#newchaps ul li:last-child").text();
         int lastestChapter = StringUtility.extractNumberFromString(lastestChapterText);
-        int totalItems = lastestChapter;
-        pagination = new Pagination<>(currentPage, perPage, totalPages, totalItems);
+        pagination = new Pagination<>(currentPage, perPage, totalPages, lastestChapter);
         PaginationUtility.updatePagination(pagination);
-        DataModel<Integer, List<Chapter>> result = new DataModel<>(pagination, chapters);
-        return result;
+        return new DataModel<>(pagination, chapters);
     }
 
     @Override
@@ -341,23 +304,17 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
         return this.getComicInfo(tagId);
     }
 
-    private String getTagIdComicFromTitleAndAuthor(String _title, String _authorName, String _comicTagId)
-            throws Exception {
+    private String getTagIdComicFromTitleAndAuthor(String _title, String _authorName, String _comicTagId) {
         String keyword = _title;
         keyword = StringUtility.removeDiacriticalMarks(keyword).toLowerCase()
-                .replace("[dich]", "").replaceAll("- suu tam", "");
+                .replace("[dich]", "").replace("- suu tam", "");
         if (keyword.contains("-")) {
             keyword = keyword.substring(0, keyword.lastIndexOf("-")).trim();
         }
         keyword = keyword.replace(" ", "+");
         var formattedAuthor = StringUtility.removeDiacriticalMarks(_authorName).toLowerCase().trim();
-        Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "searching?key=" + keyword);
+        Document doc = this.getDocumentInstanceFromUrl(COMIC_BASE_URL + "searching?key=" + keyword);
         Elements comicElements = doc.select(".list-story .list-content .list-row-img");
-        if (comicElements == null) {
-            throw new BusinessException(ExceptionType.GET_COMIC_LIST_FAILED);
-        } else if (comicElements.size() == 0) {
-            throw new BusinessException(ExceptionType.GET_COMIC_LIST_FAILED);
-        }
         String tagId = "";
         for (Element element : comicElements) {
             var comicUrlElement = element.selectFirst(".row-info h3 a");
@@ -366,7 +323,6 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
             }
             String comicUrl = comicUrlElement.attr("href");
             String comicTagId = comicUrl.substring(comicUrl.lastIndexOf("/") + 1);
-            // String title = element.selectFirst(".row-info h3 a").text();
             String authorName = element.select(".row-author").text();
             String authorFormattedName = StringUtility.removeDiacriticalMarks(authorName).toLowerCase();
             String commonTag = StringUtility.findLongestCommonSubstring(comicTagId, _comicTagId);
@@ -386,7 +342,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
     @SneakyThrows
     @Override
     public DataModel<String, ComicChapterContent> getComicChapterContent(String comicTagId, String currentChapter) {
-        Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + comicTagId + "/" + currentChapter);
+        Document doc = this.getDocumentInstanceFromUrl(COMIC_BASE_URL + comicTagId + "/" + currentChapter);
         var elementTitle = doc.selectFirst(".chapter-header ul li:nth-of-type(1) h2 a");
         if (elementTitle == null) {
             throw new BusinessException(ExceptionType.GET_CHAPTER_TITLE_FAILED);
@@ -424,9 +380,8 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
             nextPage = nextPage.substring(nextPage.lastIndexOf("/") + 1);
             pagination.setNextPage(nextPage);
         }
-        DataModel<String, ComicChapterContent> result = new DataModel<>(pagination,
+        return new DataModel<>(pagination,
                 new ComicChapterContent(title, chapterTitle, content, comicTagId, author, chapterNumber));
-        return result;
     }
 
     @SneakyThrows
@@ -440,8 +395,8 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
         String chapterUrl = "";
         int currentPage = 1;
         while (true) {
-            DataModel<Integer, List<Chapter>> result = this.getChapters(tagId, currentPage);
-            List<Chapter> chapters = result.getData();
+            var result = this.getChapters(tagId, currentPage);
+            var chapters = result.getData();
             if (chapters == null) {
                 throw new BusinessException(ExceptionType.GET_COMIC_CHAPTER_LIST_FAILED);
             }
@@ -454,24 +409,20 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
                     break;
                 }
             }
-            if (chapterUrl.length() > 0) {
+            if (!chapterUrl.isEmpty()) {
                 break;
             }
             currentPage++;
         }
-        // Lấy nội dung sau khi lấy được chapter và trả về
         return this.getComicChapterContent(tagId, chapterUrl);
     }
 
     @Override
     @SneakyThrows
     public DataModel<Integer, List<ComicModel>> getComicsByAuthor(String authorId, String tagId, int currentPage) {
-        Document doc = this.getDocumentInstanceFromUrl(TRUYEN_URL + "tac-gia/" + authorId);
+        Document doc = this.getDocumentInstanceFromUrl(COMIC_BASE_URL + "tac-gia/" + authorId);
         List<ComicModel> lastedComics = new ArrayList<>();
         Elements elements = doc.select(".list-row-img");
-        if (elements == null) {
-            throw new BusinessException(ExceptionType.GET_LASTED_COMIC_FAILED);
-        }
         for (Element element : elements) {
             var anchorTag = element.selectFirst(".row-info a");
             String title = anchorTag.text();
@@ -480,14 +431,14 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
             String image = element.selectFirst(".row-image a img").attr("src");
             var authorTag = element.selectFirst(".row-author");
             String authorName = authorTag.text();
-            Author author = new Author(authorId, authorName);
+            var author = new Author(authorId, authorName);
             List<Genre> genres = new ArrayList<>();
             boolean isFull = false;
             var comicModel = ComicModel.builder()
                     .tagId(comicTagId)
                     .title(title)
                     .image(image)
-                    .alternateImage(this.alternateImage)
+                    .alternateImage(this.ALTERNATE_IMAGE)
                     .genres(genres)
                     .author(author)
                     .isFull(isFull)
@@ -497,9 +448,8 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
         int perPage = elements.size();
         int totalPages = 1;
         int totalItems = -1;
-        var pagination = new Pagination<Integer>(currentPage, perPage, totalPages, totalItems);
+        var pagination = new Pagination<>(currentPage, perPage, totalPages, totalItems);
         PaginationUtility.updatePagination(pagination);
-        DataModel<Integer, List<ComicModel>> result = new DataModel<>(pagination, lastedComics);
-        return result;
+        return new DataModel<>(pagination, lastedComics);
     }
 }

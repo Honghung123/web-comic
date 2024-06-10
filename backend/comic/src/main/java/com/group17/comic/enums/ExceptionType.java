@@ -22,7 +22,9 @@ public enum ExceptionType {
 
     PLUGIN_NOT_FOUND(500, "Plugin not found"),
     PLUGIN_LIST_CHANGED(400, "Plugin list changed. Please refresh page" ),
-    INVALID_PLUGIN_SERVICE_TYPE(500, "Invalid plugin service type" );
+    INVALID_PLUGIN_SERVICE_TYPE(500, "Invalid plugin service type" ),
+    TRACK_CONVERT_PROGRESS_FAILED(500, "Track convert progress failed"),
+    GET_CONVERTED_FILE_FAILED(500, "Get converted file failed" );
 
     private final int code;
     private final String message;

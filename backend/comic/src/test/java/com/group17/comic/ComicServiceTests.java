@@ -8,6 +8,7 @@ import com.group17.comic.models.*;
 import com.group17.comic.service.IComicService;
 import com.group17.comic.service.IPluginServiceProvider;
 import jakarta.annotation.PostConstruct;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,6 +16,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 class ComicServiceTests {
@@ -69,5 +72,9 @@ class ComicServiceTests {
 		return comicService.getComicChapterContentOnOtherServer(serverId, altChapterDto);
 	}
 
-	// AE dinh nghia cac method can test o day, sau do, extend class de test cac method nay.
+	@Test
+	void demo(){
+		assertThat(comicService).isNotNull();
+		assertThat(pluginServiceProvider).isNotNull();
+	}
 }

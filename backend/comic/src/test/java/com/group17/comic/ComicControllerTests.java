@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureMockMvc
 @ContextConfiguration(classes = CommonConfiguration.class)
 @ExtendWith(SpringExtension.class)
-public class ComicControllerTests {
+class ComicControllerTests {
     @SpyBean private ComicServiceImpl comicService;
     @SpyBean private PluginServiceProviderImpl pluginService;
     @SpyBean private PluginFactory pluginFactory;
@@ -51,7 +51,7 @@ public class ComicControllerTests {
     @Autowired private ObjectMapper objectMapper;
 
     @PostConstruct
-    public void init() {
+    void init() {
         assertNotNull(comicService);
         assertNotNull(pluginService);
         assertNotNull(mockMvc);
@@ -59,7 +59,7 @@ public class ComicControllerTests {
     }
 
     @BeforeEach
-    public void beforeEachTests(){
+    void beforeEachTests(){
 //        pluginService.checkCrawlerPlugins();
         var crawlerService = pluginService.getPluginServiceByType(PluginServiceType.CRAWLER_SERVICE);
         assertNotNull(crawlerService);
@@ -79,7 +79,7 @@ public class ComicControllerTests {
     }
 
     @Test
-    public void testDependencyInjection() {
+    void testDependencyInjection() {
         assertThat(comicService).isNotNull();
         assertThat(pluginService).isNotNull();
         assertThat(mockMvc).isNotNull();
@@ -87,7 +87,7 @@ public class ComicControllerTests {
     }
 
     @Test
-    public void testValid_GetServerList_ReturnSuccess() throws Exception {
+    void testValid_GetServerList_ReturnSuccess() throws Exception {
         String requestUrl = Constants.BASE_URL + "/converter-plugins";
 //        List<CrawlerPlugin> crawlerPlugins = new ArrayList<>();
 //        crawlerPlugins.add(mockCrawlerPlugin());
@@ -99,7 +99,7 @@ public class ComicControllerTests {
     }
 
     @Test
-    public void testValid_WhenAlteratedChapterDTOValid_ReturnSuccess() throws Exception {
+    void testValid_WhenAlteratedChapterDTOValid_ReturnSuccess() throws Exception {
         String requestUrl = Constants.BASE_URL + "/reading/change-server-chapter-content";
         var alterChapter = mockAlternatedChapterDTO("Tien Nghich", "Nhi Can", "tien-nghich", 11);
         var jsonObject = objectMapper.writeValueAsString(alterChapter);
@@ -113,7 +113,7 @@ public class ComicControllerTests {
     }
 
     @Test
-    public void testValid_WhenServerListChange_ReturnFailed() throws Exception {
+    void testValid_WhenServerListChange_ReturnFailed() throws Exception {
         String requestUrl = Constants.BASE_URL + "/reading/change-server-chapter-content";
         var alterChapter = mockAlternatedChapterDTO("Tien Nghich", "Nhi Can", "tien-nghich", 11);
         var jsonObject = objectMapper.writeValueAsString(alterChapter);
@@ -131,7 +131,7 @@ public class ComicControllerTests {
             assertInstanceOf(RuntimeException.class, ex.getCause());
             var cause = (BusinessException)ex.getCause();
             assertInstanceOf(BusinessException.class, cause);
-            assertEquals(cause.getStatus(), HttpStatus.BAD_REQUEST);
+            assertEquals(HttpStatus.BAD_REQUEST, cause.getStatus());
         }
     }
 }

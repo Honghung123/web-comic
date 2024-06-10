@@ -11,16 +11,7 @@ class DocxConverterTest {
     private DocxExporter docxConverter;
     @Test
     void shouldBeEqualToDOCX() {
-        Assertions.assertEquals(docxConverter.getPluginName(), "DOCX");
+        Assertions.assertEquals("DOCX", docxConverter.getPluginName());
     }
 
-    @Test
-    void testBlobType() {
-
-    }
-
-    @Test
-    void getConvertedFile() {
-
-    }
 }

@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class StringUtility {
+    private StringUtility() {}
     // Chuyển tiếng Việt có dấu thành không dấu:  Thành công -> Thanh cong
     public static String removeDiacriticalMarks(String str) {
         String temp = Normalizer.normalize(str, Normalizer.Form.NFD);

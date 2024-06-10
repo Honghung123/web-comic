@@ -44,9 +44,7 @@ public class CorsConfig {
         config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001"));
         config.addAllowedHeader("*");
         config.addAllowedMethod("*"); // Accept all methods
-        // config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         source.registerCorsConfiguration("/**", config);  // Accept all routes
-        // source.registerCorsConfiguration("/user/**", config); // Only accept user routes
         FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(source));
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return bean;

@@ -55,7 +55,7 @@ public class ComicController {
             @RequestHeader(name = "list-crawlers", defaultValue = "") String crawlers) {
         pluginServiceProvider.examinePluginList(crawlers, PluginServiceType.CRAWLER_SERVICE);
         var genres = comicService.getAllGenres(serverId);
-        return new SuccessfulResponse<>(HttpStatus.OK, "Success", genres);
+        return new SuccessfulResponse<>(HttpStatus.OK, "Get all genres successfully", genres);
     }
 
     @GetMapping("/lasted-comic")
@@ -66,7 +66,7 @@ public class ComicController {
             @RequestHeader(name = "list-crawlers", defaultValue = "") String crawlers) {
         pluginServiceProvider.examinePluginList(crawlers, PluginServiceType.CRAWLER_SERVICE);
         var dataDto = comicService.getNewestCommic(serverId, page);
-        return new SuccessfulResponse<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
+        return new SuccessfulResponse<>(HttpStatus.OK, "Get lasted comic successfully", dataDto.getPagination(), dataDto.getData());
     }
 
     @GetMapping("/search")
@@ -79,7 +79,7 @@ public class ComicController {
             @RequestHeader(name = "list-crawlers", defaultValue = "") String crawlers) {
         pluginServiceProvider.examinePluginList(crawlers, PluginServiceType.CRAWLER_SERVICE);
         var dataDto = comicService.searchComic(serverId, keyword, byGenre, currentPage);
-        return new SuccessfulResponse<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData(),
+        return new SuccessfulResponse<>(HttpStatus.OK, "Search comic successfully", dataDto.getPagination(), dataDto.getData(),
                 dataDto.getMeta());
     }
 
@@ -93,7 +93,7 @@ public class ComicController {
             @RequestHeader(name = "list-crawlers", defaultValue = "") String crawlers) {
         pluginServiceProvider.examinePluginList(crawlers, PluginServiceType.CRAWLER_SERVICE);
         var dataDto = comicService.getComicsOfAnAuthor(serverId, authorId, tagId, page); 
-        return new SuccessfulResponse<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
+        return new SuccessfulResponse<>(HttpStatus.OK, "Get comics of an author successfully", dataDto.getPagination(), dataDto.getData());
     }
 
     @GetMapping("/reading/{tagId}")
@@ -104,7 +104,7 @@ public class ComicController {
             @RequestHeader(name = "list-crawlers", defaultValue = "") String crawlers) {
         pluginServiceProvider.examinePluginList(crawlers, PluginServiceType.CRAWLER_SERVICE);
         var comic = comicService.getComicInfo(serverId, tagId);
-        return new SuccessfulResponse<>(HttpStatus.OK, "Success", comic);
+        return new SuccessfulResponse<>(HttpStatus.OK, "Get comic infomation successfully", comic);
     }
 
     @GetMapping("/reading/{tagId}/chapters")
@@ -116,7 +116,7 @@ public class ComicController {
             @RequestHeader(name = "list-crawlers", defaultValue = "") String crawlers) {
         pluginServiceProvider.examinePluginList(crawlers, PluginServiceType.CRAWLER_SERVICE);
         var dataDto = comicService.getChapters(serverId, tagId, currentPage);
-        return new SuccessfulResponse<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
+        return new SuccessfulResponse<>(HttpStatus.OK, "Get chapters successfully", dataDto.getPagination(), dataDto.getData());
     }
 
     @PostMapping("/reading/change-server-comic-info")
@@ -127,7 +127,7 @@ public class ComicController {
             @RequestHeader(name = "list-crawlers", defaultValue = "") String crawlers) {
         pluginServiceProvider.examinePluginList(crawlers, PluginServiceType.CRAWLER_SERVICE);
         var comic = comicService.getComicInfoOnOtherServer(serverId, altChapterDto);
-        return new SuccessfulResponse<>(HttpStatus.OK, "Success", comic);
+        return new SuccessfulResponse<>(HttpStatus.OK, "Change server for comic info successfully", comic);
     }
 
     @GetMapping("/reading/{tagId}/chapters/{chapter}")
@@ -139,7 +139,7 @@ public class ComicController {
             @RequestHeader(name = "list-crawlers", defaultValue = "") String crawlers) {
         pluginServiceProvider.examinePluginList(crawlers, PluginServiceType.CRAWLER_SERVICE);
         var dataDto = comicService.getComicChapterContent(serverId, tagId, currentChapter);
-        return new SuccessfulResponse<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
+        return new SuccessfulResponse<>(HttpStatus.OK, "Get comic chapter content successfully", dataDto.getPagination(), dataDto.getData());
     }
 
     @PostMapping("/reading/change-server-chapter-content")
@@ -150,7 +150,7 @@ public class ComicController {
             @RequestHeader(name = "list-crawlers", defaultValue = "") String crawlers) {
         pluginServiceProvider.examinePluginList(crawlers, PluginServiceType.CRAWLER_SERVICE);
         var dataDto = comicService.getComicChapterContentOnOtherServer(serverId, altChapterDto);
-        return new SuccessfulResponse<>(HttpStatus.OK, "Success", dataDto.getPagination(), dataDto.getData());
+        return new SuccessfulResponse<>(HttpStatus.OK, "Change server for comic chapter content successfully", dataDto.getPagination(), dataDto.getData());
     }
 
     @PostMapping("/export-file")
@@ -171,7 +171,7 @@ public class ComicController {
     public SuccessfulResponse<List<CrawlerPlugin>> getAllCrawlerPlugins() {
         var crawlerService = (ICrawlerPluginService)pluginServiceProvider.getPluginServiceByType(PluginServiceType.CRAWLER_SERVICE);
         var crawlers = crawlerService.getAllPlugins();
-        return new SuccessfulResponse<>(HttpStatus.OK, "Success", crawlers);
+        return new SuccessfulResponse<>(HttpStatus.OK, "Get all crawler servers successfully", crawlers);
     }
 
     @GetMapping("/converter-plugins")
@@ -179,6 +179,6 @@ public class ComicController {
     public SuccessfulResponse<List<ConverterPlugin>> getAllConverterPlugins() {
         var exporterService = (IExporterPluginService)pluginServiceProvider.getPluginServiceByType(PluginServiceType.EXPORTER_SERVICE);
         var converters = exporterService.getAllPlugins();
-        return new SuccessfulResponse<>(HttpStatus.OK, "Success", converters);
+        return new SuccessfulResponse<>(HttpStatus.OK, "Get all converter servers successfully", converters);
     }
 }

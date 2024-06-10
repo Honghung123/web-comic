@@ -17,16 +17,16 @@ Two advantages of using generics type instead of using Object:
 public class SuccessfulResponse<T> extends ResponseEntity<SuccessfulResponse.Payload<T>>{ 
 
     public SuccessfulResponse(HttpStatus statusCode, String message){
-        super(new Payload<T>(statusCode.value(), message), statusCode);
+        super(new Payload<>(statusCode.value(), message), statusCode);
     }
     public SuccessfulResponse(HttpStatus statusCode, String message, T data){
-        super(new Payload<T>(statusCode.value(), message, data), statusCode);
+        super(new Payload<>(statusCode.value(), message, data), statusCode);
     }
     public SuccessfulResponse(HttpStatus statusCode, String message, Pagination<?> pagination, T data){
-        super(new Payload<T>(statusCode.value(), message, pagination , data), statusCode);
+        super(new Payload<>(statusCode.value(), message, pagination , data), statusCode);
     }
     public SuccessfulResponse(HttpStatus statusCode, String message, Pagination<?> pagination, T data, Object others){
-        super(new Payload<T>(statusCode.value(), message, pagination , data, others), statusCode);
+        super(new Payload<>(statusCode.value(), message, pagination , data, others), statusCode);
     }
     @Getter 
     public static class Payload<T>{

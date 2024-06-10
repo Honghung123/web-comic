@@ -1,6 +1,9 @@
 package com.group17.comic;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.group17.comic.utils.StringUtility;
@@ -8,9 +11,9 @@ import com.group17.comic.utils.StringUtility;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-public class StringUtilityTests {
+class StringUtilityTests {
     @Test
-    public void testRemoveDiacriticalMarks_ReturnTrue() {
+    void testRemoveDiacriticalMarks_ReturnTrue() {
         String input = "Thành phố Hồ Chí Minh";
         String expected = "Thanh pho Ho Chi Minh";
         String actual = StringUtility.removeDiacriticalMarks(input);
@@ -18,33 +21,31 @@ public class StringUtilityTests {
     }
 
     @Test
-    public void testRemoveDiacriticalMarks_ReturnFalse() {
+    void testRemoveDiacriticalMarks_ReturnFalse() {
         String input = "Thành phố Hồ Chí Minh";
         String notExpected = "Thành phố Hồ Chí Minh";
         String actual = StringUtility.removeDiacriticalMarks(input);
         assertNotEquals(notExpected, actual);
     }
 
-    @Test
-    public void testFindLongestCommonSubstring_ReturnSubstring() {
-        String str1 = "abcdef";
-        String str2 = "zabxy";
+    @ParameterizedTest
+    @CsvSource(value = {"abcdef, zabxy"})
+    void testFindLongestCommonSubstring_ReturnSubstring(String str1, String str2) {
         String expected = "ab";
         String actual = StringUtility.findLongestCommonSubstring(str1, str2);
         assertEquals(expected, actual);
     }
 
-    @Test
-    public void testFindLongestCommonSubstring_ReturnEmptyString() {
-        String str1 = "";
-        String str2 = "abcdef";
+    @ParameterizedTest
+    @CsvSource(value = {"abcdef, ''"})
+    void testFindLongestCommonSubstring_ReturnEmptyString(String str1, String str2) {
         String expected = "";
         String actual = StringUtility.findLongestCommonSubstring(str1, str2);
         assertEquals(expected, actual);
     }
 
     @Test
-    public void testFindLongestCommonSubstring_NoCommonSubstring() {
+    void testFindLongestCommonSubstring_NoCommonSubstring() {
         String str1 = "abc";
         String str2 = "xyz";
         String expected = "";
@@ -52,26 +53,24 @@ public class StringUtilityTests {
         assertEquals(expected, actual);
     }
 
-    @Test
-    public void testFindLongestCommonSubstring_ReturnSameStrings() {
-        String str1 = "abcdef";
-        String str2 = "abcdef";
+    @ParameterizedTest
+    @CsvSource(value = {"abcdef, abcdef"})
+    void testFindLongestCommonSubstring_ReturnSameStrings(String str1, String str2) {
         String expected = "abcdef";
         String actual = StringUtility.findLongestCommonSubstring(str1, str2);
         assertEquals(expected, actual);
     }
 
-    @Test
-    public void testFindLongestCommonSubstring_ReturnDifferentStrings() {
-        String str1 = "abcdef";
-        String str2 = "zabxy";
+    @ParameterizedTest
+    @CsvSource(value = {"abcdef, zabxy"})
+    void testFindLongestCommonSubstring_ReturnDifferentStrings(String str1, String str2) {
         String notExpected = "abc";
         String actual = StringUtility.findLongestCommonSubstring(str1, str2);
         assertNotEquals(notExpected, actual);
     }
 
     @Test
-    public void testExtractNumberFromStringNoLetters_ReturnNumber() {
+    void testExtractNumberFromStringNoLetters_ReturnNumber() {
         String input = "123456";
         int expected = 123456;
         int actual = StringUtility.extractNumberFromString(input);
@@ -79,9 +78,8 @@ public class StringUtilityTests {
     }
 
     @Test
-    public void testExtractNumberFromEmptyString_ThrowException() {
+    void testExtractNumberFromEmptyString_ThrowException() {
         String input = "";
         assertThrows(NumberFormatException.class, () -> StringUtility.extractNumberFromString(input));
     }
-
 }

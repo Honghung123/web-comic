@@ -8,42 +8,42 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-public class ComicServiceTestsWithTruyenFull extends ComicServiceTests {
+class ComicServiceTestsWithTruyenFull extends ComicServiceTests {
     private final UUID pluginId = UUID.fromString("123e4567-e89b-12d3-a456-426614173002");
 
     @Test
-    public void testValid_searchOnlyKeyword_ReturnList() {
+    void testValid_searchOnlyKeyword_ReturnList() {
         String keyword = "Tiên";
         var chapters = super.searchComic(pluginId, keyword, "", 1);
         assertThat(chapters).isNotNull();
         assertThat(chapters.getData()).isNotNull();
         assertThat(chapters.getPagination()).isNotNull();
-        assertThat(chapters.getData().size()).isNotEqualTo(0);
-        assertThat(chapters.getMeta().size()).isNotEqualTo(0);
+        assertThat(chapters.getData().size()).isNotZero();
+        assertThat(chapters.getMeta().size()).isNotZero();
     }
     @Test
-    public void testValid_searchOnlyByGenre_ReturnList() {
+    void testValid_searchOnlyByGenre_ReturnList() {
         String genre = "do-thi";
         var chapters = super.searchComic(pluginId, "", genre, 1);
         assertThat(chapters).isNotNull();
         assertThat(chapters.getData()).isNotNull();
         assertThat(chapters.getPagination()).isNotNull();
-        assertThat(chapters.getData().size()).isNotEqualTo(0);
+        assertThat(chapters.getData().size()).isNotZero();
     }
 
     @Test
-    public void testValid_searchByKeywordAndGenre_ReturnList() {
+    void testValid_searchByKeywordAndGenre_ReturnList() {
         String keyword = "Tiên Nghịch";
         String genre = "tien-hiep";
         var chapters = super.searchComic(pluginId, keyword, genre, 1);
         assertThat(chapters).isNotNull();
         assertThat(chapters.getData()).isNotNull();
         assertThat(chapters.getPagination()).isNotNull();
-        assertThat(chapters.getData().size()).isNotEqualTo(0); 
+        assertThat(chapters.getData().size()).isNotZero();
     }
 
     @Test
-    public void testInvalid_searchComic_ReturnException() {
+    void testInvalid_searchComic_ReturnException() {
         String invalidKeyword = "invalid-keyword";
         String invalidGenre = "invalid-genre";
         try {

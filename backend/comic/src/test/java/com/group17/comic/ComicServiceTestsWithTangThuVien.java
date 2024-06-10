@@ -7,19 +7,19 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-public class ComicServiceTestsWithTangThuVienPlugin extends ComicServiceTests {
+class ComicServiceTestsWithTangThuVien extends ComicServiceTests {
     private final UUID serverId = UUID.fromString("123e4567-e89b-12d3-a456-426614173000");
     @Test
-    public void testValid_getChapters_ReturnList() {
+    void testValid_getChapters_ReturnList() {
         String existedTagId = "vuong-gia-thoi-khac";
         var chapters = super.getChaptersTest(serverId, existedTagId, 1);
         assertThat(chapters).isNotNull();
         assertThat(chapters.getData()).isNotNull();
         assertThat(chapters.getPagination()).isNotNull();
-        assertThat(chapters.getData().size()).isNotEqualTo(0);
+        assertThat(chapters.getData().size()).isNotZero();
     }
     @Test
-    public void testInvalid_getChapters_ReturnException() {
+    void testInvalid_getChapters_ReturnException() {
         String invalidTagId = "invalid-tag-id";
         try {
             var chapters = super.getChaptersTest(serverId, invalidTagId, 1);

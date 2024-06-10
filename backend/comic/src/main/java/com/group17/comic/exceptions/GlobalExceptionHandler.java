@@ -36,7 +36,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({ ConstraintViolationException.class })
     public ResponseEntity<ErrorResponse> handleValidationException(ConstraintViolationException ex,
             WebRequest request) {
-        // String message = ex.getMessage();
         Logger.logError(ex.getMessage(), ex);
         String message = ex.getMessage().substring(ex.getMessage().lastIndexOf(": ") + 2);
         var httpStatus = HttpStatus.BAD_REQUEST;
@@ -50,7 +49,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({ HttpStatusException.class })
     public ResponseEntity<ErrorResponse> handleHttpStatusException(HttpStatusException ex,
             WebRequest request) {
-        // String message = ex.getMessage();
         Logger.logError(ex.getMessage(), ex);
         String message = ex.getMessage();
         var httpStatus = HttpStatus.NOT_FOUND;
@@ -73,7 +71,6 @@ public class GlobalExceptionHandler {
                 new ErrorResponse(httpStatus.value(), error, message, timestamp, path));
     } 
 
-    // Catch all Exception.class
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(
             Exception ex, WebRequest request) {

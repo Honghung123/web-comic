@@ -33,7 +33,7 @@ logging:
 comic:
   api:
     document_name: Comic API Documentation
-    description: This is the api comic documentation only for the group 17 :V
+    description: This is the api comic documentation only for the group 17
     version: v1.0.0
     server:
       local:
@@ -44,7 +44,7 @@ comic:
     crawler:
       crawler_package_name: com.group17.comic.plugins.crawler.concretes
       crawler_directory: /plugins/crawler/concretes
-      default_crawler_name: Tang Thu Vien 
+      default_crawler_name: Tang Thu Vien
     converter:
       converter_package_name: com.group17.comic.plugins.exporter.concretes
       converter_directory: /plugins/exporter/concretes

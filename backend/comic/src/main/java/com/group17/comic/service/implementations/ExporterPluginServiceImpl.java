@@ -46,7 +46,6 @@ public class ExporterPluginServiceImpl implements IExporterPluginService {
     @Override
     public void checkCurrentPlugins() {
         baseDir = PluginUtility.resolveAbsolutePath(System.getProperty("user.dir"));
-//        String converterAbsolutePath = baseDir + projectDirectory + converterDirectory;
         Path converterAbsolutePath = Paths.get(baseDir, projectDirectory, exporterDirectory);
         var exporterClasses = PluginUtility.getAllPluginsFromFolderWithoutInstantiation(
                 converterAbsolutePath.toString(), exporterPackageName, IFileExporter.class);
@@ -100,7 +99,7 @@ public class ExporterPluginServiceImpl implements IExporterPluginService {
     @Override
     public void checkPluginList(List<String> pluginList) {
         this.checkCurrentPlugins();
-        List<String> exporterIdList = exporters.stream().map(exporter -> exporter.getId().toString()).collect(Collectors.toList());
+        List<String> exporterIdList = exporters.stream().map(exporter -> exporter.getId().toString()).toList();
         if (!pluginList.isEmpty() && !ListUtility.areListsEqual(pluginList, exporterIdList)) {
             throw new BusinessException(ExceptionType.PLUGIN_LIST_CHANGED);
         }

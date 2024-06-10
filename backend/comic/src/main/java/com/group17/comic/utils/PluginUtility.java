@@ -12,22 +12,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class PluginUtility {
-    /**
-     * Retrieves all plugins from a plugin folder.
-     *
-     * @return          a list of WebCrawler plugins
-     * @throws IOException
-     * @throws ClassNotFoundException
-     * @throws NoSuchMethodException
-     * @throws InvocationTargetException
-     * @throws InstantiationException
-     * @throws IllegalAccessException
-     */
-    @SuppressWarnings("unchecked")
+    private       PluginUtility() {}
     public static <T> List<T> getAllPluginsFromFolder(String concretePath, String pluginPackageName,
             Class<?> targetInterface) throws IOException, ClassNotFoundException, NoSuchMethodException,
             InvocationTargetException, InstantiationException, IllegalAccessException {
@@ -46,8 +33,7 @@ public class PluginUtility {
     }
 
     public static List<Class<?>> getAllPluginsFromFolderWithoutInstantiation(String concretePath, String pluginPackageName,
-            Class<?> targetInterface) throws IOException, ClassNotFoundException, NoSuchMethodException,
-            InvocationTargetException, InstantiationException, IllegalAccessException {
+            Class<?> targetInterface) throws IOException, ClassNotFoundException, IllegalAccessException {
         if (!targetInterface.isInterface()) {
             throw new IllegalAccessException("The class is not an interface");
         }
@@ -65,13 +51,6 @@ public class PluginUtility {
         return pluginClasses;
     }
 
-    /**
-     * A function to get class instance of type Class from file path
-     *
-     * @param  filePath         the directory of the file
-     * @param  packageName      the package name of the file
-     * @return                 return the instance of the class which has type Class
-     */
     public static Class<?> getClassInstance(File filePath, String packageName)
             throws IOException, ClassNotFoundException {
         String fileName = filePath.getName().split("\\.")[0];
@@ -86,18 +65,11 @@ public class PluginUtility {
         return null;
     }
 
-    /**
-     * Retrieves all files in the specified directory.
-     *
-     * @param  absolutePath   the relative directory path
-     * @return               a list of files having type of File in the directory
-     * @throws IOException   if an I/O error occurs
-     */
     public static List<File> getAllFilesFromDirectory(String absolutePath) throws IOException {
         Path pluginDirectory = Paths.get(absolutePath);
         return Files.list(pluginDirectory)
                 .map(Path::toFile)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public static String resolveAbsolutePath(String absolutePath) {

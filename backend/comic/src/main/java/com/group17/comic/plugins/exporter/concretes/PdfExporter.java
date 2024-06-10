@@ -21,19 +21,12 @@ import com.group17.comic.dtos.request.ChapterRequest;
 import com.group17.comic.dtos.response.ChapterFile;
 import com.group17.comic.plugins.exporter.IFileExporter;
 
-/**
- * @author: estakov
- * @date: 20.04.2024
- * @source: https://github.com/bytescout/pdf-co-api-samples/tree/master/PDF%20from%20HTML/Java/Generate%20PDF%20From%20HTML%20File/src/com/company
- * 
- */
-
 public class PdfExporter implements IFileExporter {
-    private static String uploadDir = "backend/comic/src/main/java/com/group17/comic/plugins/exporter/uploads/";
-    private final UUID id = UUID.randomUUID();
+    private static final String UPLOAD_DIR = "backend/comic/src/main/java/com/group17/comic/plugins/exporter/uploads/";
+    private static final UUID PLUGIN_ID = UUID.randomUUID();
     @Override
     public UUID getId() {
-        return id;
+        return PLUGIN_ID;
     }
 
     @Override
@@ -55,16 +48,16 @@ public class PdfExporter implements IFileExporter {
         // Convert html to pdf online, and download it afterwards 
         byte[] fileBytes = this.savePdfFromText(chapterDto.content(), fileName);
         // Then save the pdf file to folder  
-        String uploadFolderAbsolutePath = Paths.get(uploadDir).toAbsolutePath().toString();
+        String uploadFolderAbsolutePath = Paths.get(UPLOAD_DIR).toAbsolutePath().toString();
         File uploadFolderFile = new File(uploadFolderAbsolutePath);
         FileUtility.deleteDirectory(uploadFolderFile);
         FileUtility.createDirectory(uploadFolderFile);
-        File destinationFile = Paths.get(uploadDir + fileName).toFile();
+        File destinationFile = Paths.get(UPLOAD_DIR + fileName).toFile();
         FileUtility.saveDownloadedBytesToFolder(fileBytes, destinationFile);
         // Get the pdf file from folder to return to client
-        InputStreamResource resource = new InputStreamResource(new FileInputStream(uploadDir + fileName));
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(UPLOAD_DIR + fileName));
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentLength(Files.size(Paths.get(uploadDir + fileName)));
+        headers.setContentLength(Files.size(Paths.get(UPLOAD_DIR + fileName)));
         headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);
         return new ChapterFile(headers, resource);
     }
@@ -108,14 +101,11 @@ public class PdfExporter implements IFileExporter {
                         .build();
                 // Execute request
                 Response downloadFileResponse = webClient.newCall(downloadFileRequest).execute();
-                byte[] fileBytes = downloadFileResponse.body().bytes();
-                return fileBytes;
+                return downloadFileResponse.body().bytes();
             } else {
-                // Display service reported error
                 throw new IOException(json.get("message").getAsString());
             }
         } else {
-            // Display request error
             throw new HttpStatusException(response.code() + " " + response.message(), response.code(), url);
         } 
     }

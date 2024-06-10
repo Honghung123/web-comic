@@ -7,8 +7,8 @@ import lombok.Getter;
 
 @Getter
 public class BusinessException extends RuntimeException{
-    private String message;
-    private HttpStatus status;
+    private final String message;
+    private final HttpStatus status;
     public BusinessException(ExceptionType ex) {
         super(ex.getMessage());
         this.message = ex.getMessage();

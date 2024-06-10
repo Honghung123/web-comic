@@ -13,7 +13,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -24,12 +23,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 public class Mp3Exporter implements IFileExporter {
-    @Value("${comic.plugin.converter.api_key}")
-    private String api_key;
-    private final UUID id = UUID.randomUUID(); 
+    private static final UUID PLUGIN_ID = UUID.randomUUID();
     @Override
     public UUID getId() {
-        return id;
+        return PLUGIN_ID;
     }
 
     @Override
@@ -47,7 +44,7 @@ public class Mp3Exporter implements IFileExporter {
         String formatTitile = StringUtility.removeDiacriticalMarks(chapterDto.title());
         formatTitile = formatTitile.replaceAll("[^a-zA-Z0-9]", "-").trim();
         String fileName = formatTitile + ".mp3";  
-        var mp3File = getMp3FromText(chapterDto.content(), fileName);
+        var mp3File = getMp3FromText(chapterDto.content());
         byte[] fileContent = readFileToByteArray(mp3File);
         InputStreamResource resource = new InputStreamResource(new ByteArrayInputStream(fileContent));
         HttpHeaders headers = new HttpHeaders();
@@ -61,7 +58,7 @@ public class Mp3Exporter implements IFileExporter {
 
 
     }
-    public InputStream getMp3FromText(String content, String fileInputName) throws IOException {
+    public InputStream getMp3FromText(String content) throws IOException {
         String apiUrl = "https://viettelgroup.ai/voice/api/tts/v1/rest/syn";
         String voice = "hcm-diemmy";
         String tokenId = "0jBPrUl8a2ZqmrgHiwt3h-N4SKn2PzCAzr-hrIFLPEpjG9cKsN-EuuEobkEo852f";
