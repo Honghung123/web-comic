@@ -16,10 +16,10 @@ public class PluginFactory implements IPluginFactory{
     @Lazy
     private final ICrawlerPluginService crawlerPluginService;
     @Qualifier("exporterPluginServiceV1")
+    @Lazy
     private final IExporterPluginService exporterPluginService;
 
     @Override
-    @Lazy
     public IPluginService getPluginService(PluginServiceType plugin){
         switch (plugin){
             case CRAWLER_SERVICE:

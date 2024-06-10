@@ -11,12 +11,12 @@ public interface IDataCrawler {
     UUID getID();
     String getPluginName();
     List<Genre> getGenres();
-    DataModel<Integer, List<Chapter>> getChapters(String comicTagId, int currentPage);
-    DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> search(String keyword, String byGenres, int currentPage);
-    DataModel<Integer, List<ComicModel>> getLastedComics(int currentPage);
+    PageableData<Integer, List<Chapter>> getChapters(String comicTagId, int currentPage);
+    SearchingPageableData<Integer, List<LatestComic>, List<AuthorResponse>> search(String keyword, String byGenres, int currentPage);
+    PageableData<Integer, List<LatestComic>> getLastedComics(int currentPage);
     Comic getComicInfo(String comicTagId);
     Comic getComicInfoOnOtherServer(AlternatedChapterRequest altChapterDto);
-    DataModel<?, ComicChapterContent> getComicChapterContent(String comicTagId, String currentChapter);
-    DataModel<?, ComicChapterContent> getComicChapterContentOnOtherServer(AlternatedChapterRequest altChapterDto);
-    DataModel<Integer, List<ComicModel>> getComicsByAuthor(String authorId, String tagId, int currentPage);
+    PageableData<?, ComicChapterContent> getComicChapterContent(String comicTagId, String currentChapter);
+    PageableData<?, ComicChapterContent> getComicChapterContentOnOtherServer(AlternatedChapterRequest altChapterDto);
+    PageableData<Integer, List<LatestComic>> getComicsByAuthor(String authorId, String tagId, int currentPage);
 }

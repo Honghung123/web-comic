@@ -12,19 +12,6 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.servers.Server;
 
-/**
- * - Sử dụng Swagger để tài liệu hóa API và covert nó thành API document ở Postman để chuyển giao theo ý 
- * của client (công việc này không phải dành cho Junior hay Senior mà là của Leader - người quản lí dự án)
- *   + Ngoài ra, sử dụng Swagger để tương tác api thông qua UI thay vì try hard trên các tool test api 
- * như Postman, ... chạy trên server local trong quá trình phát triển
- *  => Tại sao dùng "SpringDoc OpenAPI Starter WebMVC UI" thay vì "Swagger" dependency vì nó tích hợp sẵn Swagger 
- * và để tích hợp vào hệ thống mircoservice 
- * ==========================================================================================================
- * - @Bean openApi: Cấu hình các thông tin về API document
- * - @Bean groupedOpenApi: Cấu hình group API gộp nhiều OpenAPI doc vào một group duy nhất để tích hợp 
- * vào hệ thống microservice.
- */
-
 @Configuration
 public class OpenApiConfig { 
 
@@ -49,7 +36,7 @@ public class OpenApiConfig {
     public GroupedOpenApi groupedOpenApi(){
         return GroupedOpenApi.builder()
                             .group("comic-api-service")
-                            .packagesToScan("com.group17.comic.controller")
+                            .packagesToScan("com.group17.comic.controllers")
                             .build();
     }
 }

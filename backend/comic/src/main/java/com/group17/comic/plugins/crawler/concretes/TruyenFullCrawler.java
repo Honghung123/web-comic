@@ -61,8 +61,8 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
 
     @SneakyThrows
     @Override
-    public DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> search(String keyword,
-                                                                                   String byGenre, int currentPage) {
+    public SearchingPageableData<Integer, List<LatestComic>, List<AuthorResponse>> search(String keyword,
+                                                                                          String byGenre, int currentPage) {
         keyword = StringUtility.removeDiacriticalMarks(keyword);
         if(StringUtils.hasLength(keyword) && StringUtils.hasLength(byGenre)) {
             return searchByKeywordAndGenre(keyword, byGenre, currentPage);
@@ -76,8 +76,8 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     }
 
     @SneakyThrows
-    private DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> searchByKeywordAndGenre(String keyword, String byGenre, int currentPage) {
-        List<ComicModel> listMatchedComic = new ArrayList<>();
+    private SearchingPageableData<Integer, List<LatestComic>, List<AuthorResponse>> searchByKeywordAndGenre(String keyword, String byGenre, int currentPage) {
+        List<LatestComic> listMatchedComic = new ArrayList<>();
         String term = keyword.trim().replace(" ", "%20");
         Integer categoryId = this.getCategoryId(byGenre); 
         String apiUrl = COMIC_API_URL + "v1/tim-kiem?title=" + term + "&category=[" + categoryId + "]&page=" + currentPage;
@@ -110,7 +110,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                     int newestChapter = jsonObj.get("total_chapters").getAsInt();
                     String updatedTime = jsonObj.get("time").getAsString();
                     boolean isFull = false;
-                    var comicModel = ComicModel.builder()
+                    var comicModel = LatestComic.builder()
                             .tagId(comicTagId)
                             .title(title)
                             .image(image)
@@ -136,12 +136,12 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         } catch (Exception e) {
             throw new BusinessException(ExceptionType.REQUEST_SERVER_TO_CRAWL_FAILED);
         }
-        return new DataSearchModel<>(pagination, listMatchedComic, null);
+        return new SearchingPageableData<>(pagination, listMatchedComic, null);
     }
 
     @SneakyThrows
-    private DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> searchOnlyByGenre(String byGenre, int currentPage) {
-        List<ComicModel> listMatchedComic = new ArrayList<>(); 
+    private SearchingPageableData<Integer, List<LatestComic>, List<AuthorResponse>> searchOnlyByGenre(String byGenre, int currentPage) {
+        List<LatestComic> listMatchedComic = new ArrayList<>();
         String apiUrl = COMIC_API_URL + "/v1/story/cate?cate="+ byGenre +"&type=story_new&page=" + currentPage;
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
@@ -172,7 +172,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                     int newestChapter = jsonObj.get("total_chapters").getAsInt();
                     String updatedTime = jsonObj.get("time").getAsString();
                     boolean isFull = false;
-                    var comicModel = ComicModel.builder()
+                    var comicModel = LatestComic.builder()
                             .tagId(comicTagId)
                             .title(title)
                             .image(image)
@@ -198,12 +198,12 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         } catch (Exception e) {
             throw new BusinessException(ExceptionType.REQUEST_SERVER_TO_CRAWL_FAILED);
         }
-        return new DataSearchModel<>(pagination, listMatchedComic, null);
+        return new SearchingPageableData<>(pagination, listMatchedComic, null);
     }
 
     @SneakyThrows
-    private DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> searchOnlyByKeyword(String keyword, int currentPage) {
-        List<ComicModel> listMatchedComic = new ArrayList<>();
+    private SearchingPageableData<Integer, List<LatestComic>, List<AuthorResponse>> searchOnlyByKeyword(String keyword, int currentPage) {
+        List<LatestComic> listMatchedComic = new ArrayList<>();
         String term = keyword.trim().replace(" ", "%20");
         String apiUrl = COMIC_API_URL + "/v1/tim-kiem?title=" + term + "&page=" + currentPage;
         HttpClient client = HttpClient.newHttpClient();
@@ -239,7 +239,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                         int newestChapter = jsonObj.get("total_chapters").getAsInt();
                         String updatedTime = jsonObj.get("time").getAsString();
                         boolean isFull = false;
-                        var comicModel = ComicModel.builder()
+                        var comicModel = LatestComic.builder()
                                 .tagId(comicTagId)
                                 .title(title)
                                 .image(image)
@@ -274,7 +274,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         } catch (Exception e) {
             throw new BusinessException(ExceptionType.REQUEST_SERVER_TO_CRAWL_FAILED);
         }
-        return new DataSearchModel<>(pagination, listMatchedComic, authorList);
+        return new SearchingPageableData<>(pagination, listMatchedComic, authorList);
     }
 
     @SneakyThrows
@@ -297,9 +297,9 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
 
     @SneakyThrows
     @Override
-    public DataModel<Integer, List<ComicModel>> getLastedComics(int currentPage) {
+    public PageableData<Integer, List<LatestComic>> getLastedComics(int currentPage) {
         String apiUrl = COMIC_API_URL + "v1/story/all?type=story_update&page=" + currentPage;
-        List<ComicModel> lastedComics = new ArrayList<>();
+        List<LatestComic> lastedComics = new ArrayList<>();
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
         Pagination<Integer> pagination;
@@ -327,7 +327,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                     int newestChapter = element.getAsJsonObject().get("total_chapters").getAsInt();
                     String updatedTime = element.getAsJsonObject().get("time").getAsString();
                     boolean isFull = element.getAsJsonObject().get("is_full").getAsBoolean();
-                    var comicModel = ComicModel.builder()
+                    var comicModel = LatestComic.builder()
                             .tagId(comicTagId)
                             .title(title)
                             .image(image)
@@ -353,7 +353,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         } catch (Exception e) {
             throw new BusinessException(ExceptionType.REQUEST_SERVER_TO_CRAWL_FAILED);
         }
-        return new DataModel<>(pagination, lastedComics);
+        return new PageableData<>(pagination, lastedComics);
     }
 
     @SneakyThrows
@@ -400,8 +400,8 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     }
 
     @SneakyThrows
-    private DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> getHotOrPromoteComics(int currentPage) {
-        List<ComicModel> listMatchedComic = new ArrayList<>(); 
+    private SearchingPageableData<Integer, List<LatestComic>, List<AuthorResponse>> getHotOrPromoteComics(int currentPage) {
+        List<LatestComic> listMatchedComic = new ArrayList<>();
         String apiUrl = COMIC_API_URL + "/v1/story/all?type=story_full_rate&page=" + currentPage;
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
@@ -432,7 +432,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                     int newestChapter = jsonObj.get("total_chapters").getAsInt();
                     String updatedTime = jsonObj.get("time").getAsString();
                     boolean isFull = false;
-                    var comicModel = ComicModel.builder()
+                    var comicModel = LatestComic.builder()
                             .tagId(comicTagId)
                             .title(title)
                             .image(image)
@@ -458,12 +458,12 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         } catch (Exception e) {
             throw new BusinessException(ExceptionType.REQUEST_SERVER_TO_CRAWL_FAILED);
         }
-        return new DataSearchModel<>(pagination, listMatchedComic, null);
+        return new SearchingPageableData<>(pagination, listMatchedComic, null);
     }
 
     @Override
     @SneakyThrows
-    public DataModel<Integer, List<Chapter>> getChapters(String comicTagId, int currentPage) {
+    public PageableData<Integer, List<Chapter>> getChapters(String comicTagId, int currentPage) {
         if(!comicTagId.matches("^\\d+$")) {
             throw new BusinessException(ExceptionType.INVALID_COMIC_TAG_ID);
         }
@@ -504,7 +504,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         } catch (Exception e) { 
             throw new BusinessException(ExceptionType.REQUEST_SERVER_TO_CRAWL_FAILED);
         }
-        return new DataModel<>(pagination, chapters);
+        return new PageableData<>(pagination, chapters);
     }
 
     @Override
@@ -559,7 +559,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
 
     @Override
     @SneakyThrows
-    public DataModel<Integer, ComicChapterContent> getComicChapterContent(String comicTagId, String currentChapter) {
+    public PageableData<Integer, ComicChapterContent> getComicChapterContent(String comicTagId, String currentChapter) {
         if(!comicTagId.matches("^\\d+$")) { 
             throw new BusinessException(ExceptionType.INVALID_COMIC_TAG_ID);
         }
@@ -600,7 +600,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
         } catch (Exception e) {
             throw new BusinessException(ExceptionType.REQUEST_SERVER_TO_CRAWL_FAILED);
         }
-        return new DataModel<>(pagination, chapterContent);
+        return new PageableData<>(pagination, chapterContent);
     }
 
     @SneakyThrows
@@ -626,13 +626,13 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
 
     @Override
     @SneakyThrows
-    public DataModel<?, ComicChapterContent> getComicChapterContentOnOtherServer(AlternatedChapterRequest altChapterDto) {
+    public PageableData<?, ComicChapterContent> getComicChapterContentOnOtherServer(AlternatedChapterRequest altChapterDto) {
         String tagId = this.getTagIdComicFromTitleAndAuthor(altChapterDto.title(),
                 altChapterDto.authorName(), altChapterDto.comicTagId());
         String chapterUrl = ""; 
         int currentPage = 1;
         while(true){
-            DataModel<Integer, List<Chapter>> result = this.getChapters(tagId, currentPage);
+            PageableData<Integer, List<Chapter>> result = this.getChapters(tagId, currentPage);
             List<Chapter> chapters = result.getData();
             if(chapters == null) {
                 throw new BusinessException(ExceptionType.GET_COMIC_CHAPTER_LIST_FAILED);
@@ -656,8 +656,8 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
 
     @Override
     @SneakyThrows
-    public DataModel<Integer, List<ComicModel>> getComicsByAuthor(String authorId, String tagId, int currentPage) {
-        List<ComicModel> authorComics = new ArrayList<>();
+    public PageableData<Integer, List<LatestComic>> getComicsByAuthor(String authorId, String tagId, int currentPage) {
+        List<LatestComic> authorComics = new ArrayList<>();
         String apiUrl = COMIC_API_URL + "/v1/story/detail/" + tagId + "/story_author";
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl)).build();
@@ -676,7 +676,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                     var author = new Author(authorId, authorName);
                     List<Genre> genres = new ArrayList<>();
                     boolean isFull = false;
-                    var comicModel = ComicModel.builder()
+                    var comicModel = LatestComic.builder()
                             .tagId(comicTagId)
                             .title(title)
                             .image(image)
@@ -692,7 +692,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
                 int perPage = jsonPagination.get("per_page").getAsInt();
                 int totalPages = jsonPagination.get("total_pages").getAsInt();
                 Pagination<Integer> pagination = new Pagination<>(currentPage, perPage, totalPages, -1);
-                return new DataModel<>(pagination, authorComics);
+                return new PageableData<>(pagination, authorComics);
             } else {
                 throw new BusinessException(ExceptionType.GET_COMIC_INFO_FAILED);
             }

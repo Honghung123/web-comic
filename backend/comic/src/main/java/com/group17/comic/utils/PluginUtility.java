@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class PluginUtility {
-    private       PluginUtility() {}
+    private PluginUtility() {}
     public static <T> List<T> getAllPluginsFromFolder(String concretePath, String pluginPackageName,
             Class<?> targetInterface) throws IOException, ClassNotFoundException, NoSuchMethodException,
             InvocationTargetException, InstantiationException, IllegalAccessException {

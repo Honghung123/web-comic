@@ -37,38 +37,38 @@ class ComicServiceTests {
 		pluginServiceProvider.getPluginServiceByType(PluginServiceType.EXPORTER_SERVICE).checkCurrentPlugins();
 	}
 
-	public DataModel<Integer, List<Chapter>> getChaptersTest(UUID pluginId, String tagId, int currentPage) {
+	public PageableData<Integer, List<Chapter>> getChaptersTest(UUID pluginId, String tagId, int currentPage) {
 		return comicService.getChapters(pluginId, tagId, currentPage);
 	}
 	public List<Genre> testGetAllGenre(UUID serverId){
 		return comicService.getAllGenres(serverId);
 	}
 
-	public DataModel<Integer, List<ComicModel>> getNewestComic(UUID pluginId, int page){
+	public PageableData<Integer, List<LatestComic>> getNewestComic(UUID pluginId, int page){
 		return comicService.getNewestCommic(pluginId, page);
 	}
-	public DataModel<Integer, List<ComicModel>> getComicsOfAnAuthor(UUID serverId, String authorId, String tagId, int page){
+	public PageableData<Integer, List<LatestComic>> getComicsOfAnAuthor(UUID serverId, String authorId, String tagId, int page){
 		return comicService.getComicsOfAnAuthor(serverId, authorId, tagId, page);
 	}
-	public DataSearchModel<Integer, List<ComicModel>, List<AuthorResponse>> searchComic(UUID serverId,
-																						String keyword, String byGenres, int currentPage){
+	public SearchingPageableData<Integer, List<LatestComic>, List<AuthorResponse>> searchComic(UUID serverId,
+																							   String keyword, String byGenres, int currentPage){
 		return comicService.searchComic(serverId, keyword, byGenres, currentPage);
 	}
 	public Comic getComicInfo(UUID pluginId, String tagUrl){
 		return comicService.getComicInfo(pluginId, tagUrl);
 	}
-	public DataModel<Integer, List<Chapter>> getChapters(UUID serverId, String tagId, int currentPage){
+	public PageableData<Integer, List<Chapter>> getChapters(UUID serverId, String tagId, int currentPage){
 		return comicService.getChapters(serverId, tagId, currentPage);
 	}
 	public Comic getComicInfoOnOtherServer(UUID serverId, AlternatedChapterRequest altChapterDto){
 		return comicService.getComicInfoOnOtherServer(serverId, altChapterDto);
 	}
-	public DataModel<?, ComicChapterContent> getComicChapterContent(UUID serverId,
-																	String tagId, String currentChapter){
+	public PageableData<?, ComicChapterContent> getComicChapterContent(UUID serverId,
+																	   String tagId, String currentChapter){
 		return comicService.getComicChapterContent(serverId, tagId, currentChapter);
 	}
-	public DataModel<?, ComicChapterContent> getComicChapterContentOnOtherServer(UUID serverId,
-																				 AlternatedChapterRequest altChapterDto){
+	public PageableData<?, ComicChapterContent> getComicChapterContentOnOtherServer(UUID serverId,
+																					AlternatedChapterRequest altChapterDto){
 		return comicService.getComicChapterContentOnOtherServer(serverId, altChapterDto);
 	}
 

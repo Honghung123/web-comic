@@ -19,7 +19,7 @@ class TruyenFullCrawlerTest {
     @Test
     void canGetLastedComics() {
         int currentPage = 1;
-        DataModel<Integer, List<ComicModel>> crawledComic =truyenFullCrawler.getLastedComics(currentPage);
+        PageableData<Integer, List<LatestComic>> crawledComic =truyenFullCrawler.getLastedComics(currentPage);
         Assertions.assertNotNull(crawledComic.getData());
         Assertions.assertEquals(1, crawledComic.getPagination().getCurrentPage());
     }
@@ -28,7 +28,7 @@ class TruyenFullCrawlerTest {
     void canGetChapters() {
         String comicTagId = "9539";
         int currentPage = 1;
-        DataModel<Integer, List<Chapter>> chapterDataModel = truyenFullCrawler.getChapters(comicTagId, 1);
+        PageableData<Integer, List<Chapter>> chapterDataModel = truyenFullCrawler.getChapters(comicTagId, 1);
         Assertions.assertNotNull(chapterDataModel);
         Assertions.assertEquals(1, chapterDataModel.getPagination().getCurrentPage());
         Assertions.assertNotNull(chapterDataModel.getData());
@@ -65,7 +65,7 @@ class TruyenFullCrawlerTest {
         String tagId = "36595";
         String currentChapter = "4717189";
 
-        DataModel<Integer, ComicChapterContent> contentDataModel = truyenFullCrawler.getComicChapterContent(tagId, currentChapter);
+        PageableData<Integer, ComicChapterContent> contentDataModel = truyenFullCrawler.getComicChapterContent(tagId, currentChapter);
         ComicChapterContent chapterContent = contentDataModel.getData();
         Assertions.assertEquals(1, chapterContent.getChapterNumber());
         Assertions.assertEquals("Đối chọi", chapterContent.getChapterTitle() );

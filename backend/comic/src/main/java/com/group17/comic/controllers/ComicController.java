@@ -33,12 +33,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader; 
 
-// @Tag: A Swagger annotation used to categorize API endpoints related to the Plugin Controller.
-// @SneakyThrows: A Lombok annotation to silently throw checked exceptions
-// @Operation: A Swagger annotation to describe an HTTP operation on an API endpoint
-
 @RestController
-@RequestMapping("/api/v1/comic")
+@RequestMapping("${api.prefix}/comic")
 @RequiredArgsConstructor
 @Tag(name = "Comic Controller")
 @Validated 
@@ -60,7 +56,7 @@ public class ComicController {
 
     @GetMapping("/lasted-comic")
     @Operation(summary = "Get lasted comics", description = "Get lasted comics with specific server id. Default server id is 0 - plugin's index in plugin list Default current page is 1")
-    public SuccessfulResponse<List<ComicModel>> getLatestComics(
+    public SuccessfulResponse<List<LatestComic>> getLatestComics(
             @RequestParam(name = "server_id", required = false)  UUID serverId,
             @RequestParam(name = "page", defaultValue = "1") @Positive int page, 
             @RequestHeader(name = "list-crawlers", defaultValue = "") String crawlers) {
@@ -71,7 +67,7 @@ public class ComicController {
 
     @GetMapping("/search")
     @Operation(summary = "Search comic", description = "Search comic base on keyword(by title, author or published year) or only genres with specific server id. Default server id is 0 - plugin's index in plugin list. Default the current page is 1.")
-    public SuccessfulResponse<List<ComicModel>> searchComic(
+    public SuccessfulResponse<List<LatestComic>> searchComic(
             @RequestParam(name = "keyword", defaultValue = "") String keyword,
             @RequestParam(name = "genre", defaultValue = "") String byGenre, 
             @RequestParam(name = "server_id", required = false)UUID serverId,
@@ -85,7 +81,7 @@ public class ComicController {
 
     @GetMapping("/author/{authorId}")
     @Operation(summary = "Get author's comics", description = "Get author's comics base on author id with specific server id. Default server id is 0 - plugin's index in plugin list.")
-    public SuccessfulResponse<List<ComicModel>> getComicsOfAnAuthor(
+    public SuccessfulResponse<List<LatestComic>> getComicsOfAnAuthor(
             @PathVariable(name = "authorId", required = true) String authorId,
             @RequestParam(name = "tagId", required = true) @NotBlank String tagId,
             @RequestParam(name = "page", defaultValue = "1") @Positive int page,

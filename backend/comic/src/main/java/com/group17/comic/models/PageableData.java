@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter 
 @AllArgsConstructor 
-public class DataModel<T, V> {
+public class PageableData<T, V> {
     private Pagination<T> pagination;
     private V data;
 }
