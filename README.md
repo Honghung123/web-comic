@@ -55,7 +55,8 @@ A project for reading novel, comic
     -   How to install:
         -   Prerequisites: Docker, Maven
         *   For Back-end
-        1. Pull the SonarQube image from Docker Hub: docker pull sonarqube:lst-community
-        2. Run the image at the port 9000: docker run --name=docker-sonarqube -p=9000:9000 -d sonarqube:lts-community
-        3. At backend/comic folder, run this command in the terminal : mvn sonar:sonar -D sonar.login=your_username -D sonar.password=your_password
-        4. Wait until it done, then open this link: http://localhost:9000/dashboard?id=com.group17%3Acomic
+        1. Pull the SonarQube image from Docker Hub: **docker pull sonarqube:lst-community**
+        2. Run the image at the port 9000: **docker run --name=docker-sonarqube -p=9000:9000 -d sonarqube:lts-community**
+        3. Open localhost:9000 to login, default username and password is "admin"
+        4. At backend/comic folder, run this command in the terminal : **mvn sonar:sonar -D sonar.login=your_username -D sonar.password=your_password**
+        5. Wait until it done, then open this link: **http://localhost:9000/dashboard?id=com.group17%3Acomic**
