@@ -23,7 +23,7 @@ import lombok.SneakyThrows;
 
 public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
     private static final String COMIC_BASE_URL = "https://truyenchuth.com/";
-    private static final UUID PLUGIN_ID =  UUID.fromString("b1f6f5e0-6f6d-11ed-9d6c-0242ac120001");
+    private static final UUID PLUGIN_ID =  UUID.fromString("123e4567-e89b-12d3-a456-426614173001");
     @Override
     public UUID getID() {
         return PLUGIN_ID;
@@ -94,7 +94,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
                     .tagId(comicTagId)
                     .title(title)
                     .image(image)
-                    .alternateImage(this.ALTERNATE_IMAGE)
+                    .alternateImage(ALTERNATE_IMAGE)
                     .genres(genres)
                     .author(author)
                     .isFull(isFull)
@@ -135,7 +135,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
                     .tagId(comicTagId)
                     .title(title)
                     .image(image)
-                    .alternateImage(this.ALTERNATE_IMAGE)
+                    .alternateImage(ALTERNATE_IMAGE)
                     .genres(genres)
                     .author(author)
                     .isFull(isFull)
@@ -184,7 +184,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
                     .tagId(tagId)
                     .title(title)
                     .image(image)
-                    .alternateImage(this.ALTERNATE_IMAGE)
+                    .alternateImage(ALTERNATE_IMAGE)
                     .genres(genres)
                     .author(author)
                     .isFull(isFull)
@@ -226,7 +226,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
                 .tagId(comicTagId)
                 .title(title)
                 .image(image)
-                .alternateImage(this.ALTERNATE_IMAGE)
+                .alternateImage(ALTERNATE_IMAGE)
                 .genres(genres)
                 .author(author)
                 .description(description)
@@ -256,7 +256,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
                     .tagId(comicTagId)
                     .title(title)
                     .image(image)
-                    .alternateImage(this.ALTERNATE_IMAGE)
+                    .alternateImage(ALTERNATE_IMAGE)
                     .genres(genres)
                     .author(author)
                     .isFull(isFull)
@@ -400,16 +400,13 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
             if (chapters == null) {
                 throw new BusinessException(ExceptionType.GET_COMIC_CHAPTER_LIST_FAILED);
             }
-            if (chapters.isEmpty()) {
-                break;
-            }
             for (Chapter chapter : chapters) {
                 if (chapter.getChapterNumber() == altChapterDto.chapterNumber()) {
                     chapterUrl = chapter.getChapterNo();
                     break;
                 }
             }
-            if (!chapterUrl.isEmpty()) {
+            if (!chapterUrl.isEmpty() || chapters.isEmpty()) {
                 break;
             }
             currentPage++;
@@ -438,7 +435,7 @@ public class TruyenChuTHCrawler extends WebCrawler implements IDataCrawler {
                     .tagId(comicTagId)
                     .title(title)
                     .image(image)
-                    .alternateImage(this.ALTERNATE_IMAGE)
+                    .alternateImage(ALTERNATE_IMAGE)
                     .genres(genres)
                     .author(author)
                     .isFull(isFull)

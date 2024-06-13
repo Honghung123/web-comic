@@ -28,7 +28,7 @@ function DownloadModal({ open, setOpen, chapter }) {
                     converter_id: currentConverterId,
                 },
                 header: {
-                    'list-converters': converters.map((converter) => converter.id),
+                    list_converters: converters.map((converter) => converter.id),
                 },
                 responseType: 'blob',
             });

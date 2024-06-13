@@ -72,7 +72,7 @@ function SearchBox() {
                         server_id,
                     },
                     headers: {
-                        'list-crawlers': JSON.stringify(servers.map((server) => server.id)),
+                        list_crawlers: JSON.stringify(servers.map((server) => server.id)),
                     },
                 })
                 .then((response) => {

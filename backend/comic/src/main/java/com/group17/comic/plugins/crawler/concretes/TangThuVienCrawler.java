@@ -122,7 +122,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
                     .tagId(comicTagId)
                     .title(title)
                     .image(image)
-                    .alternateImage(this.ALTERNATE_IMAGE)
+                    .alternateImage(ALTERNATE_IMAGE)
                     .genres(genres)
                     .author(author)
                     .totalChapter(totalChapter)
@@ -177,7 +177,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
                     .tagId(comicTagId)
                     .title(title)
                     .image(image)
-                    .alternateImage(this.ALTERNATE_IMAGE)
+                    .alternateImage(ALTERNATE_IMAGE)
                     .genres(genres)
                     .author(author)
                     .totalChapter(totalChapter)
@@ -229,7 +229,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
                     .tagId(comicTagId)
                     .title(title)
                     .image(image)
-                    .alternateImage(this.ALTERNATE_IMAGE)
+                    .alternateImage(ALTERNATE_IMAGE)
                     .genres(genres)
                     .author(author)
                     .totalChapter(totalChapter)
@@ -298,7 +298,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
                     .tagId(comicTagId)
                     .title(title)
                     .image(image)
-                    .alternateImage(this.ALTERNATE_IMAGE)
+                    .alternateImage(ALTERNATE_IMAGE)
                     .genres(genres)
                     .author(author)
                     .totalChapter(totalChapter)
@@ -349,7 +349,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
                 .tagId(comicTagId)
                 .title(title)
                 .image(image)
-                .alternateImage(this.ALTERNATE_IMAGE)
+                .alternateImage(ALTERNATE_IMAGE)
                 .description(description)
                 .author(author)
                 .genres(genres)
@@ -509,16 +509,13 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
             if (chapters == null) {
                 throw new BusinessException(ExceptionType.GET_COMIC_CHAPTER_LIST_FAILED);
             }
-            if (chapters.isEmpty()) {
-                break;
-            }
             for (Chapter chapter : chapters) {
                 if (chapter.getChapterNumber() == altChapterDto.chapterNumber()) {
                     chapterUrl = chapter.getChapterNo();
                     break;
                 }
             }
-            if (!chapterUrl.isEmpty()) {
+            if (!chapterUrl.isEmpty() || chapters.isEmpty()) {
                 break;
             }
             currentPage++;
@@ -553,7 +550,7 @@ public class TangThuVienCrawler extends WebCrawler implements IDataCrawler {
                     .tagId(comicTagId)
                     .title(title)
                     .image(image)
-                    .alternateImage(this.ALTERNATE_IMAGE)
+                    .alternateImage(ALTERNATE_IMAGE)
                     .genres(genres)
                     .author(author)
                     .totalChapter(totalChapter)

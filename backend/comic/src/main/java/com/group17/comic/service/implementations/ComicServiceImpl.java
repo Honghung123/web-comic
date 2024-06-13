@@ -1,12 +1,8 @@
 package com.group17.comic.service.implementations;
 
-import com.group17.comic.enums.ExceptionType;
-import com.group17.comic.enums.PluginServiceType;
-import com.group17.comic.exceptions.BusinessException;
 import com.group17.comic.plugins.crawler.IDataCrawler;
-import com.group17.comic.service.IComicService;
-import com.group17.comic.service.ICrawlerPluginService;
-import com.group17.comic.service.IExporterPluginService;
+import com.group17.comic.service.*;
+
 import org.springframework.stereotype.Service;
 
 import com.group17.comic.dtos.request.AlternatedChapterRequest;
@@ -21,32 +17,16 @@ import java.util.UUID;
 @Service("comicServiceV1")
 @RequiredArgsConstructor
 public class ComicServiceImpl implements IComicService {
-    private final PluginServiceProviderImpl supportComicService;
+    private final ICrawlerPluginService crawlerPluginService;
 
-    private ICrawlerPluginService getCrawlerPluginService() {
-        return (ICrawlerPluginService) supportComicService
-                .getPluginServiceByType(PluginServiceType.CRAWLER_SERVICE);
+    private IDataCrawler getConcretePlugin(UUID pluginId){
+        var res = crawlerPluginService.getPluginById(pluginId);
+        return (IDataCrawler) res;
     }
 
-    private IExporterPluginService getExporterPluginService() {
-        return (IExporterPluginService) supportComicService
-                .getPluginServiceByType(PluginServiceType.EXPORTER_SERVICE);
-    }
-
-    private IDataCrawler getCrawlerPlugin(UUID pluginId){
-        var crawlerService = this.getCrawlerPluginService();
-        return (IDataCrawler) crawlerService.getPluginById(pluginId);
-    }
-
-    private UUID getDefaultPluginIdIfNull(UUID id, PluginServiceType pluginType) {
+    private UUID getDefaultPluginIdIfNull(UUID id) {
         if (id == null){
-            switch (pluginType) {
-                case CRAWLER_SERVICE ->
-                        this.supportComicService.getDefaultPluginId(this.getCrawlerPluginService());
-                case EXPORTER_SERVICE ->
-                        this.supportComicService.getDefaultPluginId(this.getExporterPluginService());
-                default -> throw new BusinessException(ExceptionType.INVALID_PLUGIN_SERVICE_TYPE);
-            }
+            return crawlerPluginService.getDefaultPluginId();
         }
         return id;
     }
@@ -54,64 +34,63 @@ public class ComicServiceImpl implements IComicService {
     @SneakyThrows
     @Override
     public List<Genre> getAllGenres(UUID pluginId) {
-        pluginId = this.getDefaultPluginIdIfNull(pluginId, PluginServiceType.CRAWLER_SERVICE);
-        return this.getCrawlerPlugin(pluginId).getGenres();
+        pluginId = this.getDefaultPluginIdIfNull(pluginId);
+        return this.getConcretePlugin(pluginId).getGenres();
     }
 
     @SneakyThrows
     @Override
     public PageableData<Integer, List<LatestComic>> getNewestCommic(UUID pluginId, int page) {
-        pluginId = this.getDefaultPluginIdIfNull(pluginId, PluginServiceType.CRAWLER_SERVICE);
-        return this.getCrawlerPlugin(pluginId).getLastedComics(page);
+        pluginId = this.getDefaultPluginIdIfNull(pluginId);
+        return this.getConcretePlugin(pluginId).getLastedComics(page);
     }
 
     @SneakyThrows
     @Override
     public Comic getComicInfo(UUID pluginId, String tagUrl) {
-        pluginId = this.getDefaultPluginIdIfNull(pluginId, PluginServiceType.CRAWLER_SERVICE);
-        return this.getCrawlerPlugin(pluginId).getComicInfo(tagUrl);
+        pluginId = this.getDefaultPluginIdIfNull(pluginId);
+        return this.getConcretePlugin(pluginId).getComicInfo(tagUrl);
     }
-
 
     @SneakyThrows
     @Override
     public SearchingPageableData<Integer, List<LatestComic>, List<AuthorResponse>> searchComic(UUID pluginId,
                                                                                                String keyword, String byGenres, int currentPage) {
-        pluginId = this.getDefaultPluginIdIfNull(pluginId, PluginServiceType.CRAWLER_SERVICE);
-        return this.getCrawlerPlugin(pluginId).search(keyword, byGenres, currentPage);
+        pluginId = this.getDefaultPluginIdIfNull(pluginId);
+        return this.getConcretePlugin(pluginId).search(keyword, byGenres, currentPage);
     }
 
     @SneakyThrows
     @Override
     public PageableData<Integer, List<Chapter>> getChapters(UUID pluginId, String tagId, int currentPage) {
-        pluginId = this.getDefaultPluginIdIfNull(pluginId, PluginServiceType.CRAWLER_SERVICE);
-        return this.getCrawlerPlugin(pluginId).getChapters(tagId, currentPage);
+        pluginId = this.getDefaultPluginIdIfNull(pluginId);
+        return this.getConcretePlugin(pluginId).getChapters(tagId, currentPage);
     }
 
     @SneakyThrows
     @Override
     public Comic getComicInfoOnOtherServer(UUID pluginId, AlternatedChapterRequest altChapterDto) {
-        pluginId = this.getDefaultPluginIdIfNull(pluginId, PluginServiceType.CRAWLER_SERVICE);
-        return this.getCrawlerPlugin(pluginId).getComicInfoOnOtherServer(altChapterDto);
+        pluginId = this.getDefaultPluginIdIfNull(pluginId);
+        return this.getConcretePlugin(pluginId).getComicInfoOnOtherServer(altChapterDto);
     }
 
     @SneakyThrows
     @Override
     public PageableData<?, ComicChapterContent> getComicChapterContent(UUID pluginId, String tagId, String currentChapter) {
-        pluginId = this.getDefaultPluginIdIfNull(pluginId, PluginServiceType.CRAWLER_SERVICE);
-        return this.getCrawlerPlugin(pluginId).getComicChapterContent(tagId, currentChapter);
+        pluginId = this.getDefaultPluginIdIfNull(pluginId);
+        return this.getConcretePlugin(pluginId).getComicChapterContent(tagId, currentChapter);
     }
 
     @Override
     public PageableData<?, ComicChapterContent> getComicChapterContentOnOtherServer(UUID pluginId,
                                                                                     AlternatedChapterRequest altChapterDto) {
-        pluginId = this.getDefaultPluginIdIfNull(pluginId, PluginServiceType.CRAWLER_SERVICE);
-        return this.getCrawlerPlugin(pluginId).getComicChapterContentOnOtherServer(altChapterDto);
+        pluginId = this.getDefaultPluginIdIfNull(pluginId);
+        return this.getConcretePlugin(pluginId).getComicChapterContentOnOtherServer(altChapterDto);
     }
 
     @Override
     public PageableData<Integer, List<LatestComic>> getComicsOfAnAuthor(UUID pluginId, String authorId, String tagId, int page) {
-        pluginId = this.getDefaultPluginIdIfNull(pluginId, PluginServiceType.CRAWLER_SERVICE);
-        return this.getCrawlerPlugin(pluginId).getComicsByAuthor(authorId, tagId, page);
+        pluginId = this.getDefaultPluginIdIfNull(pluginId);
+        return this.getConcretePlugin(pluginId).getComicsByAuthor(authorId, tagId, page);
     }
 }

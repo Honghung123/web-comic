@@ -70,7 +70,7 @@ function ReadingChapter() {
                         server_id: serverId,
                     },
                     headers: {
-                        'list-crawlers': JSON.stringify(servers.map((server) => server.id)),
+                        list_crawlers: JSON.stringify(servers.map((server) => server.id)),
                     },
                 })
                 .then((response) => {
@@ -133,7 +133,7 @@ function ReadingChapter() {
                                 server_id,
                             },
                             headers: {
-                                'list-crawlers': JSON.stringify(servers.map((server) => server.id)),
+                                list_crawlers: JSON.stringify(servers.map((server) => server.id)),
                             },
                         },
                     );
@@ -296,7 +296,7 @@ function ReadingChapter() {
                                                             id={color}
                                                             className={`rounded-full border text-purple-500 ${color} ${
                                                                 bgColor === color ? 'border-purple-500' : ''
-                                                            }  h-8 w-8 cursor-pointer text-center`}
+                                                            }  h-8 w-8 customized-cursor text-center`}
                                                         >
                                                             {bgColor === color && <CheckRoundedIcon />}
                                                         </div>

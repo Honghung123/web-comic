@@ -6,8 +6,9 @@ import java.util.UUID;
 import com.group17.comic.dtos.request.AlternatedChapterRequest;
 import com.group17.comic.dtos.response.AuthorResponse;
 import com.group17.comic.models.*;
+import com.group17.comic.tagging_interfaces.IPluginType;
 
-public interface IDataCrawler {
+public interface IDataCrawler extends IPluginType {
     UUID getID();
     String getPluginName();
     List<Genre> getGenres();

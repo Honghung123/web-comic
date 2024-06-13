@@ -19,7 +19,7 @@ function SettingServer({ serverId, setServerId }) {
                         <Tippy key={server.id} content={server.name}>
                             <div
                                 id={server.id}
-                                className={`rounded-md text-lg text-center ml-4 cursor-pointer p-[4px_12px] ${
+                                className={`rounded-md text-lg text-center ml-4 customized-cursor p-[4px_12px] ${
                                     server.id === serverId ? 'bg-purple-400 text-white' : 'bg-gray-200'
                                 }`}
                                 onClick={handleChangeServer}

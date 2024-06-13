@@ -35,7 +35,7 @@ function ListComics() {
                         keyword,
                     },
                     headers: {
-                        'list-crawlers': JSON.stringify(servers.map((server) => server.id)),
+                        list_crawlers: JSON.stringify(servers.map((server) => server.id)),
                     },
                 })
                 .then((response) => {

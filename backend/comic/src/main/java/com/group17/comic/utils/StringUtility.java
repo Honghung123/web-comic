@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.group17.comic.enums.ExceptionType;
+import com.group17.comic.exceptions.BusinessException;
 
 public class StringUtility {
     private StringUtility() {}
@@ -17,7 +19,7 @@ public class StringUtility {
     }
     
     public static String findLongestCommonSubstring(String str1, String str2) {
-        if (str1.length() == 0 || str2.length() == 0) {
+        if (str1.isEmpty() || str2.isEmpty()) {
             return "";
         }
         int[][] dp = new int[str1.length() + 1][str2.length() + 1];
@@ -44,13 +46,13 @@ public class StringUtility {
         return Integer.parseInt(numberStr);
     }
 
-    public static int extractChapterNoFromString(String str) throws Exception{
+    public static int extractChapterNoFromString(String str) throws NumberFormatException{
         String regex = "\\d+"; 
 	    var matcher = Pattern.compile(regex).matcher(str);
 	    if(matcher.find()){
 		    return Integer.parseInt(matcher.group(0));
 	    }else{
-            throw new Exception("Can't get chapter number");
+            throw new NumberFormatException("Can't get chapter number");
         }
     }
 
@@ -60,7 +62,7 @@ public class StringUtility {
         try {
             strList = Arrays.asList(objMapper.readValue(json, String[].class));
         }catch(Exception e) {
-            strList = List.of();
+            throw new BusinessException(ExceptionType.INVALID_PLUGIN_ID_LIST);
         }
         return strList;
     }

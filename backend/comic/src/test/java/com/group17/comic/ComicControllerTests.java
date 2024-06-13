@@ -2,16 +2,11 @@ package com.group17.comic;
 
 import com.group17.comic.configurations.CommonConfiguration;
 import com.group17.comic.configurations.Constants;
-import com.group17.comic.enums.PluginServiceType;
 import com.group17.comic.exceptions.BusinessException;
-import com.group17.comic.factories.PluginFactory;
 import com.group17.comic.models.CrawlerPlugin;
-import com.group17.comic.service.IPluginService;
 import com.group17.comic.service.implementations.CrawlerPluginServiceImpl;
 import com.group17.comic.service.implementations.ExporterPluginServiceImpl;
-import com.group17.comic.service.implementations.PluginServiceProviderImpl;
 import jakarta.annotation.PostConstruct;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,8 +38,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(SpringExtension.class)
 class ComicControllerTests {
     @SpyBean private ComicServiceImpl comicService;
-    @SpyBean private PluginServiceProviderImpl pluginService;
-    @SpyBean private PluginFactory pluginFactory;
     @SpyBean private CrawlerPluginServiceImpl crawlerService;
     @SpyBean private ExporterPluginServiceImpl exporterService;
     @Autowired private MockMvc mockMvc;
@@ -53,18 +46,9 @@ class ComicControllerTests {
     @PostConstruct
     void init() {
         assertNotNull(comicService);
-        assertNotNull(pluginService);
         assertNotNull(mockMvc);
         assertNotNull(objectMapper);
     }
-
-    @BeforeEach
-    void beforeEachTests(){
-//        pluginService.checkCrawlerPlugins();
-        var crawlerService = pluginService.getPluginServiceByType(PluginServiceType.CRAWLER_SERVICE);
-        assertNotNull(crawlerService);
-    }
-
 
     private AlternatedChapterRequest mockAlternatedChapterDTO(String title, String authorName, String tagId, int chapterNumber) {
         return new AlternatedChapterRequest(title, authorName, tagId, chapterNumber);
@@ -74,14 +58,9 @@ class ComicControllerTests {
         return new CrawlerPlugin(UUID.fromString("123e4567-e89b-12d3-a456-426614173000"), "Tang Thu Vien");
     }
 
-    private IPluginService getPluginServiceByType(PluginServiceType type) {
-        return pluginService.getPluginServiceByType(type);
-    }
-
     @Test
     void testDependencyInjection() {
         assertThat(comicService).isNotNull();
-        assertThat(pluginService).isNotNull();
         assertThat(mockMvc).isNotNull();
         assertThat(objectMapper).isNotNull();
     }
@@ -106,7 +85,7 @@ class ComicControllerTests {
         mockMvc.perform(MockMvcRequestBuilders.post(requestUrl)
                         .content(jsonObject)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("list-crawlers", objectMapper.writeValueAsString(Constants.SERVER_LIST))
+                        .header("list_crawlers", objectMapper.writeValueAsString(Constants.SERVER_LIST))
                         .param("server_id", "123e4567-e89b-12d3-a456-426614173000")
                 ).andExpect(MockMvcResultMatchers.status().isOk())
                 .andDo(MockMvcResultHandlers.print());
@@ -122,7 +101,7 @@ class ComicControllerTests {
             mockMvc.perform(MockMvcRequestBuilders.post(requestUrl)
                             .content(jsonObject)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("list-crawlers", objectMapper.writeValueAsString(serverList))
+                            .header("list_crawlers", objectMapper.writeValueAsString(serverList))
                             .param("server_id", "123e4567-e89b-12d3-a456-426614173000")
                     )
                     .andExpect(MockMvcResultMatchers.status().isInternalServerError())

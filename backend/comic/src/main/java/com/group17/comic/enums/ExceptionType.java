@@ -19,12 +19,14 @@ public enum ExceptionType {
     GET_CHAPTER_TITLE_FAILED(404, "Get chapter title failed" ),
     REQUEST_SERVER_TO_CRAWL_FAILED(500, "Request server to crawl failed"),
     INVALID_COMIC_TAG_ID(400, "Invalid comic tag id" ),
-
     PLUGIN_NOT_FOUND(500, "Plugin not found"),
     PLUGIN_LIST_CHANGED(400, "Plugin list changed. Please refresh page" ),
     INVALID_PLUGIN_SERVICE_TYPE(500, "Invalid plugin service type" ),
     TRACK_CONVERT_PROGRESS_FAILED(500, "Track convert progress failed"),
-    GET_CONVERTED_FILE_FAILED(500, "Get converted file failed" );
+    GET_CONVERTED_FILE_FAILED(500, "Get converted file failed" ), 
+    PLUGIN_SERVICE_NOT_FOUND(500, "Plugin service not found"),
+    INVALID_PLUGIN_CONCRETE_TYPE(500, "Invalid plugin concrete type" ),
+    INVALID_PLUGIN_ID_LIST(400, "Invalid plugin id list" );
 
     private final int code;
     private final String message;

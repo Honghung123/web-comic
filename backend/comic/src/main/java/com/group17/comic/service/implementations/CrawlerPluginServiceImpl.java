@@ -18,8 +18,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.UUID; 
 
 @Service("crawlerPluginServiceV1")
 @Slf4j
@@ -76,13 +75,11 @@ public class CrawlerPluginServiceImpl implements ICrawlerPluginService {
 
     @Override
     public UUID getPluginIdByName(String name) {
-        Optional<IDataCrawler> matchedCrawler = crawlers.stream()
+        var crawlerPlugin = crawlers.stream()
                 .filter(crawler -> crawler.getPluginName().equals(name))
-                .findFirst();
-        if (matchedCrawler.isPresent()) {
-            return matchedCrawler.get().getID();
-        }
-        throw new BusinessException(ExceptionType.PLUGIN_NOT_FOUND);
+                .findFirst()
+                .orElseThrow(() -> new BusinessException(ExceptionType.PLUGIN_NOT_FOUND));
+        return crawlerPlugin.getID();
     }
 
     @SneakyThrows
@@ -93,5 +90,4 @@ public class CrawlerPluginServiceImpl implements ICrawlerPluginService {
             throw new BusinessException(ExceptionType.PLUGIN_LIST_CHANGED);
         }
     }
-
 }

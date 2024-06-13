@@ -18,8 +18,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.UUID; 
 
 @Service("exporterPluginServiceV1")
 public class ExporterPluginServiceImpl implements IExporterPluginService {
@@ -86,13 +85,11 @@ public class ExporterPluginServiceImpl implements IExporterPluginService {
 
     @Override
     public UUID getPluginIdByName(String name) {
-        Optional<IFileExporter> matchedConverter = exporters.stream()
+        var exporterPlugin = exporters.stream()
                 .filter(exporter -> exporter.getPluginName().equals(name))
-                .findFirst();
-        if (matchedConverter.isPresent()) {
-            return matchedConverter.get().getId();
-        }
-        throw new BusinessException(ExceptionType.PLUGIN_NOT_FOUND);
+                .findFirst()
+                .orElseThrow(() -> new BusinessException(ExceptionType.PLUGIN_NOT_FOUND));
+        return exporterPlugin.getId();
     }
 
     @SneakyThrows

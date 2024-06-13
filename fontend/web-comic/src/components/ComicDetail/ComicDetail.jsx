@@ -27,7 +27,7 @@ function ComicDetail({ tagId, serverId }) {
                 .get(`${process.env.REACT_APP_API_URL}/comic/reading/${tagId}`, {
                     params: { server_id: serverIdState },
                     headers: {
-                        'list-crawlers': JSON.stringify(servers.map((server) => server.id)),
+                        list_crawlers: JSON.stringify(servers.map((server) => server.id)),
                     },
                 })
                 .then((response) => {
@@ -59,7 +59,7 @@ function ComicDetail({ tagId, serverId }) {
                         page: 1,
                     },
                     headers: {
-                        'list-crawlers': JSON.stringify(servers.map((server) => server.id)),
+                        list_crawlers: JSON.stringify(servers.map((server) => server.id)),
                     },
                 })
                 .then((response) => {
@@ -74,7 +74,7 @@ function ComicDetail({ tagId, serverId }) {
                                     page: responseData.pagination?.totalPages,
                                 },
                                 headers: {
-                                    'list-crawlers': JSON.stringify(servers.map((server) => server.id)),
+                                    list_crawlers: JSON.stringify(servers.map((server) => server.id)),
                                 },
                             })
                             .then((response) => {
@@ -122,7 +122,7 @@ function ComicDetail({ tagId, serverId }) {
                                 server_id,
                             },
                             headers: {
-                                'list-crawlers': JSON.stringify(servers.map((server) => server.id)),
+                                list_crawlers: JSON.stringify(servers.map((server) => server.id)),
                             },
                         },
                     );

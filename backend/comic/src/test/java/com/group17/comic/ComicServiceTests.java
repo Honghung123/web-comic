@@ -2,18 +2,15 @@ package com.group17.comic;
 
 import com.group17.comic.dtos.request.AlternatedChapterRequest;
 import com.group17.comic.dtos.response.AuthorResponse;
-import com.group17.comic.enums.PluginServiceType;
-import com.group17.comic.factories.PluginFactory;
 import com.group17.comic.models.*;
 import com.group17.comic.service.IComicService;
-import com.group17.comic.service.IPluginServiceProvider;
+import com.group17.comic.service.ICrawlerPluginService;
 import jakarta.annotation.PostConstruct;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,15 +23,14 @@ class ComicServiceTests {
 	private IComicService comicService;
 
 	@Autowired
-	private IPluginServiceProvider pluginServiceProvider;
-
-	@Autowired
-	private PluginFactory pluginFactory;
+	@Qualifier("crawlerPluginServiceV1")
+	private ICrawlerPluginService crawlerPluginService;
 
 	@PostConstruct
-	public void init() throws IOException {
-		pluginServiceProvider.getPluginServiceByType(PluginServiceType.CRAWLER_SERVICE).checkCurrentPlugins();
-		pluginServiceProvider.getPluginServiceByType(PluginServiceType.EXPORTER_SERVICE).checkCurrentPlugins();
+	void init(){
+		assertThat(comicService).isNotNull();
+		assertThat(crawlerPluginService).isNotNull();
+		crawlerPluginService.checkCurrentPlugins();
 	}
 
 	public PageableData<Integer, List<Chapter>> getChaptersTest(UUID pluginId, String tagId, int currentPage) {
@@ -75,6 +71,6 @@ class ComicServiceTests {
 	@Test
 	void demo(){
 		assertThat(comicService).isNotNull();
-		assertThat(pluginServiceProvider).isNotNull();
+		assertThat(crawlerPluginService).isNotNull();
 	}
 }
