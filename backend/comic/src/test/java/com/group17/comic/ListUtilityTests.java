@@ -1,19 +1,20 @@
 package com.group17.comic;
 
-import com.group17.comic.utils.ListUtility;
-import com.group17.comic.utils.StringUtility;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import com.group17.comic.utils.ListUtility;
+import com.group17.comic.utils.StringUtility;
 
 @SpringBootTest
 class ListUtilityTests {
     @Test
-    void testEqual_CompareTwoArrays_ReturnsTrue(){
-        var exampleArr = List.of("apple", "banana", "cherry" );
+    void testEqual_CompareTwoArrays_ReturnsTrue() {
+        var exampleArr = List.of("apple", "banana", "cherry");
         String arrJson = "[\"apple\", \"banana\", \"cherry\"]";
         try {
             var arr = StringUtility.getArrayFromJSON(arrJson);
@@ -25,8 +26,8 @@ class ListUtilityTests {
     }
 
     @Test
-    void testEqual_CompareTwoArrays_ReturnsFalse(){
-        var exampleArr = List.of("apple", "banana", "orange" );
+    void testEqual_CompareTwoArrays_ReturnsFalse() {
+        var exampleArr = List.of("apple", "banana", "orange");
         String arrJson = "[\"apple\", \"banana\", \"cherry\"]";
         try {
             var arr = StringUtility.getArrayFromJSON(arrJson);

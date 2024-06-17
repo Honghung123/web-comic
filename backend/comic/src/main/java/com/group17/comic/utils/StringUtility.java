@@ -15,9 +15,13 @@ public class StringUtility {
     public static String removeDiacriticalMarks(String str) {
         String temp = Normalizer.normalize(str, Normalizer.Form.NFD);
         Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
-        return pattern.matcher(temp).replaceAll("").replace('đ','d').replace('Đ','D').trim();
+        return pattern.matcher(temp)
+                .replaceAll("")
+                .replace('đ', 'd')
+                .replace('Đ', 'D')
+                .trim();
     }
-    
+
     public static String findLongestCommonSubstring(String str1, String str2) {
         if (str1.isEmpty() || str2.isEmpty()) {
             return "";
@@ -37,45 +41,46 @@ public class StringUtility {
                     dp[i][j] = 0;
                 }
             }
-        }        
+        }
         return str1.substring(endIndexStr1 - maxLength, endIndexStr1);
     }
 
-    public static int extractNumberFromString(String str){
+    public static int extractNumberFromString(String str) {
         String numberStr = str.replaceAll("\\D+", "");
         return Integer.parseInt(numberStr);
     }
 
-    public static int extractChapterNoFromString(String str) throws NumberFormatException{
-        String regex = "\\d+"; 
-	    var matcher = Pattern.compile(regex).matcher(str);
-	    if(matcher.find()){
-		    return Integer.parseInt(matcher.group(0));
-	    }else{
+    public static int extractChapterNoFromString(String str) throws NumberFormatException {
+        String regex = "\\d+";
+        var matcher = Pattern.compile(regex).matcher(str);
+        if (matcher.find()) {
+            return Integer.parseInt(matcher.group(0));
+        } else {
             throw new NumberFormatException("Can't get chapter number");
         }
     }
 
-    public static List<String> getArrayFromJSON(String json){
+    public static List<String> getArrayFromJSON(String json) {
         var objMapper = new ObjectMapper();
-        List<String> strList = null; 
+        List<String> strList = null;
         try {
             strList = Arrays.asList(objMapper.readValue(json, String[].class));
-        }catch(Exception e) {
+        } catch (Exception e) {
             throw new BusinessException(ExceptionType.INVALID_PLUGIN_ID_LIST);
         }
         return strList;
     }
 
     public static String removeHtmlTags(String content) {
-        var defaultHtmlTags = List.of("h1", "h2", "h3", "h4", "h5", "h6", "div", "p", "br", "span", "hr", "ul", "li", "ol");
+        var defaultHtmlTags =
+                List.of("h1", "h2", "h3", "h4", "h5", "h6", "div", "p", "br", "span", "hr", "ul", "li", "ol");
         return removeWithSpecificHtmlTags(content, defaultHtmlTags);
     }
 
-    public static String removeWithSpecificHtmlTags(String html, List<String> tags){
-        for (String tag : tags) { 
+    public static String removeWithSpecificHtmlTags(String html, List<String> tags) {
+        for (String tag : tags) {
             String regexOpen = "<" + tag + "(\\s+[^>]*)?>";
-            String regexClose = "</" + tag + ">"; 
+            String regexClose = "</" + tag + ">";
             html = html.replaceAll(regexOpen, "");
             html = html.replaceAll(regexClose, "");
         }

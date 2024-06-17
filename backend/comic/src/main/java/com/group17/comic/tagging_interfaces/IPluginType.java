@@ -1,4 +1,3 @@
 package com.group17.comic.tagging_interfaces;
 
-public interface IPluginType {
-}
+public interface IPluginType {}

@@ -1,14 +1,16 @@
 package com.group17.comic.exceptions;
 
-import com.group17.comic.enums.ExceptionType;
 import org.springframework.http.HttpStatus;
+
+import com.group17.comic.enums.ExceptionType;
 
 import lombok.Getter;
 
 @Getter
-public class BusinessException extends RuntimeException{
+public class BusinessException extends RuntimeException {
     private final String message;
     private final HttpStatus status;
+
     public BusinessException(ExceptionType ex) {
         super(ex.getMessage());
         this.message = ex.getMessage();
@@ -20,4 +22,4 @@ public class BusinessException extends RuntimeException{
         this.message = message;
         this.status = HttpStatus.valueOf(ex.getCode());
     }
-} 
+}

@@ -1,5 +1,15 @@
 package com.group17.comic.plugins.exporter.concretes;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.UUID;
+
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.Gson;
 import com.group17.comic.dtos.request.ChapterRequest;
@@ -19,26 +29,20 @@ import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import okhttp3.Response; 
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.UUID;
+import okhttp3.Response;
 
 @Getter
 @Setter
 class Azw3Response {
     private long id;
     private String filename;
+
     @JsonProperty("source_format")
     private String sourceFormat;
+
     @JsonProperty("target_format")
     private String targetFormat;
+
     @JsonProperty("multi_output_files")
     private boolean multiOutputFiles;
 }
@@ -53,7 +57,7 @@ class Azw3ResponseExtend extends Azw3Response {
 
 @Getter
 @Setter
-class ConvertedResponse{
+class ConvertedResponse {
     private String url;
 }
 
@@ -112,7 +116,6 @@ public class Azw3Exporter implements IFileExporter {
         headers.setContentLength(Files.size(Paths.get(UPLOAD_DIR + fileName)));
         headers.setContentType(org.springframework.http.MediaType.parseMediaType("application/vnd.amazon.mobi8-ebook"));
         return new ChapterFile(headers, resource);
-
     }
 
     public byte[] saveAsAZW3FromText(String fileInputName) throws Exception {
@@ -129,10 +132,7 @@ public class Azw3Exporter implements IFileExporter {
                 .addFormDataPart("api_key", API_KEY)
                 .addFormDataPart("conversion_id", String.valueOf(converterId))
                 .build();
-        Request request = new Request.Builder()
-                .url(reqUrl)
-                .post(requestBody)
-                .build();
+        Request request = new Request.Builder().url(reqUrl).post(requestBody).build();
         Response response = client.newCall(request).execute();
         if (response.isSuccessful() && response.body() != null) {
             return response.body().bytes();
@@ -149,10 +149,8 @@ public class Azw3Exporter implements IFileExporter {
                     .add("api_key", API_KEY)
                     .add("conversion_id", String.valueOf(converterId))
                     .build();
-            Request request = new Request.Builder()
-                    .url(reqUrl)
-                    .post(requestBody)
-                    .build();
+            Request request =
+                    new Request.Builder().url(reqUrl).post(requestBody).build();
             Response response = client.newCall(request).execute();
             var resBody = response.body().string();
             // Kiểm tra xem request có thành công không
@@ -173,13 +171,12 @@ public class Azw3Exporter implements IFileExporter {
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("api_key", API_KEY)
                 .addFormDataPart("target_format", TARGET_FORMAT)
-                .addFormDataPart("source", fileInputName,
+                .addFormDataPart(
+                        "source",
+                        fileInputName,
                         RequestBody.create(MediaType.parse("plain/txt"), new File(UPLOAD_DIR + fileInputName)))
                 .build();
-        Request request = new Request.Builder()
-                .url(API_URL)
-                .post(requestBody)
-                .build();
+        Request request = new Request.Builder().url(API_URL).post(requestBody).build();
         Response response = client.newCall(request).execute();
         String res = response.body().string();
         if (response.isSuccessful()) {

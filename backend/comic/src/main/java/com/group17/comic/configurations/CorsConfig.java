@@ -20,7 +20,7 @@ public class CorsConfig {
         config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001"));
         config.addAllowedHeader("*");
         config.addAllowedMethod("*"); // Accept all methods
-        source.registerCorsConfiguration("/**", config);  // Accept all routes
+        source.registerCorsConfiguration("/**", config); // Accept all routes
         FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(source));
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return bean;

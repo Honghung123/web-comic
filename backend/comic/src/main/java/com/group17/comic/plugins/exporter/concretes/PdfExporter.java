@@ -5,25 +5,26 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.UUID;
 
+import org.jsoup.HttpStatusException;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
-import com.group17.comic.utils.FileUtility;
-import com.group17.comic.utils.StringUtility;
-import lombok.SneakyThrows;
-import okhttp3.*;
-
-import org.jsoup.HttpStatusException;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders; 
-
 import com.group17.comic.dtos.request.ChapterRequest;
 import com.group17.comic.dtos.response.ChapterFile;
 import com.group17.comic.plugins.exporter.IFileExporter;
+import com.group17.comic.utils.FileUtility;
+import com.group17.comic.utils.StringUtility;
+
+import lombok.SneakyThrows;
+import okhttp3.*;
 
 public class PdfExporter implements IFileExporter {
     private static final String UPLOAD_DIR = "backend/comic/src/main/java/com/group17/comic/plugins/exporter/uploads/";
     private static final UUID PLUGIN_ID = UUID.randomUUID();
+
     @Override
     public UUID getId() {
         return PLUGIN_ID;
@@ -45,9 +46,9 @@ public class PdfExporter implements IFileExporter {
         String formatTitile = StringUtility.removeDiacriticalMarks(chapterDto.title());
         formatTitile = formatTitile.replaceAll("[^a-zA-Z0-9]", "-").trim();
         String fileName = formatTitile + ".pdf";
-        // Convert html to pdf online, and download it afterwards 
+        // Convert html to pdf online, and download it afterwards
         byte[] fileBytes = this.savePdfFromText(chapterDto.content(), fileName);
-        // Then save the pdf file to folder  
+        // Then save the pdf file to folder
         String uploadFolderAbsolutePath = Paths.get(UPLOAD_DIR).toAbsolutePath().toString();
         File uploadFolderFile = new File(uploadFolderAbsolutePath);
         FileUtility.deleteDirectory(uploadFolderFile);
@@ -96,18 +97,17 @@ public class PdfExporter implements IFileExporter {
                 // Get URL of generated PDF file
                 String resultFileUrl = json.get("url").getAsString();
                 // Prepare request
-                Request downloadFileRequest = new Request.Builder()
-                        .url(resultFileUrl)
-                        .build();
+                Request downloadFileRequest =
+                        new Request.Builder().url(resultFileUrl).build();
                 // Execute request
-                Response downloadFileResponse = webClient.newCall(downloadFileRequest).execute();
+                Response downloadFileResponse =
+                        webClient.newCall(downloadFileRequest).execute();
                 return downloadFileResponse.body().bytes();
             } else {
                 throw new IOException(json.get("message").getAsString());
             }
         } else {
             throw new HttpStatusException(response.code() + " " + response.message(), response.code(), url);
-        } 
+        }
     }
-
 }

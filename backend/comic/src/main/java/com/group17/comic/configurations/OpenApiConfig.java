@@ -13,30 +13,31 @@ import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.servers.Server;
 
 @Configuration
-public class OpenApiConfig { 
+public class OpenApiConfig {
 
     @Bean
     public OpenAPI openApi(
-        @Value("${comic.api.document_name}") String documentName,
-        @Value("${comic.api.version}") String version,
-        @Value("${comic.api.description}") String description,
-        @Value("${comic.api.server.local.url}") String serverUrl,
-        @Value("${comic.api.server.local.description}") String serverDescription
-    ){
+            @Value("${comic.api.document_name}") String documentName,
+            @Value("${comic.api.version}") String version,
+            @Value("${comic.api.description}") String description,
+            @Value("${comic.api.server.local.url}") String serverUrl,
+            @Value("${comic.api.server.local.description}") String serverDescription) {
         var license = new License().name("API License").url("http://group17.hcmus.edu.vn/license");
         List<Server> serverList = List.of(new Server().url(serverUrl).description(serverDescription));
-        return new OpenAPI().info(new Info().title(documentName)
-                                            .version(version)
-                                            .description(description)
-                                            .license(license))
-                            .servers(serverList);
+        return new OpenAPI()
+                .info(new Info()
+                        .title(documentName)
+                        .version(version)
+                        .description(description)
+                        .license(license))
+                .servers(serverList);
     }
 
     @Bean
-    public GroupedOpenApi groupedOpenApi(){
+    public GroupedOpenApi groupedOpenApi() {
         return GroupedOpenApi.builder()
-                            .group("comic-api-service")
-                            .packagesToScan("com.group17.comic.controllers")
-                            .build();
+                .group("comic-api-service")
+                .packagesToScan("com.group17.comic.controllers")
+                .build();
     }
 }

@@ -27,15 +27,17 @@ import okhttp3.Response;
 public class DocxExporter implements IFileExporter {
     private static final String UPLOAD_DIR = "backend/comic/src/main/java/com/group17/comic/plugins/exporter/uploads/";
     private static final UUID PLUGIN_ID = UUID.randomUUID();
+
     @Override
     public UUID getId() {
         return PLUGIN_ID;
     }
+
     @Override
     public String getPluginName() {
         return "DOCX";
     }
-    
+
     @Override
     public String getBlobType() {
         return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
@@ -44,21 +46,22 @@ public class DocxExporter implements IFileExporter {
     @SneakyThrows
     @Override
     public ChapterFile getConvertedFile(ChapterRequest chapterDto) {
-        String formatedTitle = StringUtility.removeDiacriticalMarks(chapterDto.title()).replaceAll("[^a-zA-Z0-9]", "-").trim();
+        String formatedTitle = StringUtility.removeDiacriticalMarks(chapterDto.title())
+                .replaceAll("[^a-zA-Z0-9]", "-")
+                .trim();
         String htmlFile = formatedTitle + ".html";
-        String fileOutputName = formatedTitle + ".docx";     
-        // Create a html file and save it to folder   
-        String simpleHtmlContent = 
-            "<!DOCTYPE html>\n" 
-            + "<html>\n" 
-            + "<head>\n" 
-            + "<title>Sample HTML File</title>\n" 
-            + "</head>\n" 
-            + "<body>\n" 
-            + chapterDto.content() 
-            + "\n" 
-            + "</body>\n" 
-            + "</html>";
+        String fileOutputName = formatedTitle + ".docx";
+        // Create a html file and save it to folder
+        String simpleHtmlContent = "<!DOCTYPE html>\n"
+                + "<html>\n"
+                + "<head>\n"
+                + "<title>Sample HTML File</title>\n"
+                + "</head>\n"
+                + "<body>\n"
+                + chapterDto.content()
+                + "\n"
+                + "</body>\n"
+                + "</html>";
         String htmlFilePath = UPLOAD_DIR + htmlFile;
         String uploadFolderAbsolutePath = Paths.get(UPLOAD_DIR).toAbsolutePath().toString();
         File uploadFolderFile = new File(uploadFolderAbsolutePath);
@@ -67,16 +70,15 @@ public class DocxExporter implements IFileExporter {
         FileUtility.createFile(htmlFilePath, simpleHtmlContent);
         // Then get the saved html file from folder to convert to docx, and download it afterwards
         byte[] fileBytes = this.convertFileOnline(htmlFile, htmlFilePath, fileOutputName);
-        // Next, save download converted docx to folder 
+        // Next, save download converted docx to folder
         File destinationFile = Paths.get(UPLOAD_DIR + fileOutputName).toFile();
-        FileUtility.saveDownloadedBytesToFolder(fileBytes, destinationFile); 
+        FileUtility.saveDownloadedBytesToFolder(fileBytes, destinationFile);
         // Finally, get the saved docx file from folder to return to client
-        InputStreamResource resource = 
-                    new InputStreamResource(new FileInputStream(UPLOAD_DIR + fileOutputName));
-        HttpHeaders headers = new HttpHeaders();  
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(UPLOAD_DIR + fileOutputName));
+        HttpHeaders headers = new HttpHeaders();
         headers.setContentLength(Files.size(Paths.get(UPLOAD_DIR + fileOutputName)));
-        headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);  
-        return new ChapterFile(headers, resource); 
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);
+        return new ChapterFile(headers, resource);
     }
 
     @SuppressWarnings("deprecation")
@@ -85,20 +87,20 @@ public class DocxExporter implements IFileExporter {
         String api = "https://api.apyhub.com/convert/html-file/doc-file?output=";
         String apyToken = "APY0Xu6XpJitjtR6YduOHqBpPgg3d6XbDm5SNb4R6ava3bX81L2jjuEtLiJ4jtG1xjqz4GNqy";
         RequestBody requestBody = new MultipartBody.Builder()
-            .setType(MultipartBody.FORM)
-            .addFormDataPart("file", htmlFile, 
-                    RequestBody.create(MediaType.parse("text/html"), new File(htmlFilePath)))
-            .build();
+                .setType(MultipartBody.FORM)
+                .addFormDataPart(
+                        "file", htmlFile, RequestBody.create(MediaType.parse("text/html"), new File(htmlFilePath)))
+                .build();
         Request request = new Request.Builder()
-            .url(api + fileOutputName)
-            .post(requestBody)
-            .header("apy-token", apyToken)
-            .header("content-type", "multipart/form-data")
-            .build();
+                .url(api + fileOutputName)
+                .post(requestBody)
+                .header("apy-token", apyToken)
+                .header("content-type", "multipart/form-data")
+                .build();
         OkHttpClient client = new OkHttpClient();
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-            return response.body().bytes(); 
-        } 
+            return response.body().bytes();
+        }
     }
-} 
+}

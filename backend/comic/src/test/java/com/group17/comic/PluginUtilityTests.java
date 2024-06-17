@@ -1,9 +1,7 @@
 package com.group17.comic;
 
-import com.group17.comic.utils.PluginUtility;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import org.springframework.boot.test.context.SpringBootTest;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,8 +10,11 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import com.group17.comic.utils.PluginUtility;
 
 @SpringBootTest
 class PluginUtilityTests {
@@ -59,5 +60,4 @@ class PluginUtilityTests {
         String nonExistentPath = tempDir.resolve("nonExistentDir").toString();
         assertThrows(IOException.class, () -> PluginUtility.getAllFilesFromDirectory(nonExistentPath));
     }
-
 }

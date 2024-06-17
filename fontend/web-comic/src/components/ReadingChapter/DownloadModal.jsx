@@ -27,8 +27,8 @@ function DownloadModal({ open, setOpen, chapter }) {
                 params: {
                     converter_id: currentConverterId,
                 },
-                header: {
-                    list_converters: converters.map((converter) => converter.id),
+                headers: {
+                    list_exporters: JSON.stringify(converters.map((converter) => converter.id)),
                 },
                 responseType: 'blob',
             });

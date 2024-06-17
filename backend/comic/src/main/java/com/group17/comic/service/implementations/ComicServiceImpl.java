@@ -1,31 +1,31 @@
 package com.group17.comic.service.implementations;
 
-import com.group17.comic.plugins.crawler.IDataCrawler;
-import com.group17.comic.service.*;
+import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
 import com.group17.comic.dtos.request.AlternatedChapterRequest;
 import com.group17.comic.dtos.response.AuthorResponse;
 import com.group17.comic.models.*;
+import com.group17.comic.plugins.crawler.IDataCrawler;
+import com.group17.comic.service.*;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import java.util.List;
-import java.util.UUID;
 
 @Service("comicServiceV1")
 @RequiredArgsConstructor
 public class ComicServiceImpl implements IComicService {
     private final ICrawlerPluginService crawlerPluginService;
 
-    private IDataCrawler getConcretePlugin(UUID pluginId){
+    private IDataCrawler getConcretePlugin(UUID pluginId) {
         var res = crawlerPluginService.getPluginById(pluginId);
         return (IDataCrawler) res;
     }
 
     private UUID getDefaultPluginIdIfNull(UUID id) {
-        if (id == null){
+        if (id == null) {
             return crawlerPluginService.getDefaultPluginId();
         }
         return id;
@@ -54,8 +54,8 @@ public class ComicServiceImpl implements IComicService {
 
     @SneakyThrows
     @Override
-    public SearchingPageableData<Integer, List<LatestComic>, List<AuthorResponse>> searchComic(UUID pluginId,
-                                                                                               String keyword, String byGenres, int currentPage) {
+    public SearchingPageableData<Integer, List<LatestComic>, List<AuthorResponse>> searchComic(
+            UUID pluginId, String keyword, String byGenres, int currentPage) {
         pluginId = this.getDefaultPluginIdIfNull(pluginId);
         return this.getConcretePlugin(pluginId).search(keyword, byGenres, currentPage);
     }
@@ -76,20 +76,22 @@ public class ComicServiceImpl implements IComicService {
 
     @SneakyThrows
     @Override
-    public PageableData<?, ComicChapterContent> getComicChapterContent(UUID pluginId, String tagId, String currentChapter) {
+    public PageableData<?, ComicChapterContent> getComicChapterContent(
+            UUID pluginId, String tagId, String currentChapter) {
         pluginId = this.getDefaultPluginIdIfNull(pluginId);
         return this.getConcretePlugin(pluginId).getComicChapterContent(tagId, currentChapter);
     }
 
     @Override
-    public PageableData<?, ComicChapterContent> getComicChapterContentOnOtherServer(UUID pluginId,
-                                                                                    AlternatedChapterRequest altChapterDto) {
+    public PageableData<?, ComicChapterContent> getComicChapterContentOnOtherServer(
+            UUID pluginId, AlternatedChapterRequest altChapterDto) {
         pluginId = this.getDefaultPluginIdIfNull(pluginId);
         return this.getConcretePlugin(pluginId).getComicChapterContentOnOtherServer(altChapterDto);
     }
 
     @Override
-    public PageableData<Integer, List<LatestComic>> getComicsOfAnAuthor(UUID pluginId, String authorId, String tagId, int page) {
+    public PageableData<Integer, List<LatestComic>> getComicsOfAnAuthor(
+            UUID pluginId, String authorId, String tagId, int page) {
         pluginId = this.getDefaultPluginIdIfNull(pluginId);
         return this.getConcretePlugin(pluginId).getComicsByAuthor(authorId, tagId, page);
     }

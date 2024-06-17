@@ -9,9 +9,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 class DocxConverterTest {
     @Mock
     private DocxExporter docxConverter;
+
     @Test
     void shouldBeEqualToDOCX() {
         Assertions.assertEquals("DOCX", docxConverter.getPluginName());
     }
-
 }

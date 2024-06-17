@@ -1,12 +1,10 @@
 package com.group17.comic.plugins.exporter.concretes;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.group17.comic.dtos.request.ChapterRequest;
-import com.group17.comic.dtos.response.ChapterFile;
-import com.group17.comic.plugins.exporter.IFileExporter;
-import com.group17.comic.utils.StringUtility;
-import lombok.SneakyThrows; 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.UUID;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -17,13 +15,18 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.UUID;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.group17.comic.dtos.request.ChapterRequest;
+import com.group17.comic.dtos.response.ChapterFile;
+import com.group17.comic.plugins.exporter.IFileExporter;
+import com.group17.comic.utils.StringUtility;
+
+import lombok.SneakyThrows;
+
 public class Mp3Exporter implements IFileExporter {
     private static final UUID PLUGIN_ID = UUID.randomUUID();
+
     @Override
     public UUID getId() {
         return PLUGIN_ID;
@@ -38,26 +41,24 @@ public class Mp3Exporter implements IFileExporter {
     public String getBlobType() {
         return "audio/mp3";
     }
+
     @SneakyThrows
     @Override
     public ChapterFile getConvertedFile(ChapterRequest chapterDto) {
         String formatTitile = StringUtility.removeDiacriticalMarks(chapterDto.title());
         formatTitile = formatTitile.replaceAll("[^a-zA-Z0-9]", "-").trim();
-        String fileName = formatTitile + ".mp3";  
+        String fileName = formatTitile + ".mp3";
         var mp3File = getMp3FromText(chapterDto.content());
         byte[] fileContent = readFileToByteArray(mp3File);
         InputStreamResource resource = new InputStreamResource(new ByteArrayInputStream(fileContent));
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentDisposition(ContentDisposition
-                .builder("attachment")
+        headers.setContentDisposition(ContentDisposition.builder("attachment")
                 .filename(fileName + ".mp3")
-                .build()
-        ); 
+                .build());
         headers.setContentType(org.springframework.http.MediaType.parseMediaType("audio/mpeg"));
         return new ChapterFile(headers, resource);
-
-
     }
+
     public InputStream getMp3FromText(String content) throws IOException {
         String apiUrl = "https://viettelgroup.ai/voice/api/tts/v1/rest/syn";
         String voice = "hcm-diemmy";
@@ -81,7 +82,7 @@ public class Mp3Exporter implements IFileExporter {
         request.addHeader("token", tokenId);
         request.getRequestLine();
         request.setEntity(body);
-        HttpResponse response = httpClient.execute(request); 
+        HttpResponse response = httpClient.execute(request);
         return response.getEntity().getContent();
     }
 

@@ -12,14 +12,16 @@ import lombok.SneakyThrows;
 
 public class FileUtility {
     private FileUtility() {}
+
     public static boolean createDirectory(File file) {
         if (!file.exists()) {
             return file.mkdir();
         }
         return false;
     }
+
     public static boolean deleteDirectory(File folder) {
-        if(!folder.exists()) {
+        if (!folder.exists()) {
             return false;
         }
         if (folder.isDirectory()) {
@@ -34,14 +36,14 @@ public class FileUtility {
     }
 
     @SneakyThrows
-    public static boolean createFile(String filePath, String content){
-        if(content == null){
+    public static boolean createFile(String filePath, String content) {
+        if (content == null) {
             content = "";
         }
         // create new file and write content into it
         try (FileOutputStream fos = new FileOutputStream(filePath);
-             OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
-             BufferedWriter writer = new BufferedWriter(osw)) {
+                OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
+                BufferedWriter writer = new BufferedWriter(osw)) {
             writer.write(content);
             return true;
         } catch (IOException e) {
@@ -49,8 +51,7 @@ public class FileUtility {
         }
     }
 
-    public static void saveDownloadedBytesToFolder(byte[] fileBytes, File destinationFile) throws IOException
-    {
+    public static void saveDownloadedBytesToFolder(byte[] fileBytes, File destinationFile) throws IOException {
         OutputStream output = new FileOutputStream(destinationFile);
         output.write(fileBytes);
         output.flush();

@@ -1,11 +1,11 @@
 package com.group17.comic;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 class ComicServiceTestsWithTruyenFull extends ComicServiceTests {
@@ -21,6 +21,7 @@ class ComicServiceTestsWithTruyenFull extends ComicServiceTests {
         assertThat(chapters.getData().size()).isNotZero();
         assertThat(chapters.getMeta().size()).isNotZero();
     }
+
     @Test
     void testValid_searchOnlyByGenre_ReturnList() {
         String genre = "do-thi";
@@ -48,7 +49,7 @@ class ComicServiceTestsWithTruyenFull extends ComicServiceTests {
         String invalidGenre = "invalid-genre";
         try {
             var chapters = super.searchComic(pluginId, invalidKeyword, invalidGenre, 1);
-        }catch (Exception ex) {
+        } catch (Exception ex) {
             assertThat(ex).isNotNull();
         }
     }

@@ -1,5 +1,14 @@
 package com.group17.comic.service.implementations;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import com.group17.comic.dtos.request.ChapterRequest;
 import com.group17.comic.dtos.response.ChapterFile;
 import com.group17.comic.enums.ExceptionType;
@@ -9,27 +18,24 @@ import com.group17.comic.plugins.exporter.IFileExporter;
 import com.group17.comic.service.IExporterPluginService;
 import com.group17.comic.utils.ListUtility;
 import com.group17.comic.utils.PluginUtility;
-import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID; 
+import lombok.SneakyThrows;
 
 @Service("exporterPluginServiceV1")
 public class ExporterPluginServiceImpl implements IExporterPluginService {
     String baseDir = System.getProperty("user.dir");
+
     @Value("${comic.base_dir}")
     String projectDirectory;
+
     @Value("${comic.plugin.converter.converter_package_name}")
     String exporterPackageName;
+
     @Value("${comic.plugin.converter.converter_directory}")
     String exporterDirectory;
+
     private List<IFileExporter> exporters = new ArrayList<>();
+
     @Value("${comic.plugin.converter.default_converter_name}")
     private String DEFAULT_CONVERTER;
 
@@ -49,8 +55,8 @@ public class ExporterPluginServiceImpl implements IExporterPluginService {
         var exporterClasses = PluginUtility.getAllPluginsFromFolderWithoutInstantiation(
                 converterAbsolutePath.toString(), exporterPackageName, IFileExporter.class);
         if (exporters.isEmpty() || exporterClasses.size() != exporters.size()) {
-            exporters = PluginUtility.getAllPluginsFromFolder(converterAbsolutePath.toString(),
-                    exporterPackageName, IFileExporter.class);
+            exporters = PluginUtility.getAllPluginsFromFolder(
+                    converterAbsolutePath.toString(), exporterPackageName, IFileExporter.class);
         }
     }
 
@@ -96,7 +102,8 @@ public class ExporterPluginServiceImpl implements IExporterPluginService {
     @Override
     public void checkPluginList(List<String> pluginList) {
         this.checkCurrentPlugins();
-        List<String> exporterIdList = exporters.stream().map(exporter -> exporter.getId().toString()).toList();
+        List<String> exporterIdList =
+                exporters.stream().map(exporter -> exporter.getId().toString()).toList();
         if (!pluginList.isEmpty() && !ListUtility.areListsEqual(pluginList, exporterIdList)) {
             throw new BusinessException(ExceptionType.PLUGIN_LIST_CHANGED);
         }

@@ -15,25 +15,28 @@ import java.util.List;
 
 public class PluginUtility {
     private PluginUtility() {}
-    public static <T> List<T> getAllPluginsFromFolder(String concretePath, String pluginPackageName,
-            Class<?> targetInterface) throws IOException, ClassNotFoundException, NoSuchMethodException,
-            InvocationTargetException, InstantiationException, IllegalAccessException {
+
+    public static <T> List<T> getAllPluginsFromFolder(
+            String concretePath, String pluginPackageName, Class<?> targetInterface)
+            throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException,
+                    InstantiationException, IllegalAccessException {
         if (!targetInterface.isInterface()) {
             throw new IllegalAccessException("The class is not an interface");
         }
-        var pluginClasses = getAllPluginsFromFolderWithoutInstantiation(concretePath,
-                                                         pluginPackageName, targetInterface);
+        var pluginClasses =
+                getAllPluginsFromFolderWithoutInstantiation(concretePath, pluginPackageName, targetInterface);
         List<T> plugins = new ArrayList<>();
         for (var clazz : pluginClasses) {
             Constructor<?> constructor = clazz.getDeclaredConstructor();
             T plugin = (T) constructor.newInstance();
-            plugins.add(plugin); 
+            plugins.add(plugin);
         }
         return plugins;
     }
 
-    public static List<Class<?>> getAllPluginsFromFolderWithoutInstantiation(String concretePath, String pluginPackageName,
-            Class<?> targetInterface) throws IOException, ClassNotFoundException, IllegalAccessException {
+    public static List<Class<?>> getAllPluginsFromFolderWithoutInstantiation(
+            String concretePath, String pluginPackageName, Class<?> targetInterface)
+            throws IOException, ClassNotFoundException, IllegalAccessException {
         if (!targetInterface.isInterface()) {
             throw new IllegalAccessException("The class is not an interface");
         }
@@ -43,7 +46,7 @@ public class PluginUtility {
             var clazz = getClassInstance(file, pluginPackageName);
             if (clazz != null) {
                 boolean isImplemented = targetInterface.isAssignableFrom(clazz);
-                if (isImplemented) { 
+                if (isImplemented) {
                     pluginClasses.add(clazz);
                 }
             }
@@ -57,7 +60,7 @@ public class PluginUtility {
         String extension = filePath.getName().split("\\.")[1];
         if (extension.equals("java")) {
             URL url = filePath.toURI().toURL();
-            URLClassLoader classLoader = URLClassLoader.newInstance(new URL[] { url });
+            URLClassLoader classLoader = URLClassLoader.newInstance(new URL[] {url});
             Class<?> clazz = classLoader.loadClass(packageName + "." + fileName);
             classLoader.close();
             return clazz;
@@ -67,9 +70,7 @@ public class PluginUtility {
 
     public static List<File> getAllFilesFromDirectory(String absolutePath) throws IOException {
         Path pluginDirectory = Paths.get(absolutePath);
-        return Files.list(pluginDirectory)
-                .map(Path::toFile)
-                .toList();
+        return Files.list(pluginDirectory).map(Path::toFile).toList();
     }
 
     public static String resolveAbsolutePath(String absolutePath) {
