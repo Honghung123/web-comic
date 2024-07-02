@@ -83,6 +83,7 @@ public class StringUtility {
             String regexClose = "</" + tag + ">";
             html = html.replaceAll(regexOpen, "");
             html = html.replaceAll(regexClose, "");
+            html = html.replaceAll("<\\s*(hr|br)\\s*/>", "");
         }
         return html;
     }

@@ -19,6 +19,7 @@ import com.group17.comic.dtos.request.AlternatedChapterRequest;
 import com.group17.comic.dtos.response.AuthorResponse;
 import com.group17.comic.enums.ExceptionType;
 import com.group17.comic.exceptions.BusinessException;
+import com.group17.comic.log.Logger;
 import com.group17.comic.models.*;
 import com.group17.comic.plugins.crawler.IDataCrawler;
 import com.group17.comic.plugins.crawler.WebCrawler;
@@ -30,6 +31,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     private static final String COMIC_API_URL = "https://api.truyenfull.vn/";
     private static final String COMIC_BASE_URL = "https://truyenfull.vn/";
     private static final UUID PLUGIN_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614173002");
+    private static final String ONLY_NUMBER_REGEX = "^\\d+$";
 
     @Override
     public UUID getID() {
@@ -384,7 +386,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     @SneakyThrows
     @Override
     public Comic getComicInfo(String comicTagId) {
-        if (!comicTagId.matches("^\\d+$")) {
+        if (!comicTagId.matches(ONLY_NUMBER_REGEX)) {
             throw new BusinessException(ExceptionType.INVALID_COMIC_TAG_ID);
         }
         int _id = Integer.parseInt(comicTagId);
@@ -500,7 +502,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     @Override
     @SneakyThrows
     public PageableData<Integer, List<Chapter>> getChapters(String comicTagId, int currentPage) {
-        if (!comicTagId.matches("^\\d+$")) {
+        if (!comicTagId.matches(ONLY_NUMBER_REGEX)) {
             throw new BusinessException(ExceptionType.INVALID_COMIC_TAG_ID);
         }
         int _id = Integer.parseInt(comicTagId);
@@ -553,6 +555,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
 
     private String getTagIdComicFromTitleAndAuthor(String _title, String _authorName, String _comicTagId) {
         String keyword = _title;
+        Logger.logInfo("Comic tag id: " + _comicTagId);
         keyword = StringUtility.removeDiacriticalMarks(keyword)
                 .toLowerCase()
                 .replace("[dich]", "")
@@ -604,7 +607,7 @@ public class TruyenFullCrawler extends WebCrawler implements IDataCrawler {
     @Override
     @SneakyThrows
     public PageableData<Integer, ComicChapterContent> getComicChapterContent(String comicTagId, String currentChapter) {
-        if (!comicTagId.matches("^\\d+$")) {
+        if (!comicTagId.matches(ONLY_NUMBER_REGEX)) {
             throw new BusinessException(ExceptionType.INVALID_COMIC_TAG_ID);
         }
         Integer chapterId = Integer.parseInt(currentChapter);
