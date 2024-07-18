@@ -17,7 +17,12 @@ public class CorsConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001"));
+        config.setAllowedOrigins(List.of(
+                "http://localhost:3000",
+                "http://localhost:3001",
+                "https://web-comic-57tgloqam-hungs-projects-fb1b48cc.vercel.app",
+                "https://web-comic-production.up.railway.app"
+        ));
         config.addAllowedHeader("*");
         config.addAllowedMethod("*"); // Accept all methods
         source.registerCorsConfiguration("/**", config); // Accept all routes

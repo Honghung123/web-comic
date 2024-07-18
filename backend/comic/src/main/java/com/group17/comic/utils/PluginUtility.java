@@ -1,5 +1,7 @@
 package com.group17.comic.utils;
 
+import com.group17.comic.plugins.crawler.IDataCrawler;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -26,6 +28,7 @@ public class PluginUtility {
         var pluginClasses =
                 getAllPluginsFromFolderWithoutInstantiation(concretePath, pluginPackageName, targetInterface);
         List<T> plugins = new ArrayList<>();
+        System.out.println("Start instantiation");
         for (var clazz : pluginClasses) {
             Constructor<?> constructor = clazz.getDeclaredConstructor();
             T plugin = (T) constructor.newInstance();
@@ -41,6 +44,7 @@ public class PluginUtility {
             throw new IllegalAccessException("The class is not an interface");
         }
         List<File> files = getAllFilesFromDirectory(concretePath);
+        System.out.println("Get all files from directory successfully: " + files.size());
         List<Class<?>> pluginClasses = new ArrayList<>();
         for (File file : files) {
             var clazz = getClassInstance(file, pluginPackageName);
@@ -60,7 +64,9 @@ public class PluginUtility {
         String extension = filePath.getName().split("\\.")[1];
         if (extension.equals("java")) {
             URL url = filePath.toURI().toURL();
-            URLClassLoader classLoader = URLClassLoader.newInstance(new URL[] {url});
+            URL newUrl = new URL(url.toString().replaceAll("app/", "app/backend/comic/"));
+            System.out.println("Url: " + newUrl);
+            URLClassLoader classLoader = URLClassLoader.newInstance(new URL[] {newUrl});
             Class<?> clazz = classLoader.loadClass(packageName + "." + fileName);
             classLoader.close();
             return clazz;
@@ -69,7 +75,9 @@ public class PluginUtility {
     }
 
     public static List<File> getAllFilesFromDirectory(String absolutePath) throws IOException {
-        Path pluginDirectory = Paths.get(absolutePath);
+        System.out.println(absolutePath);
+        String resolvedPath = absolutePath.replaceAll("/app/backend/comic/", "");
+        Path pluginDirectory = Paths.get(resolvedPath);
         return Files.list(pluginDirectory).map(Path::toFile).toList();
     }
 
